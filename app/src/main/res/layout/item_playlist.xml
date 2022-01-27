@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/frame_playlist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+        <ImageView
+            android:id="@+id/avt_playlist"
+            android:layout_width="160sp"
+            android:layout_height="168sp"
+            android:scaleType="centerCrop"
+            android:src="@color/black"
+            android:background="@drawable/border_avt_playlist"
+            android:clipToOutline="true"
+            />
+
+        <TextView
+            android:id="@+id/title_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="title"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            />
+
+        <TextView
+            android:id="@+id/description_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description playlist"
+            android:textSize="14dp"
+            android:textFontWeight="@integer/material_motion_duration_short_1"/>
+
+    </LinearLayout>
+</layout>
