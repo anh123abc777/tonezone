@@ -4,8 +4,15 @@ import SpotifyData
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.tonezone.databinding.ActivityMainBinding
 import com.example.tonezone.network.ToneApi
 import com.spotify.sdk.android.auth.AccountsQueryParameters.CLIENT_ID
@@ -23,7 +30,10 @@ import retrofit2.Response
 
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
@@ -38,7 +48,19 @@ class MainActivity : AppCompatActivity() {
 
         AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
 
+        setupNav()
     }
+
+    private fun setupNav(){
+        navController = findNavController(R.id.nav_host)
+        binding.bottomBar.setupWithNavController(navController)
+        binding.bottomBar.selectedItemId = R.id.homeFragment
+
+        NavigationUI.setupActionBarWithNavController(this,navController)
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment,R.id.searchFragment,R.id.yourLibraryFragment))
+        setupActionBarWithNavController(navController,appBarConfiguration)
+    }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -69,15 +91,15 @@ class MainActivity : AppCompatActivity() {
                 AuthorizationResponse.Type.TOKEN -> {
 //                    binding.textView.text= response.accessToken
                     gido(response)
-                    binding.textView.text =  "Success" + albumTrack.href
+//                    binding.textView.text =  "Success" + albumTrack.href
 
                 }
                 AuthorizationResponse.Type.ERROR -> {
-                    binding.textView.text =  "Not Found"
+//                    binding.textView.text =  "Not Found"
 
                 }
                 else -> {
-                    binding.textView.text =  "Not Found"
+//                    binding.textView.text =  "Not Found"
                 }
             }
         }

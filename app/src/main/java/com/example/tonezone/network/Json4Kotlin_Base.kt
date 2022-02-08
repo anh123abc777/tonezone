@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 data class SpotifyData (
 
 	val href : String,
-	val items : List<Items>,
+	val items : List<Track>,
 	val limit : Int,
 	val next : String?="",
 	val offset : Int,
