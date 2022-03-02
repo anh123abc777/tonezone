@@ -5,41 +5,51 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.tonezone.databinding.ItemPlaylistBinding
-import com.google.android.exoplayer2.extractor.mp4.Track
+import com.example.tonezone.databinding.ItemTrackBinding
+import com.example.tonezone.network.Track
 
-class TrackAdapter : ListAdapter<Track, TrackAdapter.ViewHolder>(DiffCallBack){
+class TrackAdapter(private val clickListener: OnClickListener) : ListAdapter<Track, TrackAdapter.ViewHolder>(DiffCallBack){
 
     companion object DiffCallBack: DiffUtil.ItemCallback<Track>() {
         override fun areItemsTheSame(oldItem: Track, newItem: Track): Boolean {
-            TODO("Not yet implemented")
+            return oldItem===newItem
         }
 
         override fun areContentsTheSame(oldItem: Track, newItem: Track): Boolean {
-            TODO("Not yet implemented")
+            return oldItem.id == newItem.id
         }
 
     }
 
-    class ViewHolder(private val binding: ItemPlaylistBinding): RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder private constructor
+        (private val binding: ItemTrackBinding): RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(track: Track){
+        fun bind(track: Track, clickListener: OnClickListener){
+            binding.track = track
+            binding.clickListener = clickListener
+            binding.executePendingBindings()
         }
 
         companion object{
             fun from(parent: ViewGroup) : ViewHolder{
                 val layoutInflater = LayoutInflater.from(parent.context)
-                val binding = ItemPlaylistBinding.inflate(layoutInflater,parent,false)
+                val binding = ItemTrackBinding.inflate(layoutInflater,parent,false)
                 return ViewHolder(binding)
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        TODO("Not yet implemented")
+        return ViewHolder.from(parent)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        TODO("Not yet implemented")
+        val newItem = getItem(position)
+        holder.bind(newItem,clickListener)
     }
+}
+
+class OnClickListener(val clickListener : (track: Track) -> Unit) {
+
+    fun onClick(track: Track) = clickListener(track)
 }

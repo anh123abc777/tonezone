@@ -1,83 +1,74 @@
 package com.example.tonezone
 
-import SpotifyData
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.tonezone.database.Token
+import com.example.tonezone.database.TokenRepository
+import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
-import com.example.tonezone.network.ToneApi
-import com.spotify.sdk.android.auth.AccountsQueryParameters.CLIENT_ID
+import com.example.tonezone.network.SpotifyData
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.spotify.sdk.android.auth.LoginActivity.REQUEST_CODE
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.*
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+    private  var token = Token("")
+    private lateinit var repository: TokenRepository
+//    var exoPlayer: SimpleExoPlayer? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
-        val REDIRECT_URI = "https://tonezone.com/callback/"
+        val REDIRECT_URI = "com.tonezone://callback"
 
         val builder =
-            AuthorizationRequest.Builder("0546209c8b9b4b66a8d49037c566caa6", AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
-
+            AuthorizationRequest.Builder(
+                "0546209c8b9b4b66a8d49037c566caa6",
+                AuthorizationResponse.Type.TOKEN,
+                REDIRECT_URI)
         builder.setScopes(arrayOf("streaming"))
         val request = builder.build()
-
         AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
 
+
+        repository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
+
         setupNav()
+
+//        val extractorsFactory = DefaultExtractorsFactory()
+//            .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES)
+//            .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS)
+//        exoPlayer = SimpleExoPlayer.Builder(application.applicationContext!!)
+//            .setMediaSourceFactory(
+//                DefaultMediaSourceFactory(
+//                    application.applicationContext,
+//                    extractorsFactory
+//                )
+//            )
+//            .build()
+
     }
+
 
     private fun setupNav(){
         navController = findNavController(R.id.nav_host)
         binding.bottomBar.setupWithNavController(navController)
         binding.bottomBar.selectedItemId = R.id.homeFragment
-
-        NavigationUI.setupActionBarWithNavController(this,navController)
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment,R.id.searchFragment,R.id.yourLibraryFragment))
-        setupActionBarWithNavController(navController,appBarConfiguration)
     }
 
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        val uri = intent.data
-
-        if (uri != null) {
-            val response = AuthorizationResponse.fromUri(uri)
-            when (response.type) {
-                AuthorizationResponse.Type.TOKEN -> {
-                }
-                AuthorizationResponse.Type.ERROR -> {
-                }
-                else -> {
-                }
-            }
-        }
-    }
 
     var albumTrack = SpotifyData("nbnb,kjhlk", listOf(),0,"",0,"",0)
 
@@ -89,36 +80,61 @@ class MainActivity : AppCompatActivity() {
             val response = AuthorizationClient.getResponse(resultCode, intent)
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-//                    binding.textView.text= response.accessToken
-                    gido(response)
-//                    binding.textView.text =  "Success" + albumTrack.href
+                    token.value = response.accessToken
 
                 }
                 AuthorizationResponse.Type.ERROR -> {
-//                    binding.textView.text =  "Not Found"
+                    token.value =  "Not Found"
 
                 }
                 else -> {
-//                    binding.textView.text =  "Not Found"
+                    token.value =  "Not Found"
                 }
             }
         }
+
+        runBlocking(Dispatchers.IO) {
+            repository.insert(token)
+        }
     }
 
-    private fun gido(response: AuthorizationResponse) = runBlocking {
-        try {
-            var getAlbumTrackDeferred : Deferred<SpotifyData>
+//    @SuppressLint("HardwareIds")
+//    private fun gido(response: AuthorizationResponse) = runBlocking {
+//        try {
+//
+//            var getAlbumTrackDeferred : Deferred<SpotifyData> = ToneApi.retrofitService
+//                .getAlbumStracks(
+//                    "Bearer " + response.accessToken,
+//
+//                    "ES"
+//                )
+//            albumTrack = getAlbumTrackDeferred.await()
+//
+//        }catch (e: Exception){
+//            albumTrack =  SpotifyData(e.message!!, listOf(),0,"",0,"",0)
+//        }
+//        val adapter = TrackAdapter(OnClickListener {
+////            onStartMusic()
+////            exoPlayer!!.prepare()
+////            exoPlayer!!.play()
+//            Toast.makeText(this@MainActivity,it.name,Toast.LENGTH_SHORT).show()
+//        })
+////        binding.groupPlaylist.adapter = adapter
+////        adapter.submitList(albumTrack.items)
+//    }
 
-            getAlbumTrackDeferred = ToneApi.retrofitService
-                .getAlbumStracks(
-                    "Bearer " + response.accessToken,
 
-                    "ES"
-                )
-            albumTrack = getAlbumTrackDeferred.await()
+//    fun onStartMusic() = runBlocking{
+//        exoPlayer!!.clearMediaItems()
+//            exoPlayer!!.addMediaItem(MediaItem.fromUri("http://api.mp3.zing.vn/api/streaming/audio/ZZUB0I0E/128"))
+//
+//        delay(600L)
+//    }
 
-        }catch (e: Exception){
-            albumTrack =  SpotifyData(e.message!!, listOf(),0,"",0,"",0)
+    override fun onDestroy() {
+        runBlocking(Dispatchers.IO) {
+            repository.clear()
         }
+        super.onDestroy()
     }
 }
