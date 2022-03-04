@@ -32,6 +32,11 @@ interface ToneApiService {
         @Body context_uri: String,
         @Query("device_id") device_id: String
     ): Deferred<String>
+
+    @GET("recommendations/available-genre-seeds")
+    fun getGenres(
+        @Header("Authorization") auth: String
+    ): Deferred<Topic>
 }
 
 object ToneApi{

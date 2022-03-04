@@ -1,5 +1,6 @@
 package com.example.tonezone
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
 import com.example.tonezone.network.SpotifyData
+import com.example.tonezone.network.ToneApi
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -81,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
                     token.value = response.accessToken
-
+//                    gido(response)
                 }
                 AuthorizationResponse.Type.ERROR -> {
                     token.value =  "Not Found"
@@ -94,25 +96,29 @@ class MainActivity : AppCompatActivity() {
         }
 
         runBlocking(Dispatchers.IO) {
+            repository.clear()
+        }
+        runBlocking(Dispatchers.IO) {
             repository.insert(token)
         }
     }
 
-//    @SuppressLint("HardwareIds")
-//    private fun gido(response: AuthorizationResponse) = runBlocking {
-//        try {
-//
-//            var getAlbumTrackDeferred : Deferred<SpotifyData> = ToneApi.retrofitService
-//                .getAlbumStracks(
-//                    "Bearer " + response.accessToken,
-//
-//                    "ES"
-//                )
-//            albumTrack = getAlbumTrackDeferred.await()
-//
-//        }catch (e: Exception){
-//            albumTrack =  SpotifyData(e.message!!, listOf(),0,"",0,"",0)
-//        }
+    @SuppressLint("HardwareIds")
+    private fun getToken(response: AuthorizationResponse) = runBlocking {
+        try {
+
+            var getAlbumTrackDeferred: Deferred<SpotifyData> = ToneApi.retrofitService
+                .getAlbumStracks(
+                    "Bearer " + response.accessToken,
+
+                    "ES"
+                )
+            albumTrack = getAlbumTrackDeferred.await()
+
+        } catch (e: Exception) {
+            albumTrack = SpotifyData(e.message!!, listOf(), 0, "", 0, "", 0)
+        }
+    }
 //        val adapter = TrackAdapter(OnClickListener {
 ////            onStartMusic()
 ////            exoPlayer!!.prepare()
