@@ -5,23 +5,50 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.tonezone.R
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import androidx.lifecycle.ViewModelProvider
+import com.example.tonezone.adapter.GenreAdapter
+import com.example.tonezone.adapter.PlaylistAdapter
+import com.example.tonezone.databinding.FragmentYourLibraryBinding
 
-/**
- * A simple [Fragment] subclass.
- * Use the [Your_Library_Fragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class YourLibraryFragment : Fragment() {
+
+    private lateinit var binding : FragmentYourLibraryBinding
+    private lateinit var viewModel:  YourLibraryViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_your_library, container, false)
+
+        binding = FragmentYourLibraryBinding.inflate(inflater)
+        val application = requireNotNull(activity).application
+        val factory = YourLibraryViewModelFactory(application)
+        viewModel = ViewModelProvider(this,factory).get(YourLibraryViewModel::class.java)
+
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
+
+        observeToken()
+        observeUserPlaylists()
+        setupAdapterPlaylist()
+
+        return binding.root
+    }
+
+    private fun setupAdapterPlaylist(){
+        val adapter = PlaylistAdapter()
+        binding.yourLibraryList.adapter = adapter
+
+    }
+
+    private fun observeToken(){
+        viewModel.token.observe(viewLifecycleOwner){
+            if(it!=null){
+                viewModel.getDataUserPlaylists()
+            }
+        }
+    }
+
+    private fun observeUserPlaylists(){
+        viewModel.userPlaylists.observe(viewLifecycleOwner){}
     }
 
 }

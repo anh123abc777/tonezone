@@ -12,7 +12,7 @@
     <item
         android:id="@+id/searchFragment"
         android:title="@string/search"
-        android:icon="@drawable/ic_outline_search_24"
+        android:icon="@drawable/ic_search"
         app:showAsAction="always"
         />
 

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="playlist"
+            type="com.example.tonezone.network.Playlist" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        >
+
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            imageUrl="@{playlist.images.get(0).url}"
+            />
+
+        <TextView
+            android:id="@+id/name_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/thumbnail"
+            android:layout_alignParentTop="true"
+            android:text="@{playlist.name}"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp"
+            />
+
+        <TextView
+            android:id="@+id/type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/thumbnail"
+            android:layout_below="@id/name_playlist"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp"
+            android:textSize="14sp"
+            android:text="@{playlist.type}"
+            android:textColor="@android:color/darker_gray"
+
+            />
+
+    </RelativeLayout>
+</layout>

@@ -19,6 +19,7 @@ import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.spotify.sdk.android.auth.LoginActivity.REQUEST_CODE
 import kotlinx.coroutines.*
+const val REDIRECT_URI = "com.tonezone://callback"
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,14 +35,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
-        val REDIRECT_URI = "com.tonezone://callback"
 
         val builder =
             AuthorizationRequest.Builder(
                 "0546209c8b9b4b66a8d49037c566caa6",
                 AuthorizationResponse.Type.TOKEN,
                 REDIRECT_URI)
-        builder.setScopes(arrayOf("streaming"))
+        builder.setScopes(arrayOf("streaming","playlist-read-private"))
         val request = builder.build()
         AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
 
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
         try {
 
             var getAlbumTrackDeferred: Deferred<SpotifyData> = ToneApi.retrofitService
-                .getAlbumStracks(
+                .getAlbumTracksAsync(
                     "Bearer " + response.accessToken,
 
                     "ES"

@@ -13,10 +13,10 @@ import kotlinx.coroutines.*
 
 class SearchViewModel(application: Application) : ViewModel() {
 
-    private val repository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
+    private val tokenRepository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-    val token = repository.token
+    val token = tokenRepository.token
 
     private var _topics = MutableLiveData<Topic>()
     val topics : LiveData<Topic>
@@ -26,7 +26,7 @@ class SearchViewModel(application: Application) : ViewModel() {
         runBlocking{
             _topics.value = try {
                 var getGenres: Deferred<Topic> = ToneApi.retrofitService
-                    .getGenres("Bearer ${token.value!!.value}")
+                    .getGenresAsync("Bearer ${token.value!!.value}")
                 getGenres.await()
             } catch (e: Exception) {
                 Log.i("error",token.value!!.value!!)
