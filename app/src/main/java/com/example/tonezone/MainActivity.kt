@@ -3,17 +3,21 @@ package com.example.tonezone
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.example.tonezone.database.Token
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
 import com.example.tonezone.network.SpotifyData
 import com.example.tonezone.network.ToneApi
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -50,6 +54,7 @@ class MainActivity : AppCompatActivity() {
 
         setupNav()
 
+        temp()
 //        val extractorsFactory = DefaultExtractorsFactory()
 //            .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES)
 //            .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS)
@@ -62,6 +67,24 @@ class MainActivity : AppCompatActivity() {
 //            )
 //            .build()
 
+    }
+
+    private fun temp(){
+        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+        bottomSheetBehavior.isHideable = false
+
+        Glide.with(binding.miniPlayer.thumbnail.context)
+            .load("https://picsum.photos/200/200")
+            .apply(
+                RequestOptions()
+                    .placeholder(R.drawable.ic_baseline_home_24)
+                    .error(R.drawable.ic_outline_search_24))
+            .into(binding.miniPlayer.thumbnail)
+
+        binding.miniPlayer.miniPlayerFrame.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            Toast.makeText(application,"t da click",Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -83,7 +106,6 @@ class MainActivity : AppCompatActivity() {
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
                     token.value = response.accessToken
-//                    gido(response)
                 }
                 AuthorizationResponse.Type.ERROR -> {
                     token.value =  "Not Found"
@@ -107,7 +129,7 @@ class MainActivity : AppCompatActivity() {
     private fun getToken(response: AuthorizationResponse) = runBlocking {
         try {
 
-            var getAlbumTrackDeferred: Deferred<SpotifyData> = ToneApi.retrofitService
+            val getAlbumTrackDeferred: Deferred<SpotifyData> = ToneApi.retrofitService
                 .getAlbumTracksAsync(
                     "Bearer " + response.accessToken,
 
