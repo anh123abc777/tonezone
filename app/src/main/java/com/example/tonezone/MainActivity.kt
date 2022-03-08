@@ -33,7 +33,8 @@ class MainActivity : AppCompatActivity() {
     private  var token = Token("")
     private lateinit var repository: TokenRepository
 //    var exoPlayer: SimpleExoPlayer? = null
-
+//    0546209c8b9b4b66a8d49037c566caa6
+//    af0096163f014e97b4b3ca30d3f674a6
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
                 "0546209c8b9b4b66a8d49037c566caa6",
                 AuthorizationResponse.Type.TOKEN,
                 REDIRECT_URI)
-        builder.setScopes(arrayOf("streaming","playlist-read-private"))
+        builder.setScopes(arrayOf("streaming","playlist-read-private","playlist-read-collaborative"))
         val request = builder.build()
         AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
 

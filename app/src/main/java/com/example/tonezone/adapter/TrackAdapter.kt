@@ -16,7 +16,7 @@ class TrackAdapter(private val clickListener: OnClickListener) : ListAdapter<Tra
         }
 
         override fun areContentsTheSame(oldItem: Track, newItem: Track): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem.name == newItem.name
         }
 
     }

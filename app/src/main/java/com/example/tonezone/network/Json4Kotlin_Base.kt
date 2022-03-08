@@ -3,7 +3,6 @@ package com.example.tonezone.network
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
 data class SpotifyData (
 
 	val href : String,
@@ -13,4 +12,4 @@ data class SpotifyData (
 	val offset : Int,
 	val previous : String?="",
 	val total : Int?=0
-) : Parcelable
+)

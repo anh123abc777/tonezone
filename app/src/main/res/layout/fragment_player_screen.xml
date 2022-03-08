@@ -33,9 +33,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="360dp"
                 android:layout_gravity="center_horizontal"
-                imageUrl="@{viewModel.imgUri}"
+                imageUrl="@{viewModel.currentTrack.imageUri.raw}"
                 />
-<!-- imageUrl="@{viewModel.song.thumbnail}" -->
+
         </androidx.cardview.widget.CardView>
 
         <LinearLayout
@@ -49,18 +49,16 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/songName"
                 android:textSize="20sp"
-                android:text="gido"
+                android:text="@{viewModel.currentTrack.name}"
                 />
-            <!--            android:text="@{viewModel.song.name}"-->
 
             <TextView
                 android:id="@+id/artists"
                 android:layout_width="268dp"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:text="cai gi do khac"
+                android:text="@{viewModel.currentTrack.artist.name}"
                 />
-            <!--            android:text="@{viewModel.song.artists_names}"-->
 
         </LinearLayout>
 
@@ -107,8 +105,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="4:00"
-                    android:layout_alignParentRight="true"/>
-<!--                formatTime="@{viewModel.song.duration}"-->
+                    android:layout_alignParentRight="true"
+                    formatTime="@{viewModel.currentTrack.duration}"
+                    />
 
             </RelativeLayout>
 
@@ -159,7 +158,6 @@
                 android:layout_centerVertical="true"
                 android:onClick="@{() -> viewModel.onNext()}"
                 />
-<!--            android:onClick="@{() -> viewModel.onNext()}"-->
 
         </RelativeLayout>
 

@@ -1,14 +1,19 @@
 package com.example.tonezone.yourlibrary
 
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.tonezone.adapter.GenreAdapter
 import com.example.tonezone.adapter.PlaylistAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
+import com.example.tonezone.network.PlaylistInfo
+import kotlinx.parcelize.Parcelize
 
 class YourLibraryFragment : Fragment() {
 
@@ -24,7 +29,7 @@ class YourLibraryFragment : Fragment() {
         viewModel = ViewModelProvider(this,factory).get(YourLibraryViewModel::class.java)
 
         binding.viewModel = viewModel
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
 
         observeToken()
         observeUserPlaylists()
@@ -33,8 +38,19 @@ class YourLibraryFragment : Fragment() {
         return binding.root
     }
 
+    private fun listenClickItemPlaylist(){
+
+    }
+
     private fun setupAdapterPlaylist(){
-        val adapter = PlaylistAdapter()
+        val adapter = PlaylistAdapter(PlaylistAdapter.OnClickListener {
+           findNavController().navigate(YourLibraryFragmentDirections
+               .actionYourLibraryFragmentToDetailPlaylistFragment(
+                   PlaylistInfo( it.id,
+                   it.name,
+                   it.description,
+                   it.images?.get(0)!!.url)))
+        })
         binding.yourLibraryList.adapter = adapter
 
     }
@@ -50,5 +66,4 @@ class YourLibraryFragment : Fragment() {
     private fun observeUserPlaylists(){
         viewModel.userPlaylists.observe(viewLifecycleOwner){}
     }
-
 }

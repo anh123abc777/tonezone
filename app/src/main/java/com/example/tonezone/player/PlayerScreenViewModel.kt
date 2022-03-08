@@ -2,11 +2,15 @@ package com.example.tonezone.player
 
 import android.app.Application
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
-import com.spotify.protocol.types.PlayerState
+import com.spotify.protocol.types.Album
+import com.spotify.protocol.types.Artist
+import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.Track
 
 
@@ -20,9 +24,22 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
         .showAuthView(true)
         .build()!!
     var imgUri = "https://picsum.photos/200/300"
+    private var _currentTrack = MutableLiveData<Track>()
+    val currentTrack : LiveData<Track>
+    get() = _currentTrack
 
     init {
         onStart()
+        _currentTrack.value = Track(Artist("",""),
+            listOf(Artist("","")),
+            Album("",""),
+            0L,
+            "",
+            "",
+            ImageUri(""),
+            false,
+            false
+        )
     }
 
     private fun onStart(){
@@ -40,6 +57,11 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
 
     fun onPlay() {
         mSpotifyAppRemote!!.playerApi.play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL")
+        mSpotifyAppRemote!!.playerApi
+            .subscribeToPlayerState()
+            .setEventCallback { playerState ->
+                _currentTrack.value = playerState.track
+            }
     }
 
     fun onPause() {
@@ -62,5 +84,12 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
         mSpotifyAppRemote!!.playerApi.resume()
     }
 
+    fun disconnect(){
+        SpotifyAppRemote.disconnect(mSpotifyAppRemote)
+    }
 
+    override fun onCleared() {
+        super.onCleared()
+//        SpotifyAppRemote.disconnect(mSpotifyAppRemote)
+    }
 }

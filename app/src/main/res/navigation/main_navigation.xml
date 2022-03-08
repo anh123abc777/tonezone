@@ -18,5 +18,17 @@
         android:id="@+id/yourLibraryFragment"
         android:name="com.example.tonezone.yourlibrary.YourLibraryFragment"
         android:label="Your library"
-        tools:layout="@layout/fragment_your_library" />
+        tools:layout="@layout/fragment_your_library" >
+        <action
+            android:id="@+id/action_yourLibraryFragment_to_detailPlaylistFragment"
+            app:destination="@id/detailPlaylistFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailPlaylistFragment"
+        android:name="com.example.tonezone.detailplaylist.DetailPlaylistFragment"
+        android:label="DetailPlaylistFragment" >
+        <argument
+            android:name="playlistInfo"
+            app:argType="com.example.tonezone.network.PlaylistInfo" />
+    </fragment>
 </navigation>

@@ -28,6 +28,16 @@ class PlayerScreenFragment : Fragment() {
         return binding.root
     }
 
-//    WTF should I do with this screen????
+    override fun onStop() {
+        super.onStop()
+        viewModel.onPause()
+    }
+
+    override fun onDestroy() {
+        viewModel.onPause()
+        viewModel.disconnect()
+        super.onDestroy()
+    }
+    //    WTF should I do with this screen????
 
 }

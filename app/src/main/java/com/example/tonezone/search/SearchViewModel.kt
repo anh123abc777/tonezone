@@ -23,16 +23,19 @@ class SearchViewModel(application: Application) : ViewModel() {
         get() = _topics
 
     fun getGenres() =
-        runBlocking{
+        uiScope.launch{
             _topics.value = try {
                 var getGenres: Deferred<Topic> = ToneApi.retrofitService
                     .getGenresAsync("Bearer ${token.value!!.value}")
                 getGenres.await()
             } catch (e: Exception) {
-                Log.i("error",token.value!!.value!!)
+                Log.i("error",token.value!!.value)
                 Topic(listOf("alo","á lồ"))
             }
-
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        uiScope.cancel()
+    }
 }

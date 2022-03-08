@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.tonezone.detailplaylist.DetailPlaylistViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".detailplaylist.DetailPlaylistFragment"
+        android:orientation="vertical"
+        android:padding="8dp"
+        >
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:src="@drawable/ic_custom_play"
+            android:layout_gravity="center_horizontal"
+            imageUrl="@{viewModel.playlistInfo.image}"
+            />
+
+        <TextView
+            android:id="@+id/playlist_name"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="@{viewModel.playlistInfo.name}"
+            android:textSize="16dp"
+            />
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="@{viewModel.playlistInfo.description}"
+            />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <ImageView
+                android:id="@+id/more_option"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_ver_more"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:foregroundTint="@color/primary"
+                app:tint="@color/primary" />
+
+            <ImageView
+                android:id="@+id/play"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_custom_play"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                />
+
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/playlist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:orientation="vertical"
+            tools:listitem="@layout/item_track"
+            android:layout_marginTop="8dp"
+            playlist="@{viewModel.playlistItems}"
+            android:nestedScrollingEnabled="false"
+            />
+
+    </LinearLayout>
+    </ScrollView>
+</layout>

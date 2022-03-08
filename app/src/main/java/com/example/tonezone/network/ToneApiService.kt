@@ -1,5 +1,7 @@
 package com.example.tonezone.network
 
+import DataPlaylistItems
+import PlaylistItems
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -12,6 +14,7 @@ import retrofit2.http.*
 
 private const val BASE_URL = "https://api.spotify.com/v1/"
 
+
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
     .build()
@@ -23,6 +26,10 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .build()
 
+private val retrofitGetString = Retrofit.Builder()
+    .addConverterFactory(ScalarsConverterFactory.create())
+    .baseUrl(BASE_URL)
+    .build()
 interface ToneApiService {
     @GET("albums/4aawyAB9vmqN3uQ7FjRGTy/tracks")
     fun getAlbumTracksAsync(
@@ -45,10 +52,20 @@ interface ToneApiService {
     fun getCurrentUserPlaylistsAsync(
         @Header("Authorization") auth: String
     ): Deferred<UserPlaylists>
+
+    @GET("playlists/{playlist_id}/tracks")
+    fun getPlaylistItemsAsync(
+        @Header("Authorization") auth: String,
+        @Path("playlist_id") playlist_Id: String
+        ): Deferred<DataPlaylistItems>
 }
 
 object ToneApi{
     val retrofitService: ToneApiService by lazy{
         retrofit.create(ToneApiService::class.java)
+    }
+
+    val retrofitService2: ToneApiService by lazy {
+        retrofitGetString.create(ToneApiService::class.java)
     }
 }

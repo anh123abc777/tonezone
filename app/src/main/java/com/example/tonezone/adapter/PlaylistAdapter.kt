@@ -1,7 +1,6 @@
 package com.example.tonezone.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -10,7 +9,7 @@ import com.example.tonezone.databinding.ItemLibraryBinding
 import com.example.tonezone.network.Playlist
 
 
-class PlaylistAdapter: ListAdapter<Playlist, PlaylistAdapter.ViewHolder>(DiffCallBack) {
+class PlaylistAdapter(private val clickListener: OnClickListener): ListAdapter<Playlist, PlaylistAdapter.ViewHolder>(DiffCallBack) {
 
     companion object DiffCallBack: DiffUtil.ItemCallback<Playlist>() {
         override fun areItemsTheSame(oldItem: Playlist, newItem: Playlist): Boolean {
@@ -20,16 +19,15 @@ class PlaylistAdapter: ListAdapter<Playlist, PlaylistAdapter.ViewHolder>(DiffCal
         override fun areContentsTheSame(oldItem: Playlist, newItem: Playlist): Boolean {
             return newItem.id == oldItem.id
         }
-
-
     }
 
     class ViewHolder private constructor
         (private val binding: ItemLibraryBinding): RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(playlist: Playlist){
+        fun bind(playlist: Playlist, clickListener: OnClickListener){
             binding.playlist = playlist
-            binding.executePendingBindings()
+            binding.clickListener = clickListener
+//            binding.executePendingBindings()
         }
 
         companion object{
@@ -46,6 +44,12 @@ class PlaylistAdapter: ListAdapter<Playlist, PlaylistAdapter.ViewHolder>(DiffCal
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position),clickListener)
     }
+
+    class OnClickListener(val clickListener: (playlist: Playlist) -> Unit){
+        fun onClick(playlist: Playlist) = clickListener(playlist)
+    }
+
+
 }
