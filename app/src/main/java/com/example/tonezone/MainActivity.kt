@@ -84,7 +84,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.miniPlayer.miniPlayerFrame.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            Toast.makeText(application,"t da click",Toast.LENGTH_SHORT).show()
         }
     }
 

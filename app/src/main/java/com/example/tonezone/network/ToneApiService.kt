@@ -58,6 +58,12 @@ interface ToneApiService {
         @Header("Authorization") auth: String,
         @Path("playlist_id") playlist_Id: String
         ): Deferred<DataPlaylistItems>
+
+    @GET("tracks/{id}")
+    fun getTrackAsync(
+        @Header("Authorization") auth: String,
+        @Path("id") id: String
+    ): Deferred<Track>
 }
 
 object ToneApi{

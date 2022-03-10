@@ -1,10 +1,10 @@
 package com.example.tonezone
 
-import android.net.Uri
 import android.text.format.DateUtils
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.net.toUri
+import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -13,6 +13,7 @@ import com.example.tonezone.adapter.GenreAdapter
 import com.example.tonezone.adapter.PlaylistAdapter
 import com.example.tonezone.adapter.TrackAdapter
 import com.example.tonezone.network.*
+import com.example.tonezone.player.PlayerScreenViewModel
 
 //@BindingAdapter("imageUrl")
 //fun bindImage(imgView : ImageView, imgUrl : String?){
@@ -80,10 +81,26 @@ fun bindTime(textView: TextView, timeInt : Long?){
 }
 
 @BindingAdapter("artists")
-fun bindTextView(textView: TextView, list: List<Artists>){
+fun bindTextView(textView: TextView, list: List<Artist>){
     var artists = ""
     list.forEachIndexed { index, artist ->
         artists += artist.name+ if(index!=list.size-1) ", " else ""
     }
     textView.text = artists
+}
+
+@BindingAdapter("playerState")
+fun bindStatePlayButton(button: AppCompatButton, state: PlayerScreenViewModel.PlayerState){
+    when(state){
+        PlayerScreenViewModel.PlayerState.PLAY -> button.setBackgroundResource(R.drawable.ic_custom_pause)
+        PlayerScreenViewModel.PlayerState.PAUSE -> button.setBackgroundResource(R.drawable.ic_custom_play)
+    }
+}
+
+@BindingAdapter("isShuffling")
+fun bindColorShuffleButton(imageView: ImageView, isShuffling: Boolean){
+    if(isShuffling)
+        imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.primary))
+    else
+        imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.gray))
 }

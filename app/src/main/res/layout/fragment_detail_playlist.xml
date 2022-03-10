@@ -9,7 +9,7 @@
             type="com.example.tonezone.detailplaylist.DetailPlaylistViewModel" />
     </data>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     <LinearLayout
@@ -77,10 +77,11 @@
             android:orientation="vertical"
             tools:listitem="@layout/item_track"
             android:layout_marginTop="8dp"
+            android:paddingBottom="100dp"
             playlist="@{viewModel.playlistItems}"
             android:nestedScrollingEnabled="false"
             />
 
     </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </layout>

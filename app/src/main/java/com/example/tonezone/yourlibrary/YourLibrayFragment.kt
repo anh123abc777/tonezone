@@ -1,19 +1,15 @@
 package com.example.tonezone.yourlibrary
 
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.example.tonezone.adapter.GenreAdapter
 import com.example.tonezone.adapter.PlaylistAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
 import com.example.tonezone.network.PlaylistInfo
-import kotlinx.parcelize.Parcelize
 
 class YourLibraryFragment : Fragment() {
 
@@ -21,7 +17,7 @@ class YourLibraryFragment : Fragment() {
     private lateinit var viewModel:  YourLibraryViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
 
         binding = FragmentYourLibraryBinding.inflate(inflater)
         val application = requireNotNull(activity).application
@@ -38,10 +34,6 @@ class YourLibraryFragment : Fragment() {
         return binding.root
     }
 
-    private fun listenClickItemPlaylist(){
-
-    }
-
     private fun setupAdapterPlaylist(){
         val adapter = PlaylistAdapter(PlaylistAdapter.OnClickListener {
            findNavController().navigate(YourLibraryFragmentDirections
@@ -49,7 +41,8 @@ class YourLibraryFragment : Fragment() {
                    PlaylistInfo( it.id,
                    it.name,
                    it.description,
-                   it.images?.get(0)!!.url)))
+                   it.images?.get(0)!!.url,
+                   it.uri)))
         })
         binding.yourLibraryList.adapter = adapter
 

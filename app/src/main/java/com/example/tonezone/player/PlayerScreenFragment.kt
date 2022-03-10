@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import com.example.tonezone.databinding.FragmentPlayerScreenBinding
+import com.example.tonezone.network.Track
 
 class PlayerScreenFragment : Fragment() {
 
@@ -25,16 +26,46 @@ class PlayerScreenFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = activity
 
+        setupImageCurrentTrack()
+        observeCurrentTrack()
+        observePlayerState()
+        observeProgress()
+        binding.executePendingBindings()
+
         return binding.root
     }
 
-    override fun onStop() {
-        super.onStop()
-        viewModel.onPause()
+    private fun observeShuffleIcon(){
+        viewModel.isShuffling.observe(viewLifecycleOwner){}
+    }
+
+    private fun observeProgress(){
+        viewModel.progress.observe(viewLifecycleOwner){}
+    }
+
+    private fun observePlayerState(){
+        viewModel.playerState.observe(viewLifecycleOwner){}
+    }
+
+    private fun observeCurrentTrack(){
+        var currentTrack = Track()
+        viewModel.currentTrack.observe(viewLifecycleOwner){
+            if(it!= Track() && currentTrack!=it){
+                viewModel.initSeekBar().start()
+                currentTrack = it
+            }
+        }
+    }
+
+    private fun setupImageCurrentTrack(){
+        viewModel.uriTrackResponse.observe(viewLifecycleOwner){
+            viewModel.token.observe(viewLifecycleOwner){
+                viewModel.getImageTrack()
+            }
+        }
     }
 
     override fun onDestroy() {
-        viewModel.onPause()
         viewModel.disconnect()
         super.onDestroy()
     }

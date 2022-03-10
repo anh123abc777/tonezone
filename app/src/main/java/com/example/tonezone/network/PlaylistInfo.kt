@@ -9,5 +9,6 @@ data class PlaylistInfo(
     val id: String,
     val name: String,
     val description: String,
-    val image: String
+    val image: String,
+    val uri: String
 ) : Parcelable

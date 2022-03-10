@@ -30,34 +30,19 @@ class DetailPlaylistViewModel
         get() = _playlistItems
 
     fun getDataPlaylistItems()=
-        uiScope.launch {
-
-//            ToneApi.retrofitService2.getPlaylistItemsAsync("Bearer ${token.value!!.value}")
-//                .enqueue(object : Callback<String>{
-//                    override fun onResponse(call: Call<String>, response: Response<String>) {
-//                        Log.i("retrofit",response.body().toString())
-//                    }
-//
-//                    override fun onFailure(call: Call<String>, t: Throwable) {
-//                        Log.i("retrofit","Failure" + t.message!!)
-//                    }
-//                })
+        uiScope.launch(Dispatchers.Main) {
             _playlistItems.value=try {
                 val playlistItemsDeferred = ToneApi.retrofitService
                     .getPlaylistItemsAsync("Bearer ${token.value!!.value}",playlistInfo.id)
-                    Log.i("playlistItems",playlistItemsDeferred.await().items.toString())
                 val dataPlaylistItems = playlistItemsDeferred.await().items
                 dataPlaylistItems.map {
                     it.track
                 }
-
             } catch (e: Exception){
                 Log.i("error",e.message!!+" los lis ")
                 listOf<Track>()
             }
-
         }
-
 
     override fun onCleared() {
         super.onCleared()
