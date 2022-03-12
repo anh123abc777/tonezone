@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.tonezone.yourlibrary.YourLibraryViewModel" />
+        <variable
+            name="type"
+            type="com.example.tonezone.yourlibrary.TypeItemLibrary" />
+    </data>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/filter_type_chip_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/Widget.MaterialComponents.Chip.Filter"
+        >
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/all_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="all"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:onClick="@{() -> viewModel.filterType(type.All)}"
+            sizeList="@{viewModel.userPlaylists.size()+viewModel.followedArtists.size()}"
+            />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/playlist_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="playlist"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:onClick="@{() -> viewModel.filterType(type.Playlist)}"
+            sizeList="@{viewModel.userPlaylists.size()}"
+            />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/artist_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="artist"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:onClick="@{() -> viewModel.filterType(type.Artist)}"
+            sizeList="@{viewModel.followedArtists.size()}"
+            />
+
+<!--        <com.google.android.material.chip.Chip-->
+<!--            android:id="@+id/album"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="album"-->
+<!--            android:background="@color/white" />-->
+
+    </com.google.android.material.chip.ChipGroup>
+</layout>

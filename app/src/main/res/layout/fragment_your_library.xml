@@ -9,7 +9,7 @@
             type="com.example.tonezone.yourlibrary.YourLibraryViewModel" />
     </data>
 
-    <LinearLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".yourlibrary.YourLibraryFragment"
@@ -17,127 +17,104 @@
         android:padding="8dp"
         >
 
+
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@color/white"
-            app:elevation="0in"
-        >
-            <RelativeLayout
+            app:liftOnScrollTargetViewId="@id/toolbar"
+            android:paddingBottom="8dp"
+            app:liftOnScroll="true"
+            >
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:title="Your Library"
+                    android:elevation="0dp"
+                    app:layout_scrollFlags="enterAlwaysCollapsed"
+                    app:menu="@menu/appbar_yourlibrary_menu"
+                    >
+                    <EditText
+                        android:id="@+id/search_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:hint="@string/search_your_library"
+                        />
+                </com.google.android.material.appbar.MaterialToolbar>
+
+            <include
+                android:id="@+id/chip_group"
+                layout="@layout/chipgroup_yourlibrary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            >
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 >
+            <RelativeLayout
+                android:id="@+id/arrangement_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                >
+
+                <ImageView
+                    android:id="@+id/sort_icon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:src="@drawable/ic_swap"
+                    />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Library"
-                    android:textSize="26sp"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    />
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_search"
-                    android:layout_toLeftOf="@id/add"
-                    android:layout_marginEnd="10dp"
-                    android:layout_centerVertical="true"
-                    />
+                    android:layout_toEndOf="@id/sort_icon"
+                    android:layout_marginStart="8dp"
+                    android:textSize="14sp"
+                    android:onClick="@{() -> viewModel.changeSortOption()}"
+                    android:text="@{viewModel.sortOption.toString()}"/>
 
                 <ImageView
-                    android:id="@+id/add"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_add"
-                    android:layout_alignParentEnd="true"
+                    android:id="@+id/display_option"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
                     android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_grid"
                     />
+
             </RelativeLayout>
 
-            <androidx.appcompat.widget.Toolbar
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/your_library_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
-                app:layout_scrollFlags="scroll|enterAlways|snapMargins"
-                >
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    >
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="artist"
-                        android:textSize="14sp"
-                        android:background="@drawable/border_chip"
-                        android:layout_marginEnd="8dp"
-                        />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="playlist"
-                        android:textSize="14sp"
-                        android:background="@drawable/border_chip"
-                        android:layout_marginEnd="8dp"
-                        />
-
-                </LinearLayout>
-
-            </androidx.appcompat.widget.Toolbar>
-
-        </com.google.android.material.appbar.AppBarLayout>
-
-
-        <RelativeLayout
-            android:id="@+id/arrangement_frame"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            >
-
-            <ImageView
-                android:id="@+id/sort_icon"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
-                android:src="@drawable/ic_swap"
+                android:clipToPadding="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="vertical"
+                artistData="@{viewModel.followedArtists}"
+                playlistData="@{viewModel.userPlaylists}"
                 />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/sort_icon"
-                android:layout_marginStart="8dp"
-                android:textSize="14sp"
-                android:text="Recently played"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_grid"
-                />
-
-        </RelativeLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/your_library_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:orientation="vertical"
-            tools:listitem="@layout/item_library"
-            valueYourLibrary="@{viewModel.userPlaylists}"
-            />
-
-
-    </LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

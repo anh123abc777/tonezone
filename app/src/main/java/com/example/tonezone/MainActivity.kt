@@ -46,7 +46,11 @@ class MainActivity : AppCompatActivity() {
                 "0546209c8b9b4b66a8d49037c566caa6",
                 AuthorizationResponse.Type.TOKEN,
                 REDIRECT_URI)
-        builder.setScopes(arrayOf("streaming","playlist-read-private","playlist-read-collaborative"))
+        builder.setScopes(arrayOf("streaming",
+            "playlist-read-private",
+            "playlist-read-collaborative",
+            "user-follow-read",
+            ))
         val request = builder.build()
         AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
 

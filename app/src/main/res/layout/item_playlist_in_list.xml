@@ -7,7 +7,7 @@
             type="com.example.tonezone.network.Playlist" />
         <variable
             name="clickListener"
-            type="com.example.tonezone.adapter.PlaylistAdapter.OnClickListener" />
+            type="com.example.tonezone.adapter.LibraryAdapter.OnClickListener" />
     </data>
 
     <RelativeLayout

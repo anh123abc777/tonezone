@@ -71,7 +71,8 @@
                 android:layout_height="24dp"
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
-                app:tint="@color/primary"
+                app:tint="@color/colorSecondary"
+                android:src="@drawable/ic_ver_more"
                 />
         </RelativeLayout>
 <!--        <View-->

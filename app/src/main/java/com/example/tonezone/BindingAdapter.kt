@@ -1,6 +1,7 @@
 package com.example.tonezone
 
 import android.text.format.DateUtils
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
@@ -10,10 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.tonezone.adapter.GenreAdapter
-import com.example.tonezone.adapter.PlaylistAdapter
+import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.adapter.TrackAdapter
 import com.example.tonezone.network.*
 import com.example.tonezone.player.PlayerScreenViewModel
+import com.google.android.material.chip.Chip
 
 //@BindingAdapter("imageUrl")
 //fun bindImage(imgView : ImageView, imgUrl : String?){
@@ -36,11 +38,15 @@ fun bindDataGenres(recyclerView: RecyclerView, data: Topic?){
     }
 }
 
-@BindingAdapter("valueYourLibrary")
-fun bindDataYourLibrary(recyclerView: RecyclerView, data: UserPlaylists?){
-    val adapter = recyclerView.adapter as PlaylistAdapter
-    if (data!=null) {
-        adapter.submitList(data.items)
+@BindingAdapter(value = ["playlistData","artistData"],requireAll = false)
+fun bindDataYourLibrary(recyclerView: RecyclerView, playlistData: List<Playlist>?, artistData: List<Artist>?){
+    val adapter = recyclerView.adapter as LibraryAdapter
+    if (playlistData != null) {
+        if (artistData != null) {
+            if (playlistData.isNotEmpty() || artistData.isNotEmpty()) {
+                adapter.submitYourLibrary(playlistData,artistData)
+            }
+        }
     }
 }
 
@@ -100,7 +106,15 @@ fun bindStatePlayButton(button: AppCompatButton, state: PlayerScreenViewModel.Pl
 @BindingAdapter("isShuffling")
 fun bindColorShuffleButton(imageView: ImageView, isShuffling: Boolean){
     if(isShuffling)
-        imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.primary))
+        imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.colorSecondary))
     else
         imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.gray))
+}
+
+@BindingAdapter("sizeList")
+fun bindChip(chip: Chip, sizeList: Int?){
+    if(sizeList!=0 && sizeList!=null)
+        chip.visibility = View.VISIBLE
+    else
+        chip.visibility = View.GONE
 }
