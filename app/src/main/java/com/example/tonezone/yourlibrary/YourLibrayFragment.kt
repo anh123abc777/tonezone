@@ -113,24 +113,17 @@ class YourLibraryFragment : Fragment() {
 
     private fun setupYourLibraryAdapter(){
          adapter = LibraryAdapter(LibraryAdapter.OnClickListener {
-
-            when(it.type){
-                2 -> {
-                    it as LibraryAdapter.DataItem.ArtistItem
-                    Toast.makeText(context,it.artist.name,Toast.LENGTH_SHORT).show()
-                }
-                else -> {
-                   it as LibraryAdapter.DataItem.PlaylistItem
-                    findNavController().navigate(YourLibraryFragmentDirections
-                        .actionYourLibraryFragmentToDetailPlaylistFragment(
-                            PlaylistInfo( it.playlist.id,
-                                it.playlist.name,
-                                it.playlist.description,
-                                it.playlist.images?.get(0)!!.url,
-                                it.playlist.uri)))
-                }
-            }
-
+            findNavController().navigate(YourLibraryFragmentDirections
+                .actionYourLibraryFragmentToDetailPlaylistFragment(
+                    PlaylistInfo(
+                        it.id,
+                        it.name,
+                        it.description,
+                        it.image!!,
+                        it.uri,
+                        it.typeName
+                    )
+                ))
         })
         binding.yourLibraryList.adapter = adapter
 

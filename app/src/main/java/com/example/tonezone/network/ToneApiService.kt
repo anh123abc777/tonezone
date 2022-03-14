@@ -70,6 +70,14 @@ interface ToneApiService {
         @Header("Authorization") auth: String,
         @Query("type") type: String
     ): Deferred<DataFollowedArtists>
+
+    @GET("artists/{id}/top-tracks")
+    fun getArtistTopTracksAsync(
+        @Header("Authorization") auth: String,
+        @Path("id") idArtist: String,
+        @Query("market") market: String
+    ): Deferred<ArtistTopTracks>
+
 }
 
 object ToneApi{

@@ -9,13 +9,8 @@ import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.ToneApi
-import com.example.tonezone.network.ToneApiService
 import com.example.tonezone.network.Track
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.await
 
 class DetailPlaylistViewModel
     (application: Application,  val playlistInfo: PlaylistInfo) : ViewModel() {
@@ -31,18 +26,40 @@ class DetailPlaylistViewModel
 
     fun getDataPlaylistItems()=
         uiScope.launch(Dispatchers.Main) {
-            _playlistItems.value=try {
-                val playlistItemsDeferred = ToneApi.retrofitService
-                    .getPlaylistItemsAsync("Bearer ${token.value!!.value}",playlistInfo.id)
-                val dataPlaylistItems = playlistItemsDeferred.await().items
-                dataPlaylistItems.map {
-                    it.track
-                }
-            } catch (e: Exception){
-                Log.i("error",e.message!!+" los lis ")
-                listOf<Track>()
-            }
+            _playlistItems.value =
+                if (playlistInfo.type=="artist")
+                    getArtistTopTracks()
+                else
+                    getPlaylistTracks()
         }
+
+    private suspend fun getPlaylistTracks(): List<Track> {
+        return try {
+            val playlistItemsDeferred = ToneApi.retrofitService
+                .getPlaylistItemsAsync("Bearer ${token.value!!.value}", playlistInfo.id)
+            val dataPlaylistItems = playlistItemsDeferred.await().items
+            dataPlaylistItems.map {
+                it.track
+            }
+        } catch (e: Exception) {
+            Log.i("error", e.message!! )
+            listOf()
+        }
+    }
+
+    private suspend fun getArtistTopTracks(): List<Track> {
+        return try {
+            val artistTopTracksDeferred = ToneApi.retrofitService
+                .getArtistTopTracksAsync(
+                    "Bearer ${token.value!!.value}",
+                    playlistInfo.id,
+                    "VN")
+            artistTopTracksDeferred.await().tracks
+        } catch (e: Exception) {
+            Log.i("error", e.message!! )
+            listOf()
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()

@@ -170,6 +170,9 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val type = 1
             override val name = playlist.name
             override val typeName = playlist.type
+            override val uri = playlist.uri
+            override val description = playlist.description
+            override val image = playlist.images?.get(0)?.url
         }
 
         data class ArtistItem( val artist: Artist): DataItem(){
@@ -177,13 +180,19 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val type = 2
             override val name = artist.name
             override val typeName = artist.type
+            override val uri = artist.uri
+            override val description = artist.type
+            override val image = artist.images?.get(0)?.url
+
         }
 
         abstract val id: String
         abstract val type: Int
         abstract val name: String
         abstract val typeName: String
-
+        abstract val uri: String
+        abstract val description: String
+        abstract val image: String?
     }
 
     class OnClickListener(val clickListener: (dataItem: DataItem) -> Unit){
