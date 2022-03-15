@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tonezone.R
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.network.*
@@ -42,10 +41,10 @@ class YourLibraryViewModel(application: Application) : ViewModel() {
 
     fun getDataUserPlaylists() = runBlocking{
         try {
-            val userPlaylistsDeferred: Deferred<UserPlaylists>
+            val userPlaylistsDeferred: Deferred<Playlists>
             = ToneApi.retrofitService
                 .getCurrentUserPlaylistsAsync("Bearer ${token.value!!.value}")
-            _userPlaylists.value = userPlaylistsDeferred.await().items
+            _userPlaylists.value = userPlaylistsDeferred.await().items!!
         } catch (e: Exception) {
             Log.i("error",e.message!!)
         }
@@ -54,10 +53,10 @@ class YourLibraryViewModel(application: Application) : ViewModel() {
     fun getDataFollowedArtists() = runBlocking{
         try {
 
-            val followerArtistsDeferred: Deferred<DataFollowedArtists>
+            val followerArtistsDeferred: Deferred<ArtistsObject>
             = ToneApi.retrofitService
                 .getFollowedArtistsAsync("Bearer ${token.value!!.value}","artist")
-            _followedArtists.value = followerArtistsDeferred.await().artists.items!!
+            _followedArtists.value = followerArtistsDeferred.await().artists!!.items!!
             Log.i("artists",_followedArtists.value.toString())
 
         }catch (e: java.lang.Exception){

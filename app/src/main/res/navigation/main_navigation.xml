@@ -13,7 +13,11 @@
         android:id="@+id/searchFragment"
         android:name="com.example.tonezone.search.SearchFragment"
         android:label="Search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_search" >
+        <action
+            android:id="@+id/action_searchFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+    </fragment>
     <fragment
         android:id="@+id/yourLibraryFragment"
         android:name="com.example.tonezone.yourlibrary.YourLibraryFragment"
@@ -30,5 +34,16 @@
         <argument
             android:name="playlistInfo"
             app:argType="com.example.tonezone.network.PlaylistInfo" />
+    </fragment>
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="com.example.tonezone.search.result.ResultFragment"
+        android:label="ResultFragment" >
+        <argument
+            android:name="genre_name"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_resultFragment_to_detailPlaylistFragment"
+            app:destination="@id/detailPlaylistFragment" />
     </fragment>
 </navigation>

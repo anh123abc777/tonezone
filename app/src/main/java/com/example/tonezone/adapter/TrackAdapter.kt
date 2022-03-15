@@ -47,9 +47,9 @@ class TrackAdapter(private val clickListener: OnClickListener) : ListAdapter<Tra
         val newItem = getItem(position)
         holder.bind(newItem,clickListener)
     }
-}
 
-class OnClickListener(val clickListener : (track: Track) -> Unit) {
+    class OnClickListener(val clickListener : (track: Track) -> Unit) {
 
-    fun onClick(track: Track) = clickListener(track)
+        fun onClick(track: Track) = clickListener(track)
+    }
 }

@@ -6,15 +6,16 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tonezone.databinding.ItemGenreBinding
+import com.example.tonezone.network.Category
 
-class GenreAdapter(): ListAdapter<String, GenreAdapter.ViewHolder>(DiffCallBack) {
+class GenreAdapter(val clickListener: OnClickListener): ListAdapter<Category, GenreAdapter.ViewHolder>(DiffCallBack) {
 
-    companion object DiffCallBack: DiffUtil.ItemCallback<String>() {
-        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
-            return oldItem === newItem
+    companion object DiffCallBack: DiffUtil.ItemCallback<Category>() {
+        override fun areItemsTheSame(oldItem: Category, newItem: Category): Boolean {
+            return oldItem == newItem
         }
 
-        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+        override fun areContentsTheSame(oldItem: Category, newItem: Category): Boolean {
             return  oldItem == newItem
         }
     }
@@ -22,8 +23,9 @@ class GenreAdapter(): ListAdapter<String, GenreAdapter.ViewHolder>(DiffCallBack)
     class ViewHolder
     private constructor
         (private val binding: ItemGenreBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(genre: String){
-            binding.genreName = genre
+        fun bind(category: Category, clickListener: OnClickListener){
+            binding.category = category
+            binding.clickListener = clickListener
             binding.executePendingBindings()
         }
 
@@ -41,10 +43,14 @@ class GenreAdapter(): ListAdapter<String, GenreAdapter.ViewHolder>(DiffCallBack)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position),clickListener)
     }
 
     override fun getItemCount(): Int {
         return currentList.size.coerceAtMost(20)
+    }
+    class OnClickListener(val clickListener : (category: Category) -> Unit) {
+
+        fun onClick(category: Category) = clickListener(category)
     }
 }

@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tonezone.databinding.ItemArtistBinding
 import com.example.tonezone.databinding.ItemPlaylistInListBinding
+import com.example.tonezone.databinding.ItemTrackBinding
 import com.example.tonezone.network.Artist
 import com.example.tonezone.network.Playlist
+import com.example.tonezone.network.Track
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -164,6 +166,24 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         }
     }
 
+    class TrackViewHolder private constructor
+        (private val binding: ItemTrackBinding): RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(track: Track, clickListener: OnClickListener){
+            binding.track = track
+            binding
+            binding.executePendingBindings()
+        }
+
+        companion object{
+            fun from(parent: ViewGroup): TrackViewHolder{
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val binding = ItemTrackBinding.inflate(layoutInflater,parent,false)
+                return TrackViewHolder(binding)
+            }
+        }
+    }
+
     sealed class DataItem{
         data class PlaylistItem(val playlist: Playlist): DataItem(){
             override val id = playlist.id
@@ -186,6 +206,17 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
         }
 
+        data class TrackItem( val track: Track): DataItem(){
+            override val id = track.id
+            override val type = 3
+            override val name = track.name
+            override val typeName = track.type
+            override val uri = track.uri
+            override val description = ""
+            override val image = track.album?.uri
+
+        }
+
         abstract val id: String
         abstract val type: Int
         abstract val name: String
@@ -198,7 +229,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     class OnClickListener(val clickListener: (dataItem: DataItem) -> Unit){
         fun onClick(playlist: Playlist) = clickListener(DataItem.PlaylistItem(playlist))
         fun onClick(artist: Artist) = clickListener(DataItem.ArtistItem(artist))
+        fun onClick(track: Track) = clickListener(DataItem.TrackItem(track))
     }
-
 
 }

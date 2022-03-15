@@ -3,24 +3,40 @@
 
     <data>
         <variable
-            name="genreName"
-            type="String" />
+            name="category"
+            type="com.example.tonezone.network.Category" />
+
+        <variable
+            name="clickListener"
+            type="com.example.tonezone.adapter.GenreAdapter.OnClickListener" />
     </data>
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/border_avt_playlist"
+        android:layout_height="80dp"
         android:layout_margin="4dp"
+        android:background="@drawable/border_avt_playlist"
+        android:onClick="@{() -> clickListener.onClick(category)}"
         >
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            listImageUrl="@{category.icons}"
+            android:elevation="0dp"
+            android:scaleType="fitXY"
+            />
 
         <TextView
             android:id="@+id/genre_name_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{genreName}"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
+            android:text="@{category.name}"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:elevation="4dp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/white"
         />
     </RelativeLayout>
 </layout>

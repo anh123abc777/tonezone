@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.example.tonezone.adapter.OnClickListener
 import com.example.tonezone.adapter.TrackAdapter
 import com.example.tonezone.databinding.FragmentDetailPlaylistBinding
 import com.example.tonezone.network.PlaylistInfo
@@ -53,10 +52,14 @@ class DetailPlaylistFragment : Fragment() {
         val playerFactory = PlayerScreenViewModelFactory(application)
         val playerViewModel = ViewModelProvider(requireActivity(),playerFactory).get(PlayerScreenViewModel::class.java)
 
-        val adapter = TrackAdapter(OnClickListener {
+        val adapter = TrackAdapter(TrackAdapter.OnClickListener {
             val pos = viewModel.playlistItems.value!!.indexOf(it)
-            playerViewModel.onPlay(playlistInfo.uri,pos)
-            Toast.makeText(application, viewModel.playlistItems.value!!.size.toString(),Toast.LENGTH_SHORT).show()
+            playerViewModel.onPlay(playlistInfo.uri, pos)
+            Toast.makeText(
+                application,
+                viewModel.playlistItems.value!!.size.toString(),
+                Toast.LENGTH_SHORT
+            ).show()
         })
         binding.playlist.adapter = adapter
 

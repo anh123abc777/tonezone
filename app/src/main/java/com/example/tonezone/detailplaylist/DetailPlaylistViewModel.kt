@@ -54,7 +54,7 @@ class DetailPlaylistViewModel
                     "Bearer ${token.value!!.value}",
                     playlistInfo.id,
                     "VN")
-            artistTopTracksDeferred.await().tracks
+            artistTopTracksDeferred.await().tracks!!
         } catch (e: Exception) {
             Log.i("error", e.message!! )
             listOf()

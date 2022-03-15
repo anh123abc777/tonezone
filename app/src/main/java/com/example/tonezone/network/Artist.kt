@@ -4,13 +4,13 @@ package com.example.tonezone.network
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-data class DataFollowedArtists(
-	val artists: Artists
+data class ArtistsObject(
+	val artists: Artists?=Artists()
 )
 
 @Parcelize
 data class Artists(
-	val items: List<Artist>?
+	val items: List<Artist>?= listOf()
 ) : Parcelable
 
 @Parcelize

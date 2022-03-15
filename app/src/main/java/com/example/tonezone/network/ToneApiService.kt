@@ -1,7 +1,6 @@
 package com.example.tonezone.network
 
 import DataPlaylistItems
-import PlaylistItems
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -51,7 +50,7 @@ interface ToneApiService {
     @GET("me/playlists")
     fun getCurrentUserPlaylistsAsync(
         @Header("Authorization") auth: String
-    ): Deferred<UserPlaylists>
+    ): Deferred<Playlists>
 
     @GET("playlists/{playlist_id}/tracks")
     fun getPlaylistItemsAsync(
@@ -69,7 +68,7 @@ interface ToneApiService {
     fun getFollowedArtistsAsync(
         @Header("Authorization") auth: String,
         @Query("type") type: String
-    ): Deferred<DataFollowedArtists>
+    ): Deferred<ArtistsObject>
 
     @GET("artists/{id}/top-tracks")
     fun getArtistTopTracksAsync(
@@ -78,6 +77,26 @@ interface ToneApiService {
         @Query("market") market: String
     ): Deferred<ArtistTopTracks>
 
+    @GET("search")
+    fun searchGenreAsync(
+        @Header("Authorization") auth: String,
+        @Query("q") query: String,
+        @Query("market") market: String = "VN",
+        @Query("type") type: Array<String> = arrayOf("playlist")
+    ): Deferred<SearchedItem>
+
+    @GET("browse/categories")
+    fun getCategoriesAsync(
+        @Header("Authorization") auth: String,
+        @Query("country") country: String = "VN"
+        ): Deferred<CategoriesObject>
+
+    @GET("browse/categories/{category_id}/playlists")
+    fun getCategoryPlaylistsAsync(
+        @Header("Authorization") auth: String,
+        @Path("category_id") category_id: String,
+        @Query("country") country: String = "VN"
+        ): Deferred<PlaylistsObject>
 }
 
 object ToneApi{

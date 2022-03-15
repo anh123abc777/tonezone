@@ -92,6 +92,7 @@ dependencies {
 
     //Glide
     implementation "com.github.bumptech.glide:glide:$version_glide"
+    implementation 'jp.wasabeef:glide-transformations:4.3.0'
 
     implementation 'com.spotify.android:auth:1.2.5'
     implementation 'androidx.browser:browser:1.0.0'
@@ -107,6 +108,7 @@ dependencies {
     implementation "androidx.room:room-ktx:$version_room"
 
     implementation "com.google.code.gson:gson:$version_gson"
+    implementation "jp.wasabeef:blurry:4.0.1"
 
 
 }

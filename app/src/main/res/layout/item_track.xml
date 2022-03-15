@@ -9,7 +9,7 @@
             type="com.example.tonezone.network.Track" />
         <variable
             name="clickListener"
-            type="com.example.tonezone.adapter.OnClickListener" />
+            type="com.example.tonezone.adapter.TrackAdapter.OnClickListener" />
     </data>
 
         <RelativeLayout

@@ -11,7 +11,7 @@ data class Playlist(
     val name: String,
     val owner: Owner,
     val primary_color: Int?,
-    val public: Boolean,
+    val public: Boolean?,
     val type: String,
     val uri: String
 )
