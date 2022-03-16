@@ -78,12 +78,14 @@ interface ToneApiService {
     ): Deferred<ArtistTopTracks>
 
     @GET("search")
-    fun searchGenreAsync(
+    fun searchForItemAsync(
         @Header("Authorization") auth: String,
         @Query("q") query: String,
+        @Query("type") type: String = "track,artist,playlist",
+        //        @Query("type") type: Array<String> = arrayOf("track","artist","playlist"),
+
         @Query("market") market: String = "VN",
-        @Query("type") type: Array<String> = arrayOf("playlist")
-    ): Deferred<SearchedItem>
+        ): Deferred<SearchedItem>
 
     @GET("browse/categories")
     fun getCategoriesAsync(

@@ -31,8 +31,17 @@ class SearchFragment : Fragment() {
 
         observeDataToken()
         setupAdapterGenres()
+        setupNavigateSearchForItem()
 
         return binding.root
+    }
+
+    private fun setupNavigateSearchForItem(){
+        binding.searchBar.setOnClickListener {
+            findNavController().navigate(
+                SearchFragmentDirections.actionSearchFragmentToSearchForItemFragment()
+            )
+        }
     }
 
     private fun setupAdapterGenres(){

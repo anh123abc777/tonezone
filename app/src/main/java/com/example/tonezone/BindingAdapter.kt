@@ -47,16 +47,16 @@ import jp.wasabeef.glide.transformations.BlurTransformation
 //    }
 //}
 
-@BindingAdapter(value = ["playlistData","artistData"],requireAll = false)
-fun bindDataYourLibrary(recyclerView: RecyclerView, playlistData: List<Playlist>?, artistData: List<Artist>?){
+@BindingAdapter(value = ["playlistData","artistData","trackData"],requireAll = false)
+fun bindDataYourLibrary(recyclerView: RecyclerView, playlistData: List<Playlist>?, artistData: List<Artist>?, trackData: List<Track>?){
     val adapter = recyclerView.adapter as LibraryAdapter
-    if (playlistData != null) {
-        if (artistData != null) {
-            if (playlistData.isNotEmpty() || artistData.isNotEmpty()) {
-                adapter.submitYourLibrary(playlistData,artistData)
-            }
-        }
-    }
+
+    val playlists = playlistData ?: listOf()
+    val tracks = trackData ?: listOf()
+    val artists = artistData ?: listOf()
+
+    adapter.submitYourLibrary(playlists,artists,tracks)
+
 }
 
 @BindingAdapter("playlist")
@@ -144,4 +144,12 @@ fun bindChip(chip: Chip, sizeList: Int?){
         chip.visibility = View.VISIBLE
     else
         chip.visibility = View.GONE
+}
+
+@BindingAdapter("sizeSearchedItems")
+fun bindContentSearchForItem(textView: TextView,size: Int?){
+    when(size){
+        0,null -> textView.visibility = View.VISIBLE
+        else -> textView.visibility = View.GONE
+    }
 }

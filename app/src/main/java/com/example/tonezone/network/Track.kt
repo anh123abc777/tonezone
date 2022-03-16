@@ -1,5 +1,9 @@
 package com.example.tonezone.network
 
+data class Tracks(
+    val items: List<Track>?= listOf()
+)
+
 data class Track (
     val artists : List<Artist>? = listOf(),
     val disc_number : Int? = 0,

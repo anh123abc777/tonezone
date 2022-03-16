@@ -6,4 +6,11 @@
     <string name="your_playlist">Your playlist</string>
     <string name="home">Home</string>
     <string name="search_your_library">Search Your Library</string>
+    <string name="content_search_for_item"><b>Play what you love</b>
+Search for artist, songs and more</string>
+    <string name="track">track</string>
+    <string name="artist">artist</string>
+    <string name="playlist">playlist</string>
+    <string name="all">all</string>
+    <string name="song">song</string>
 </resources>

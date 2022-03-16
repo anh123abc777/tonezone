@@ -16,13 +16,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.ClassCastException
 
 
 class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<LibraryAdapter.DataItem, RecyclerView.ViewHolder>(DiffCallBack) {
 
     private val ARTIST = 2
     private val PLAYLIST = 1
+    private val TRACK = 3
 
     companion object DiffCallBack: DiffUtil.ItemCallback<DataItem>() {
         override fun areItemsTheSame(oldItem: DataItem, newItem: DataItem): Boolean {
@@ -37,6 +37,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     override fun getItemViewType(position: Int): Int {
         return when(getItem(position)){
             is DataItem.ArtistItem -> ARTIST
+            is DataItem.TrackItem -> TRACK
             else -> PLAYLIST
         }
     }
@@ -45,7 +46,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         return when(viewType){
             1 -> PlaylistViewHolder.from(parent)
             2 -> ArtistViewHolder.from(parent)
-            else -> throw ClassCastException("Unknown viewType $viewType")
+            else -> TrackViewHolder.from(parent)
         }
     }
 
@@ -60,15 +61,21 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
                 val playlistItem = getItem(position) as DataItem.PlaylistItem
                 holder.bind(playlistItem.playlist,clickListener)
             }
+
+            is TrackViewHolder -> {
+                val trackItem = getItem(position) as DataItem.TrackItem
+                holder.bind(trackItem.track,clickListener)
+            }
         }
     }
 
     private val adapterScope = CoroutineScope(Dispatchers.Default)
     private var defaultData = listOf<DataItem>()
-    fun submitYourLibrary(playlists: List<Playlist>?, artists: List<Artist>?){
+    fun submitYourLibrary(playlists: List<Playlist>?, artists: List<Artist>?, tracks: List<Track>?){
         adapterScope.launch {
             val items = (artists?.map { DataItem.ArtistItem(it) }
-                ?: listOf()) + (playlists?.map { DataItem.PlaylistItem(it) } ?: listOf())
+                ?: listOf()) + (playlists?.map { DataItem.PlaylistItem(it) } ?: listOf())+
+                    (tracks?.map { DataItem.TrackItem(it) } ?: listOf())
 
             withContext(Dispatchers.Main){
                 submitList(items)
@@ -171,7 +178,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
         fun bind(track: Track, clickListener: OnClickListener){
             binding.track = track
-            binding
+            binding.clickListener = clickListener
             binding.executePendingBindings()
         }
 
@@ -192,7 +199,10 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val typeName = playlist.type
             override val uri = playlist.uri
             override val description = playlist.description
-            override val image = playlist.images?.get(0)?.url
+            override val image =
+                if(playlist.images?.size!=0)
+                playlist.images?.get(0)?.url
+            else ""
         }
 
         data class ArtistItem( val artist: Artist): DataItem(){
@@ -202,7 +212,10 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val typeName = artist.type
             override val uri = artist.uri
             override val description = artist.type
-            override val image = artist.images?.get(0)?.url
+            override val image =
+                if(artist.images?.size!=0)
+                    artist.images?.get(0)?.url
+            else ""
 
         }
 
@@ -210,7 +223,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val id = track.id
             override val type = 3
             override val name = track.name
-            override val typeName = track.type
+            override val typeName = "Track"
             override val uri = track.uri
             override val description = ""
             override val image = track.album?.uri

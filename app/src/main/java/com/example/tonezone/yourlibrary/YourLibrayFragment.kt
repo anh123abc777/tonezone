@@ -15,7 +15,9 @@ import androidx.navigation.fragment.findNavController
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
+import com.example.tonezone.network.Artists
 import com.example.tonezone.network.PlaylistInfo
+import com.example.tonezone.network.Playlists
 
 class YourLibraryFragment : Fragment() {
 
@@ -36,6 +38,7 @@ class YourLibraryFragment : Fragment() {
 
         observeToken()
         observeUserPlaylists()
+        observeFollowedArtists()
         setupYourLibraryAdapter()
         setupMenuAppbarOnClick()
         bindChipGroup()
@@ -70,8 +73,15 @@ class YourLibraryFragment : Fragment() {
 
     @SuppressLint("ResourceAsColor")
     private fun bindChipGroup(){
-        binding.chipGroup.viewModel = viewModel
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
+
+        binding.chipGroup.filterTypeChipGroup.setOnCheckedChangeListener { group, checkedId ->
+            when(checkedId){
+                R.id.all_type -> viewModel.filterType(TypeItemLibrary.All)
+                R.id.playlist_type -> viewModel.filterType(TypeItemLibrary.Playlist)
+                R.id.artist_type -> viewModel.filterType(TypeItemLibrary.Artist)
+            }
+        }
     }
 
     private fun setupSearchBar() {
@@ -140,22 +150,24 @@ class YourLibraryFragment : Fragment() {
 
     private fun observeUserPlaylists(){
         viewModel.userPlaylists.observe(viewLifecycleOwner){
-            observeFollowedArtists()
+            binding.chipGroup.playlistData = Playlists(viewModel.userPlaylists.value)
             Log.i("observe","2")
         }
     }
 
     private fun observeFollowedArtists(){
-        viewModel.followedArtists.observe(viewLifecycleOwner){}
+        viewModel.followedArtists.observe(viewLifecycleOwner){
+            if(it!=null){
+                binding.chipGroup.artistData = Artists(viewModel.followedArtists.value)
+            }
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        Log.i("observe","top")
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.i("observe","destroy")
     }
 }

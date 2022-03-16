@@ -26,8 +26,6 @@ class TrackAdapter(private val clickListener: OnClickListener) : ListAdapter<Tra
 
         fun bind(track: Track, clickListener: OnClickListener){
             binding.track = track
-            binding.clickListener = clickListener
-            binding.executePendingBindings()
         }
 
         companion object{

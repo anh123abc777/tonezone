@@ -17,6 +17,9 @@
         <action
             android:id="@+id/action_searchFragment_to_resultFragment"
             app:destination="@id/resultFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_searchForItemFragment"
+            app:destination="@id/searchForItemFragment" />
     </fragment>
     <fragment
         android:id="@+id/yourLibraryFragment"
@@ -46,4 +49,8 @@
             android:id="@+id/action_resultFragment_to_detailPlaylistFragment"
             app:destination="@id/detailPlaylistFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/searchForItemFragment"
+        android:name="com.example.tonezone.search.searchfoitem.SearchForItemFragment"
+        android:label="SearchForItemFragment" />
 </navigation>

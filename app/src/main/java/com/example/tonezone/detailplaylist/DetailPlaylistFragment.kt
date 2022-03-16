@@ -2,14 +2,13 @@ package com.example.tonezone.detailplaylist
 
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.example.tonezone.adapter.TrackAdapter
+import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentDetailPlaylistBinding
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.player.PlayerScreenViewModel
@@ -52,8 +51,9 @@ class DetailPlaylistFragment : Fragment() {
         val playerFactory = PlayerScreenViewModelFactory(application)
         val playerViewModel = ViewModelProvider(requireActivity(),playerFactory).get(PlayerScreenViewModel::class.java)
 
-        val adapter = TrackAdapter(TrackAdapter.OnClickListener {
-            val pos = viewModel.playlistItems.value!!.indexOf(it)
+        val adapter = LibraryAdapter(LibraryAdapter.OnClickListener {
+            val trackItem = it as LibraryAdapter.DataItem.TrackItem
+            val pos = viewModel.playlistItems.value!!.indexOf(trackItem.track)
             playerViewModel.onPlay(playlistInfo.uri, pos)
             Toast.makeText(
                 application,

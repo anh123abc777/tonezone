@@ -78,7 +78,7 @@
             tools:listitem="@layout/item_track"
             android:layout_marginTop="8dp"
             android:paddingBottom="100dp"
-            playlist="@{viewModel.playlistItems}"
+            trackData="@{viewModel.playlistItems}"
             android:nestedScrollingEnabled="false"
             />
 
