@@ -5,7 +5,6 @@ import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterF
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Deferred
-import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -98,6 +97,26 @@ interface ToneApiService {
         @Header("Authorization") auth: String,
         @Path("category_id") category_id: String,
         @Query("country") country: String = "VN"
+        ): Deferred<PlaylistsObject>
+
+    @GET("browse/new-releases")
+    fun getNewReleasesAsync(
+        @Header("Authorization") auth: String,
+        @Query("country") country: String = "VN"
+    ): Deferred<AlbumsObject>
+
+    @GET("browse/featured-playlists")
+    fun getFeaturedPlaylistsAsync(
+        @Header("Authorization") auth: String,
+        @Query("country") country: String = "VN",
+        @Query("locale") locale: String = "sv_VN"
+    ): Deferred<PlaylistsObject>
+
+    @GET("browse/categories/toplists/playlists")
+    fun getChartsAsync(
+        @Header("Authorization") auth: String,
+        @Query("country") country: String = "VN",
+        @Query("offset") offset: Int = 9
         ): Deferred<PlaylistsObject>
 }
 

@@ -17,9 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import com.bumptech.glide.request.RequestOptions
-import com.example.tonezone.adapter.GenreAdapter
-import com.example.tonezone.adapter.LibraryAdapter
-import com.example.tonezone.adapter.TrackAdapter
+import com.example.tonezone.adapter.*
 import com.example.tonezone.network.*
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.google.android.material.chip.Chip
@@ -47,6 +45,22 @@ import jp.wasabeef.glide.transformations.BlurTransformation
 //    }
 //}
 
+@BindingAdapter("groupPlaylists")
+fun bindGroupPlaylistsRecyclerview(recyclerView: RecyclerView, list: List<GroupPlaylist>?){
+    if (list!=null){
+        val adapter = recyclerView.adapter as GroupPlaylistAdapter
+        adapter.submitList(list)
+    }
+}
+
+@BindingAdapter("playlistInGridData")
+fun bindPlaylistRecyclerview(recyclerView: RecyclerView, list: List<Playlist>?){
+    if(list!=null){
+        val adapter = recyclerView.adapter as PlaylistAdapter
+        adapter.submitList(list)
+    }
+}
+
 @BindingAdapter(value = ["playlistData","artistData","trackData"],requireAll = false)
 fun bindDataYourLibrary(recyclerView: RecyclerView, playlistData: List<Playlist>?, artistData: List<Artist>?, trackData: List<Track>?){
     val adapter = recyclerView.adapter as LibraryAdapter
@@ -57,14 +71,6 @@ fun bindDataYourLibrary(recyclerView: RecyclerView, playlistData: List<Playlist>
 
     adapter.submitYourLibrary(playlists,artists,tracks)
 
-}
-
-@BindingAdapter("playlist")
-fun bindDataPlaylist(recyclerView: RecyclerView,data: List<Track>?){
-    val adapter = recyclerView.adapter as TrackAdapter
-    if(data!=null){
-        adapter.submitList(data)
-    }
 }
 
 @BindingAdapter(value = ["imageUrl","listImageUrl","blur"],requireAll = false)

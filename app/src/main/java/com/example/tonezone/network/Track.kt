@@ -19,5 +19,5 @@ data class Track (
     val track_number : Int? = 0,
     val type : String = "",
     val uri : String = "",
-    val album: Album? = Album("","", listOf(),"","")
+    val album: Album? = Album()
 )

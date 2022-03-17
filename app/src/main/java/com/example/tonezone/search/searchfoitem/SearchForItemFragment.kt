@@ -1,6 +1,6 @@
 package com.example.tonezone.search.searchfoitem
 
-import android.app.Application
+
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.lifecycle.ViewModelProvider
 import com.example.tonezone.R
@@ -44,6 +43,14 @@ class SearchForItemFragment : Fragment() {
 
         return binding.root
     }
+//
+//    @SuppressLint("Recycle")
+//    private fun temp(){
+//        val scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X,4f)
+//        val scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y,4f)
+//
+//        val animator
+//    }
 
     private fun setupSearchbar(){
         binding.searchBar.addTextChangedListener(object: TextWatcher{
@@ -102,7 +109,7 @@ class SearchForItemFragment : Fragment() {
                 TypeItemLibrary.All -> adapter.filterType("all")
                 TypeItemLibrary.Playlist -> adapter.filterType("playlist")
                 TypeItemLibrary.Artist -> adapter.filterType("artist")
-                else -> throw IllegalArgumentException("unknown value")
+                else -> adapter.filterType("Track")
             }
         }
     }

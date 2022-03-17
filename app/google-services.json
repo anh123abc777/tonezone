@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "829898913",
+    "project_id": "tonezone-eec00",
+    "storage_bucket": "tonezone-eec00.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829898913:android:0db7e842e228ab7f3c30e0",
+        "android_client_info": {
+          "package_name": "com.example.tonezone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "829898913-j612md1m9dbp56j5e4s8g4fglt8p1v1g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tonezone",
+            "certificate_hash": "d804ea51c10556ae4cccfc2d0fb9efef11a79994"
+          }
+        },
+        {
+          "client_id": "829898913-b9e5h8e54dtsbi9kbibsq4o6ic040b8n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9wkL-KISOo3BvtfUUvNtJV_VTtB3Wwuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "829898913-b9e5h8e54dtsbi9kbibsq4o6ic040b8n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

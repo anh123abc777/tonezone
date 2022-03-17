@@ -35,7 +35,6 @@ class DetailPlaylistFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
 
 
-
         return binding.root
     }
 

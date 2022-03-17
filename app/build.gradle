@@ -4,6 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.parcelize'
     id 'org.jetbrains.kotlin.kapt'
     id 'androidx.navigation.safeargs'
+    id 'com.google.gms.google-services'
 
 }
 
@@ -110,5 +111,6 @@ dependencies {
     implementation "com.google.code.gson:gson:$version_gson"
     implementation "jp.wasabeef:blurry:4.0.1"
 
+    implementation 'com.google.firebase:firebase-analytics-ktx:17.6.0'
 
 }
