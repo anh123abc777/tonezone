@@ -3,11 +3,16 @@ package com.example.tonezone
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -30,47 +35,20 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
-    private  var token = Token("")
-    private lateinit var repository: TokenRepository
-//    var exoPlayer: SimpleExoPlayer? = null
-//    0546209c8b9b4b66a8d49037c566caa6
-//    af0096163f014e97b4b3ca30d3f674a6
+    private val viewModel : MainViewModel by viewModels {
+        MainViewModelFactory(this)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
-
-        val builder =
-            AuthorizationRequest.Builder(
-                "0546209c8b9b4b66a8d49037c566caa6",
-                AuthorizationResponse.Type.TOKEN,
-                REDIRECT_URI)
-        builder.setScopes(arrayOf("streaming",
-            "playlist-read-private",
-            "playlist-read-collaborative",
-            "user-follow-read",
-            ))
-        val request = builder.build()
-        AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
-
-
-        repository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
+        viewModel.initAuthorization()
 
         setupNav()
 
         temp()
-//        val extractorsFactory = DefaultExtractorsFactory()
-//            .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES)
-//            .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS)
-//        exoPlayer = SimpleExoPlayer.Builder(application.applicationContext!!)
-//            .setMediaSourceFactory(
-//                DefaultMediaSourceFactory(
-//                    application.applicationContext,
-//                    extractorsFactory
-//                )
-//            )
-//            .build()
 
     }
 
@@ -93,11 +71,21 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun setupNav(){
-        navController = findNavController(R.id.nav_host)
+//        navController = findNavController(R.id.nav_host)
+
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host) as NavHostFragment
+        val navController = navHostFragment.navController
+
         binding.bottomBar.setupWithNavController(navController)
         binding.bottomBar.selectedItemId = R.id.homeFragment
+
     }
 
+//    override fun onSupportNavigateUp(): Boolean {
+//        val navController = this.findNavController(R.id.nav_host)
+//        return navController.navigateUp()
+//    }
 
     var albumTrack = SpotifyData("nbnb,kjhlk", listOf(),0,"",0,"",0)
 
@@ -109,64 +97,18 @@ class MainActivity : AppCompatActivity() {
             val response = AuthorizationClient.getResponse(resultCode, intent)
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    token.value = response.accessToken
+                    viewModel.token = response.accessToken
                 }
                 AuthorizationResponse.Type.ERROR -> {
-                    token.value =  "Not Found"
+                    viewModel.token =  "Not Found"
 
                 }
                 else -> {
-                    token.value =  "Not Found"
+                    viewModel.token =  "Not Found"
                 }
             }
         }
 
-        runBlocking(Dispatchers.IO) {
-            repository.clear()
-        }
-        runBlocking(Dispatchers.IO) {
-            repository.insert(token)
-        }
-    }
 
-    @SuppressLint("HardwareIds")
-    private fun getToken(response: AuthorizationResponse) = runBlocking {
-        try {
-
-            val getAlbumTrackDeferred: Deferred<SpotifyData> = ToneApi.retrofitService
-                .getAlbumTracksAsync(
-                    "Bearer " + response.accessToken,
-
-                    "ES"
-                )
-            albumTrack = getAlbumTrackDeferred.await()
-
-        } catch (e: Exception) {
-            albumTrack = SpotifyData(e.message!!, listOf(), 0, "", 0, "", 0)
-        }
-    }
-//        val adapter = TrackAdapter(OnClickListener {
-////            onStartMusic()
-////            exoPlayer!!.prepare()
-////            exoPlayer!!.play()
-//            Toast.makeText(this@MainActivity,it.name,Toast.LENGTH_SHORT).show()
-//        })
-////        binding.groupPlaylist.adapter = adapter
-////        adapter.submitList(albumTrack.items)
-//    }
-
-
-//    fun onStartMusic() = runBlocking{
-//        exoPlayer!!.clearMediaItems()
-//            exoPlayer!!.addMediaItem(MediaItem.fromUri("http://api.mp3.zing.vn/api/streaming/audio/ZZUB0I0E/128"))
-//
-//        delay(600L)
-//    }
-
-    override fun onDestroy() {
-        runBlocking(Dispatchers.IO) {
-            repository.clear()
-        }
-        super.onDestroy()
     }
 }

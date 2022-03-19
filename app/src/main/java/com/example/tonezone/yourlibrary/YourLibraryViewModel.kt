@@ -1,66 +1,66 @@
 package com.example.tonezone.yourlibrary
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tonezone.database.TokenRepository
-import com.example.tonezone.database.TonezoneDB
+import androidx.lifecycle.viewModelScope
+import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
 import kotlinx.coroutines.*
 
 
-class YourLibraryViewModel(application: Application) : ViewModel() {
+class YourLibraryViewModel(val token: String) : ViewModel() {
 
-    private val tokenRepository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
-    val token = tokenRepository.token
-//    private val job = Job()
-//    private val uiScope = CoroutineScope(job + Dispatchers.Main)
+    private val job = Job()
+    private val uiScope = CoroutineScope(job + Dispatchers.Main)
 
-    private var _userPlaylists = MutableLiveData<List<Playlist>>()
+    private val _userPlaylists = MutableLiveData<List<Playlist>>()
     val userPlaylists : LiveData<List<Playlist>>
         get() = _userPlaylists
 
-    private var _followedArtists = MutableLiveData<List<Artist>>()
+     private val _followedArtists = MutableLiveData<List<Artist>>()
     val followedArtists : LiveData<List<Artist>>
         get() = _followedArtists
 
-    private var _sortOption = MutableLiveData<SortOption>()
+    private val _sortOption = MutableLiveData<SortOption>()
     val sortOption : LiveData<SortOption>
         get() = _sortOption
 
-    private var _type = MutableLiveData<TypeItemLibrary>()
+    private val _type = MutableLiveData<TypeItemLibrary>()
     val type : LiveData<TypeItemLibrary>
         get() = _type
 
+    private val _navigateToDetailPlaylist= MutableLiveData<PlaylistInfo>()
+    val navigateToDetailPlaylist : LiveData<PlaylistInfo>
+        get() = _navigateToDetailPlaylist
+
     init {
-        _sortOption.value = SortOption.Alphabetical
-        _type.value = TypeItemLibrary.All
+        getDataFollowedArtists()
+        getDataUserPlaylists()
     }
 
-    fun getDataUserPlaylists() = runBlocking{
-        try {
-            val userPlaylistsDeferred: Deferred<Playlists>
-            = ToneApi.retrofitService
-                .getCurrentUserPlaylistsAsync("Bearer ${token.value!!.value}")
-            _userPlaylists.value = userPlaylistsDeferred.await().items!!
-        } catch (e: Exception) {
-            Log.i("error",e.message!!)
+    private fun getDataUserPlaylists(){
+        viewModelScope.launch {
+            try {
+                _userPlaylists.value = ToneApi.retrofitService
+                    .getCurrentUserPlaylistsAsync("Bearer $token").items!!
+            } catch (e: Exception) {
+                Log.i("error", e.message!!)
+            }
         }
     }
 
-    fun getDataFollowedArtists() = runBlocking{
-        try {
+    private fun getDataFollowedArtists(){
+        viewModelScope.launch {
+            try {
 
-            val followerArtistsDeferred: Deferred<ArtistsObject>
-            = ToneApi.retrofitService
-                .getFollowedArtistsAsync("Bearer ${token.value!!.value}","artist")
-            _followedArtists.value = followerArtistsDeferred.await().artists!!.items!!
-            Log.i("artists",_followedArtists.value.toString())
+                _followedArtists.value = ToneApi.retrofitService
+                    .getFollowedArtistsAsync("Bearer $token", "artist").artists?.items!!
 
-        }catch (e: java.lang.Exception){
-            Log.i("errorGetFollowedArtists",e.message!!)
+            } catch (e: java.lang.Exception) {
+                Log.i("errorGetFollowedArtists", e.message!!)
+            }
         }
     }
 
@@ -73,5 +73,20 @@ class YourLibraryViewModel(application: Application) : ViewModel() {
 
     fun filterType(type: TypeItemLibrary){
         _type.value = type
+    }
+
+    fun displayPlaylistDetails(dataItem: LibraryAdapter.DataItem){
+        _navigateToDetailPlaylist.value = PlaylistInfo(
+            dataItem.id.toString(),
+            dataItem.name.toString(),
+            dataItem.description.toString(),
+            dataItem.image,
+            dataItem.uri.toString(),
+            dataItem.typeName.toString()
+        )
+    }
+
+    fun displayPlaylistDetailsComplete() {
+        _navigateToDetailPlaylist.value = null
     }
 }

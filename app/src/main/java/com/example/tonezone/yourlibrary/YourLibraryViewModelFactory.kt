@@ -1,14 +1,14 @@
 package com.example.tonezone.yourlibrary
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+@Suppress("UNCHECKED_CAST")
 class YourLibraryViewModelFactory
-    (val application: Application):ViewModelProvider.Factory {
+    (val token: String):ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(YourLibraryViewModel::class.java))
-            return YourLibraryViewModel(application) as T
+            return YourLibraryViewModel(token) as T
         throw IllegalArgumentException("Unknown VM class")
     }
 }
