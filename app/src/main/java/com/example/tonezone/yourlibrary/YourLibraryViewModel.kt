@@ -1,5 +1,6 @@
 package com.example.tonezone.yourlibrary
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,12 +16,12 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
     private val job = Job()
     private val uiScope = CoroutineScope(job + Dispatchers.Main)
 
-    private val _userPlaylists = MutableLiveData<List<Playlist>>()
-    val userPlaylists : LiveData<List<Playlist>>
+    private val _userPlaylists = MutableLiveData<Playlists>()
+    val userPlaylists : LiveData<Playlists>
         get() = _userPlaylists
 
-     private val _followedArtists = MutableLiveData<List<Artist>>()
-    val followedArtists : LiveData<List<Artist>>
+     private val _followedArtists = MutableLiveData<Artists>()
+    val followedArtists : LiveData<Artists>
         get() = _followedArtists
 
     private val _sortOption = MutableLiveData<SortOption>()
@@ -38,13 +39,16 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
     init {
         getDataFollowedArtists()
         getDataUserPlaylists()
+        _sortOption.value = SortOption.Alphabetical
+        _type.value = TypeItemLibrary.All
+
     }
 
     private fun getDataUserPlaylists(){
         viewModelScope.launch {
             try {
                 _userPlaylists.value = ToneApi.retrofitService
-                    .getCurrentUserPlaylistsAsync("Bearer $token").items!!
+                    .getCurrentUserPlaylistsAsync("Bearer $token")
             } catch (e: Exception) {
                 Log.i("error", e.message!!)
             }
@@ -56,10 +60,11 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
             try {
 
                 _followedArtists.value = ToneApi.retrofitService
-                    .getFollowedArtistsAsync("Bearer $token", "artist").artists?.items!!
+                    .getFollowedArtistsAsync("Bearer $token", "artist").artists!!
 
             } catch (e: java.lang.Exception) {
                 Log.i("errorGetFollowedArtists", e.message!!)
+                _followedArtists.value = Artists()
             }
         }
     }
@@ -86,6 +91,7 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
         )
     }
 
+    @SuppressLint("NullSafeMutableLiveData")
     fun displayPlaylistDetailsComplete() {
         _navigateToDetailPlaylist.value = null
     }

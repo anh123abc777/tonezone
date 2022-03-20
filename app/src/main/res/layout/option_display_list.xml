@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.tonezone.yourlibrary.YourLibraryViewModel" />
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/arrangement_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+
+        >
+
+        <ImageView
+            android:id="@+id/sort_icon"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_swap" />
+
+        <TextView
+            android:id="@+id/sort_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/sort_icon"
+            android:layout_marginStart="8dp"
+            android:textSize="14sp"
+            android:onClick="@{() -> viewModel.changeSortOption()}"
+            android:text="@{viewModel.sortOption.toString()}"
+            />
+
+        <!--
+
+        -->
+
+        <ImageView
+            android:id="@+id/display_option"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_grid" />
+
+    </RelativeLayout>
+</layout>
