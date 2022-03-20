@@ -5,8 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.tonezone.MainViewModel
 import com.example.tonezone.adapter.GenreAdapter
 import com.example.tonezone.databinding.FragmentSearchBinding
 
@@ -14,7 +16,10 @@ import com.example.tonezone.databinding.FragmentSearchBinding
 class SearchFragment : Fragment() {
 
     private lateinit var binding: FragmentSearchBinding
-    private lateinit var viewModel: SearchViewModel
+    private val mainViewModel : MainViewModel by activityViewModels()
+    private val viewModel: SearchViewModel by viewModels{
+        SearchViewModelFactory(mainViewModel.token)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -22,14 +27,10 @@ class SearchFragment : Fragment() {
     ): View{
 
         binding =  FragmentSearchBinding.inflate(inflater)
-        val application = requireNotNull(activity).application
-        val factory = SearchViewModelFactory(application)
-        viewModel = ViewModelProvider(this,factory).get(SearchViewModel::class.java)
 
         binding.viewModel= viewModel
         binding.lifecycleOwner = this
 
-        observeDataToken()
         setupAdapterGenres()
         setupNavigateSearchForItem()
 
@@ -56,11 +57,4 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun observeDataToken(){
-        viewModel.token.observe(viewLifecycleOwner){
-            if(it!=null) {
-                viewModel.getGenres()
-            }
-        }
-    }
 }

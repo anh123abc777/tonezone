@@ -5,8 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.tonezone.MainViewModel
 import com.example.tonezone.adapter.PlaylistAdapter
 import com.example.tonezone.databinding.FragmentResultBinding
 import com.example.tonezone.network.PlaylistInfo
@@ -14,7 +16,14 @@ import com.example.tonezone.network.PlaylistInfo
 class ResultFragment : Fragment() {
 
     private lateinit var binding: FragmentResultBinding
-    private lateinit var viewModel: ResultViewModel
+
+    private val mainViewModel : MainViewModel by activityViewModels()
+
+    private lateinit var genreName: String
+
+    private val viewModel: ResultViewModel by viewModels {
+        ResultViewModelFactory(mainViewModel.token, genreName)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -22,16 +31,13 @@ class ResultFragment : Fragment() {
     ): View {
 
         binding = FragmentResultBinding.inflate(inflater,container,false)
-        val application = requireNotNull(activity).application
-        val genreName = ResultFragmentArgs.fromBundle(requireArguments()).genreName
-        val factory = ResultViewModelFactory(application,genreName)
-        viewModel = ViewModelProvider(this,factory).get(ResultViewModel::class.java)
+
+        genreName = ResultFragmentArgs.fromBundle(requireArguments()).genreName
 
         binding.viewModel= viewModel
         binding.lifecycleOwner = this
 
         createAdapter()
-        observeDataToken()
         observeDataSearch()
 
         return binding.root
@@ -39,7 +45,7 @@ class ResultFragment : Fragment() {
 
     private fun createAdapter(){
         binding.dataSearch.adapter = PlaylistAdapter(PlaylistAdapter.OnClickListener {
-            findNavController().navigate(ResultFragmentDirections.actionResultFragmentToDetailPlaylistFragment(
+            findNavController().navigate(ResultFragmentDirections.actionResultFragmentToPlaylistDetailsFragment(
                 PlaylistInfo(
                     it.id,
                     it.name,
@@ -50,14 +56,6 @@ class ResultFragment : Fragment() {
                 )
             ))
         })
-    }
-
-    private fun observeDataToken(){
-        viewModel.token.observe(viewLifecycleOwner){
-            if(it!=null) {
-                viewModel.getSearchResultData()
-            }
-        }
     }
 
     private fun observeDataSearch(){

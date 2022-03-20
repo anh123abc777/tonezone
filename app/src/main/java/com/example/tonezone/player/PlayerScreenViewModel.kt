@@ -13,6 +13,7 @@ import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.*
+import java.lang.IllegalArgumentException
 
 
 class PlayerScreenViewModel(val application: Application) : ViewModel() {
@@ -108,12 +109,14 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
         _currentTrack.value = try {
             val id = _uriTrackResponse.value
                 ?.substring(_uriTrackResponse.value!!.lastIndexOf(":")+1, _uriTrackResponse.value!!.length)
-            val trackDeferred = ToneApi.retrofitService
+
+            ToneApi.retrofitService
                 .getTrackAsync("Bearer ${token.value!!.value}", id!!)
-            trackDeferred.await()
+
         }catch (e: Exception){
             Track()
         }
+
     }
 
 
@@ -129,6 +132,7 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
         when(_playerState.value){
             PlayerState.PAUSE -> onResume()
             PlayerState.PLAY -> onPause()
+            else -> throw IllegalArgumentException("nothing")
         }
     }
 
@@ -167,7 +171,6 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         uiScope.cancel()
-//        SpotifyAppRemote.disconnect(mSpotifyAppRemote)
     }
 
     enum class PlayerState{PLAY, PAUSE, NONE}

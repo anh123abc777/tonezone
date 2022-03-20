@@ -33,6 +33,9 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             listImageUrl="@{artist.images}"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+
             />
 <!--            listImageUrl="@{artist.images}"
 -->

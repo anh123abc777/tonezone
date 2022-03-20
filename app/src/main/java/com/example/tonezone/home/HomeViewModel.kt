@@ -1,20 +1,16 @@
 package com.example.tonezone.home
 
-import android.app.Application
+import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tonezone.database.TokenRepository
-import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.network.GroupPlaylist
-import com.example.tonezone.network.PlaylistsObject
+import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.ToneApi
 import kotlinx.coroutines.*
 
-class HomeViewModel(application: Application) : ViewModel() {
+class HomeViewModel(val token: String) : ViewModel() {
 
-    private val tokenRepository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
-    val token = runBlocking(Dispatchers.IO) { tokenRepository.token}
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
 
@@ -22,22 +18,44 @@ class HomeViewModel(application: Application) : ViewModel() {
     val groupPlaylists : LiveData<List<GroupPlaylist>>
         get() = _groupPlaylists
 
-    fun getGroupPlaylistsData() = uiScope.launch {
+    private val _navigateToPlaylistDetails = MutableLiveData<PlaylistInfo>()
+    val navigateToPlaylistDetails : LiveData<PlaylistInfo>
+        get() = _navigateToPlaylistDetails
 
-        _groupPlaylists.value =try {
-            val featuredPlaylistsDeferred: Deferred<PlaylistsObject> = ToneApi.retrofitService
-                .getFeaturedPlaylistsAsync("Bearer ${token.value!!.value}")
+    init {
+        getGroupPlaylistsData()
+    }
 
-            val chartsDeferred : Deferred<PlaylistsObject> = ToneApi.retrofitService
-                .getChartsAsync("Bearer ${token.value!!.value}")
+    private fun getGroupPlaylistsData() {
+        uiScope.launch {
 
-            listOf(
-                GroupPlaylist("feature playlist",featuredPlaylistsDeferred.await().playlists.items),
-                GroupPlaylist("charts",chartsDeferred.await().playlists.items))
+            _groupPlaylists.value = try {
+                val featuredPlaylistsDeferred= ToneApi.retrofitService
+                    .getFeaturedPlaylistsAsync("Bearer $token")
+
+                val chartsDeferred = ToneApi.retrofitService
+                    .getChartsAsync("Bearer $token")
+
+                listOf(
+                    GroupPlaylist(
+                        "feature playlist",
+                        featuredPlaylistsDeferred.playlists.items
+                    ),
+                    GroupPlaylist("charts", chartsDeferred.playlists.items)
+                )
+            } catch (e: Exception) {
+                listOf()
+            }
         }
-        catch (e: Exception){
-            listOf()
-        }
+    }
+
+     fun displayPlaylistDetails(playlistInfo: PlaylistInfo){
+        _navigateToPlaylistDetails.value = playlistInfo
+    }
+
+    @SuppressLint("NullSafeMutableLiveData")
+     fun displayPlaylistDetailsComplete(){
+        _navigateToPlaylistDetails.value = null
     }
 
 }

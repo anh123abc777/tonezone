@@ -60,7 +60,9 @@ class PlayerScreenFragment : Fragment() {
     private fun setupImageCurrentTrack(){
         viewModel.uriTrackResponse.observe(viewLifecycleOwner){
             viewModel.token.observe(viewLifecycleOwner){
-                viewModel.getImageTrack()
+                if(it!=null){
+                    viewModel.getImageTrack()
+                }
             }
         }
     }

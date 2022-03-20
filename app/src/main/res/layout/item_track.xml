@@ -14,7 +14,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:background="@color/white"
             android:onClick="@{() ->clickListener.onClick(track)}"
             android:paddingStart="8dp"
@@ -67,6 +67,7 @@
                 android:textSize="12dp"/>
 
             <ImageView
+                android:id="@+id/more_option_with_track"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_centerVertical="true"

@@ -12,10 +12,6 @@ import com.example.tonezone.databinding.ItemTrackBinding
 import com.example.tonezone.network.Artist
 import com.example.tonezone.network.Playlist
 import com.example.tonezone.network.Track
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<LibraryAdapter.DataItem, RecyclerView.ViewHolder>(DiffCallBack) {
@@ -26,7 +22,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
     companion object DiffCallBack: DiffUtil.ItemCallback<DataItem>() {
         override fun areItemsTheSame(oldItem: DataItem, newItem: DataItem): Boolean {
-            return newItem.id == oldItem.id
+            return newItem.id== oldItem.id
         }
 
         override fun areContentsTheSame(oldItem: DataItem, newItem: DataItem): Boolean {
@@ -69,21 +65,15 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         }
     }
 
-    private val adapterScope = CoroutineScope(Dispatchers.Default)
     private var defaultData = listOf<DataItem>()
     fun submitYourLibrary(playlists: List<Playlist>?, artists: List<Artist>?, tracks: List<Track>?){
-        adapterScope.launch {
-            val items = (artists?.map { DataItem.ArtistItem(it) }
-                ?: listOf()) + (playlists?.map { DataItem.PlaylistItem(it) } ?: listOf())+
-                    (tracks?.map { DataItem.TrackItem(it) } ?: listOf())
+        val items = (artists?.map { DataItem.ArtistItem(it) }
+            ?: listOf()) + (playlists?.map { DataItem.PlaylistItem(it) } ?: listOf())+
+                (tracks?.map { DataItem.TrackItem(it) } ?: listOf())
 
-            withContext(Dispatchers.Main){
-                submitList(items)
-                defaultData = items
-            }
-        }
+            defaultData = items
+
     }
-
 
 
     @SuppressLint("NotifyDataSetChanged")
@@ -91,7 +81,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         val items = mutableListOf<DataItem>()
         if (query.isNotEmpty()) {
             for (item in defaultData) {
-                if (item.name.lowercase().contains(query.lowercase())) {
+                if (item.name?.lowercase()?.contains(query.lowercase()) == true) {
                     items.add(item)
                 }
             }
@@ -117,21 +107,25 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             items.addAll(defaultData)
         }
 
-        updateDate(items)
+        updateData(items)
     }
 
     fun sortByAlphabetical(){
         defaultData = defaultData.sortedBy { it.name }
-        updateDate(defaultData)
+        updateData(defaultData)
     }
 
     fun sortByCreator(){
         defaultData = defaultData.sortedBy { it.typeName }
-        updateDate(defaultData)
+        updateData(defaultData)
+    }
+
+    fun sortByDefault(){
+        updateData(defaultData)
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateDate(data: List<DataItem>){
+    fun updateData(data: List<DataItem>){
         submitList(data)
         notifyDataSetChanged()
     }
@@ -230,12 +224,12 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
         }
 
-        abstract val id: String
+        abstract val id: String?
         abstract val type: Int
-        abstract val name: String
-        abstract val typeName: String
-        abstract val uri: String
-        abstract val description: String
+        abstract val name: String?
+        abstract val typeName: String?
+        abstract val uri: String?
+        abstract val description: String?
         abstract val image: String?
     }
 

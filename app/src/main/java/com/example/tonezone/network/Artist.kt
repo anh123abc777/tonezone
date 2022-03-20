@@ -15,20 +15,19 @@ data class Artists(
 
 @Parcelize
 data class Artist (
-	val external_urls : External_urls,
-	val href : String,
-	val id : String,
-	val name : String,
-	val type : String,
-	val uri : String,
-	val followers: Follower?,
-	val genres: List<String>?,
-	val images: List<Image>?,
-	val popularity: Int?,
+	val href : String?="",
+	val id : String?="",
+	val name : String?="",
+	val type : String?="",
+	val uri : String?="",
+	val followers: Follower?= Follower(),
+	val genres: List<String>?= listOf(),
+	val images: List<Image>?= listOf(),
+	val popularity: Int?=0,
 ) : Parcelable
 
 @Parcelize
 data class Follower(
-	val href: String?,
-	val total: Long?
+	val href: String?="",
+	val total: Long?=0L
 ) : Parcelable

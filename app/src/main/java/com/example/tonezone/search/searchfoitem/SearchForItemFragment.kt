@@ -10,7 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import com.example.tonezone.MainViewModel
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentSearchForItemBinding
@@ -22,7 +24,12 @@ import com.example.tonezone.yourlibrary.TypeItemLibrary
 class SearchForItemFragment : Fragment() {
 
     private lateinit var binding: FragmentSearchForItemBinding
-    private lateinit var viewModel: SearchForItemViewModel
+
+    private val mainViewModel: MainViewModel by activityViewModels()
+
+    private val viewModel: SearchForItemViewModel by viewModels {
+        SearchForItemViewModelFactory(mainViewModel.token)
+    }
     private lateinit var adapter: LibraryAdapter
 
     override fun onCreateView(
@@ -30,14 +37,11 @@ class SearchForItemFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSearchForItemBinding.inflate(inflater,container,false)
-        val application = requireNotNull(activity).application
-        val factory = SearchForItemViewModelFactory(application)
-        viewModel = ViewModelProvider(this,factory).get(SearchForItemViewModel::class.java)
 
         binding.viewModel= viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        observeDataToken()
+        setupSearchbar()
         observeSearchedItems()
         setupFilterType()
 
@@ -66,7 +70,7 @@ class SearchForItemFragment : Fragment() {
         binding.backSearchButton.setOnClickListener {
             binding.searchBar.text?.clear()
             binding.searchBar.clearFocus()
-            (activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as
+            (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
                     InputMethodManager).hideSoftInputFromWindow(binding.root.windowToken,0)
         }
     }
@@ -85,12 +89,6 @@ class SearchForItemFragment : Fragment() {
                 R.id.artist_type -> viewModel.filterType(TypeItemLibrary.Artist)
                 R.id.track_type -> viewModel.filterType(TypeItemLibrary.Track)
             }
-        }
-    }
-
-    private fun observeDataToken(){
-        viewModel.token.observe(viewLifecycleOwner){
-            setupSearchbar()
         }
     }
 

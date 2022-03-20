@@ -19,7 +19,7 @@ private val moshi = Moshi.Builder()
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(MoshiConverterFactory.create(moshi))
-    .addCallAdapterFactory(CoroutineCallAdapterFactory())
+//    .addCallAdapterFactory(CoroutineCallAdapterFactory())
 //    .addConverterFactory(ScalarsConverterFactory.create())
     .baseUrl(BASE_URL)
     .build()
@@ -42,82 +42,80 @@ interface ToneApiService {
 //    ): Deferred<String>
 
     @GET("recommendations/available-genre-seeds")
-    fun getGenresAsync(
+    suspend fun getGenresAsync(
         @Header("Authorization") auth: String
-    ): Deferred<Topic>
+    ): Topic
 
     @GET("me/playlists")
-    fun getCurrentUserPlaylistsAsync(
+    suspend fun getCurrentUserPlaylistsAsync(
         @Header("Authorization") auth: String
-    ): Deferred<Playlists>
+    ): Playlists
 
     @GET("playlists/{playlist_id}/tracks")
-    fun getPlaylistItemsAsync(
+    suspend fun getPlaylistItemsAsync(
         @Header("Authorization") auth: String,
         @Path("playlist_id") playlist_Id: String
-        ): Deferred<DataPlaylistItems>
+        ): DataPlaylistItems
 
     @GET("tracks/{id}")
-    fun getTrackAsync(
+    suspend fun getTrackAsync(
         @Header("Authorization") auth: String,
         @Path("id") id: String
-    ): Deferred<Track>
+    ): Track
 
     @GET("me/following")
-    fun getFollowedArtistsAsync(
+    suspend fun getFollowedArtistsAsync(
         @Header("Authorization") auth: String,
         @Query("type") type: String
-    ): Deferred<ArtistsObject>
+    ): ArtistsObject
 
     @GET("artists/{id}/top-tracks")
-    fun getArtistTopTracksAsync(
+    suspend fun getArtistTopTracksAsync(
         @Header("Authorization") auth: String,
         @Path("id") idArtist: String,
         @Query("market") market: String
-    ): Deferred<ArtistTopTracks>
+    ): ArtistTopTracks
 
     @GET("search")
-    fun searchForItemAsync(
+    suspend fun searchForItemAsync(
         @Header("Authorization") auth: String,
         @Query("q") query: String,
         @Query("type") type: String = "track,artist,playlist",
-        //        @Query("type") type: Array<String> = arrayOf("track","artist","playlist"),
-
         @Query("market") market: String = "VN",
-        ): Deferred<SearchedItem>
+        ): SearchedItem
 
     @GET("browse/categories")
-    fun getCategoriesAsync(
+    suspend fun getCategoriesAsync(
         @Header("Authorization") auth: String,
         @Query("country") country: String = "VN"
-        ): Deferred<CategoriesObject>
+        ): CategoriesObject
 
     @GET("browse/categories/{category_id}/playlists")
-    fun getCategoryPlaylistsAsync(
+    suspend fun getCategoryPlaylistsAsync(
         @Header("Authorization") auth: String,
         @Path("category_id") category_id: String,
         @Query("country") country: String = "VN"
-        ): Deferred<PlaylistsObject>
+        ): PlaylistsObject
 
     @GET("browse/new-releases")
-    fun getNewReleasesAsync(
+    suspend fun getNewReleasesAsync(
         @Header("Authorization") auth: String,
         @Query("country") country: String = "VN"
-    ): Deferred<AlbumsObject>
+    ): AlbumsObject
 
     @GET("browse/featured-playlists")
-    fun getFeaturedPlaylistsAsync(
+    suspend fun getFeaturedPlaylistsAsync(
         @Header("Authorization") auth: String,
         @Query("country") country: String = "VN",
         @Query("locale") locale: String = "sv_VN"
-    ): Deferred<PlaylistsObject>
+    ): PlaylistsObject
 
     @GET("browse/categories/toplists/playlists")
-    fun getChartsAsync(
+    suspend fun getChartsAsync(
         @Header("Authorization") auth: String,
         @Query("country") country: String = "VN",
         @Query("offset") offset: Int = 9
-        ): Deferred<PlaylistsObject>
+        ): PlaylistsObject
 }
 
 object ToneApi{

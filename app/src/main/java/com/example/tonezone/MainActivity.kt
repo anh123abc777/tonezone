@@ -1,17 +1,14 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.tonezone
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
@@ -20,14 +17,13 @@ import com.example.tonezone.database.Token
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
-import com.example.tonezone.network.SpotifyData
-import com.example.tonezone.network.ToneApi
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.spotify.sdk.android.auth.AuthorizationClient
-import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import com.spotify.sdk.android.auth.LoginActivity.REQUEST_CODE
-import kotlinx.coroutines.*
+import com.spotify.sdk.android.auth.LoginActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+
 const val REDIRECT_URI = "com.tonezone://callback"
 
 
@@ -35,19 +31,21 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
-    private val viewModel : MainViewModel by viewModels {
+
+    private val mainViewModel: MainViewModel by viewModels {
         MainViewModelFactory(this)
     }
 
+
+
+    private lateinit var repository: TokenRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
-        viewModel.initAuthorization()
-
+        repository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
         setupNav()
-
         temp()
 
     }
@@ -71,15 +69,69 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun setupNav(){
-//        navController = findNavController(R.id.nav_host)
-
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host) as NavHostFragment
-        val navController = navHostFragment.navController
+        navController = navHostFragment.navController
 
         binding.bottomBar.setupWithNavController(navController)
         binding.bottomBar.selectedItemId = R.id.homeFragment
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when(destination.id){
+                R.id.loginFragment -> {
+                    binding.bottomBar.visibility = View.GONE
+                }
+                else  -> {
+                    binding.bottomBar.visibility = View.VISIBLE
+                }
+            }
+        }
+
+    }
+
+    override fun onBackPressed() {
+        val currentDestination= navController.currentDestination
+
+        if (currentDestination != null) {
+            when(currentDestination.id) {
+                R.id.loginFragment -> {
+                    finish()
+                }
+            }
+        }
+        super.onBackPressed()
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
+
+        // Check if result comes from the correct activity
+        if (requestCode == LoginActivity.REQUEST_CODE) {
+            val response = AuthorizationClient.getResponse(resultCode, intent)
+            when (response.type) {
+                AuthorizationResponse.Type.TOKEN -> {
+                    mainViewModel.token = response.accessToken
+                    navController.popBackStack()
+                    navController.navigate(R.id.home)
+                }
+                AuthorizationResponse.Type.ERROR -> {
+                    mainViewModel.token =  "Not Found"
+
+                }
+                else -> {
+                    mainViewModel.token =  "Not Found"
+                }
+            }
+
+            runBlocking(Dispatchers.IO) {
+                repository.clear()
+            }
+
+            runBlocking(Dispatchers.IO) {
+                repository.insert(Token(response.accessToken))
+            }
+        }
     }
 
 //    override fun onSupportNavigateUp(): Boolean {
@@ -87,28 +139,11 @@ class MainActivity : AppCompatActivity() {
 //        return navController.navigateUp()
 //    }
 
-    var albumTrack = SpotifyData("nbnb,kjhlk", listOf(),0,"",0,"",0)
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        super.onActivityResult(requestCode, resultCode, intent)
-
-        // Check if result comes from the correct activity
-        if (requestCode == REQUEST_CODE) {
-            val response = AuthorizationClient.getResponse(resultCode, intent)
-            when (response.type) {
-                AuthorizationResponse.Type.TOKEN -> {
-                    viewModel.token = response.accessToken
-                }
-                AuthorizationResponse.Type.ERROR -> {
-                    viewModel.token =  "Not Found"
-
-                }
-                else -> {
-                    viewModel.token =  "Not Found"
-                }
-            }
+    override fun onDestroy() {
+        super.onDestroy()
+        runBlocking(Dispatchers.IO) {
+            repository.clear()
         }
-
 
     }
 }

@@ -1,28 +1,20 @@
 package com.example.tonezone
 
-import android.graphics.BlurMaskFilter
-import android.graphics.RenderEffect
-import android.graphics.Shader
-import android.graphics.drawable.Drawable
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import com.bumptech.glide.request.RequestOptions
 import com.example.tonezone.adapter.*
 import com.example.tonezone.network.*
 import com.example.tonezone.player.PlayerScreenViewModel
+import com.example.tonezone.yourlibrary.SortOption
 import com.google.android.material.chip.Chip
-import jp.wasabeef.blurry.Blurry
-import jp.wasabeef.glide.transformations.BlurTransformation
 
 //@BindingAdapter("imageUrl")
 //fun bindImage(imgView : ImageView, imgUrl : String?){
@@ -61,30 +53,42 @@ fun bindPlaylistRecyclerview(recyclerView: RecyclerView, list: List<Playlist>?){
     }
 }
 
-@BindingAdapter(value = ["playlistData","artistData","trackData"],requireAll = false)
-fun bindDataYourLibrary(recyclerView: RecyclerView, playlistData: List<Playlist>?, artistData: List<Artist>?, trackData: List<Track>?){
+@BindingAdapter(value = ["playlistData","artistData","trackData","sortOption"],requireAll = false)
+fun bindDataYourLibrary(recyclerView: RecyclerView,
+                        playlistData: List<Playlist>?,
+                        artistData: List<Artist>?,
+                        trackData: List<Track>?,
+                        sortOption: SortOption?){
     val adapter = recyclerView.adapter as LibraryAdapter
 
     val playlists = playlistData ?: listOf()
     val tracks = trackData ?: listOf()
     val artists = artistData ?: listOf()
 
-    adapter.submitYourLibrary(playlists,artists,tracks)
+    adapter.submitYourLibrary(playlists, artists, tracks)
+    when(sortOption){
+        SortOption.Alphabetical -> adapter.sortByAlphabetical()
+        SortOption.Creator -> adapter.sortByCreator()
+        null -> adapter.sortByDefault()
+    }
 
 }
 
-@BindingAdapter(value = ["imageUrl","listImageUrl","blur"],requireAll = false)
-fun bindImage(imageView: ImageView,imageUrl: String?,listImageUrl: List<Image>?,blur: Int?){
-var gidoblur = 0
-    if (blur == null)
-        gidoblur=1
-    else
-        gidoblur = blur
+@BindingAdapter(value = ["imageUrl","listImageUrl"],requireAll = false)
+fun bindImage(imageView: ImageView,imageUrl: String?,listImageUrl: List<Image>?){
+//var numBlur = 0
+//    if (blur == null)
+//        numBlur=1
+//    else
+//        numBlur = blur
+
     if(listImageUrl?.size!=0) {
         Glide.with(imageView.context)
             .load(listImageUrl?.get(0)?.url)
             .apply(
-               RequestOptions.bitmapTransform(BlurTransformation(gidoblur,2))
+               RequestOptions()
+                   .placeholder(R.drawable.loading_animation)
+                   .error(R.drawable.ic_connection_error)
             )
             .into(imageView)
 
@@ -93,8 +97,8 @@ var gidoblur = 0
         Glide.with(imageView.context)
             .load(imageUrl)
             .apply(RequestOptions()
-                .placeholder(R.drawable.ic_baseline_home_24)
-                .error(R.drawable.ic_custom_play)
+                .placeholder(R.drawable.loading_animation)
+                .error(R.drawable.ic_connection_error)
                 )
             .into(imageView)
 }
@@ -133,6 +137,7 @@ fun bindStatePlayButton(button: AppCompatButton, state: PlayerScreenViewModel.Pl
     when(state){
         PlayerScreenViewModel.PlayerState.PLAY -> button.setBackgroundResource(R.drawable.ic_custom_pause)
         PlayerScreenViewModel.PlayerState.PAUSE -> button.setBackgroundResource(R.drawable.ic_custom_play)
+        else -> button.setBackgroundResource(R.drawable.ic_custom_play)
     }
 }
 
