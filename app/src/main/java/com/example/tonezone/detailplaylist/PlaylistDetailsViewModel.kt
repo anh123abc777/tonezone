@@ -7,10 +7,11 @@ import androidx.lifecycle.ViewModel
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.ToneApi
 import com.example.tonezone.network.Track
+import com.example.tonezone.utils.Signal
 import kotlinx.coroutines.*
 
 class PlaylistDetailsViewModel
-    (val token: String,  val playlistInfo: PlaylistInfo) : ViewModel() {
+    (val token: String,  var playlistInfo: PlaylistInfo) : ViewModel() {
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
 
@@ -18,22 +19,26 @@ class PlaylistDetailsViewModel
     val playlistItems : LiveData<List<Track>>
         get() = _playlistItems
 
-    private var _onClick = MutableLiveData<Boolean>()
-    val onClick : LiveData<Boolean>
-        get() = _onClick
+    private var _signal = MutableLiveData<Signal>()
+    val signal : LiveData<Signal>
+        get() = _signal
 
     init {
-        _onClick.value = false
         getDataPlaylistItems()
     }
 
     private fun getDataPlaylistItems() {
         uiScope.launch(Dispatchers.Main) {
             _playlistItems.value =
-                if (playlistInfo.type == "artist")
-                    getArtistTopTracks()
-                else
-                    getPlaylistTracks()
+                when (playlistInfo.type) {
+                    "artist" -> getArtistTopTracks()
+                    else -> {
+                        if(playlistInfo.id=="userSavedTrack")
+                            getUserSavedTracks()
+                        else
+                            getPlaylistTracks()
+                    }
+                }
         }
     }
 
@@ -51,6 +56,16 @@ class PlaylistDetailsViewModel
         }
     }
 
+    private suspend fun getUserSavedTracks(): List<Track>{
+        return try {
+                ToneApi.retrofitService
+                    .getUserSavedTracks("Bearer $token").items?.map { it.track }?: listOf()
+            }catch (e: Exception){
+                listOf()
+            }
+
+    }
+
     private suspend fun getArtistTopTracks(): List<Track> {
         return try {
             val artistTopTracksDeferred = ToneApi.retrofitService
@@ -65,6 +80,33 @@ class PlaylistDetailsViewModel
         }
     }
 
+    fun handleSignal(){
+        when(_signal.value){
+            null -> Log.i("signal","don't have happen")
+
+            Signal.LIKE_TRACK -> likeTrack()
+
+            Signal.LIKE_PLAYLIST -> likePlaylist()
+
+            Signal.ADD_TO_QUEUE -> addToQueue()
+        }
+    }
+
+    private fun likeTrack(){
+        TODO()
+    }
+
+    private fun likePlaylist(){
+        TODO()
+    }
+
+    private fun addToQueue(){
+        TODO()
+    }
+
+    fun receiveSignal(signal: Signal){
+        _signal.value = signal
+    }
 
     override fun onCleared() {
         super.onCleared()

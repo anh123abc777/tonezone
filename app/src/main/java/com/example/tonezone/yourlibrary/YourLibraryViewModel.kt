@@ -13,9 +13,6 @@ import kotlinx.coroutines.*
 
 class YourLibraryViewModel(val token: String) : ViewModel() {
 
-    private val job = Job()
-    private val uiScope = CoroutineScope(job + Dispatchers.Main)
-
     private val _userPlaylists = MutableLiveData<Playlists>()
     val userPlaylists : LiveData<Playlists>
         get() = _userPlaylists
@@ -23,6 +20,10 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
      private val _followedArtists = MutableLiveData<Artists>()
     val followedArtists : LiveData<Artists>
         get() = _followedArtists
+
+    private val _userSavedTracks = MutableLiveData<SavedTracks>()
+    val userSavedTracks : LiveData<SavedTracks>
+        get() = _userSavedTracks
 
     private val _sortOption = MutableLiveData<SortOption>()
     val sortOption : LiveData<SortOption>
@@ -37,6 +38,7 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
         get() = _navigateToDetailPlaylist
 
     init {
+        getDataUserSavedTracks()
         getDataFollowedArtists()
         getDataUserPlaylists()
         _sortOption.value = SortOption.Alphabetical
@@ -49,6 +51,7 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
             try {
                 _userPlaylists.value = ToneApi.retrofitService
                     .getCurrentUserPlaylistsAsync("Bearer $token")
+
             } catch (e: Exception) {
                 Log.i("error", e.message!!)
             }
@@ -58,13 +61,23 @@ class YourLibraryViewModel(val token: String) : ViewModel() {
     private fun getDataFollowedArtists(){
         viewModelScope.launch {
             try {
-
                 _followedArtists.value = ToneApi.retrofitService
                     .getFollowedArtistsAsync("Bearer $token", "artist").artists!!
 
-            } catch (e: java.lang.Exception) {
-                Log.i("errorGetFollowedArtists", e.message!!)
+            } catch (e: Exception) {
+                Log.i("errorFollowedArtists", e.message!!)
                 _followedArtists.value = Artists()
+            }
+        }
+    }
+
+    private fun getDataUserSavedTracks(){
+        viewModelScope.launch {
+            _userSavedTracks.value = try {
+                ToneApi.retrofitService.getUserSavedTracks("Bearer $token")
+            }catch (e: Exception){
+                Log.i("errorUserSavedTracks",e.message.toString())
+                SavedTracks()
             }
         }
     }

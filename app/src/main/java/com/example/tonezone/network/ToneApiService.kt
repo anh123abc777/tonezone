@@ -51,6 +51,12 @@ interface ToneApiService {
         @Header("Authorization") auth: String
     ): Playlists
 
+    @GET("me/tracks")
+    suspend fun getUserSavedTracks(
+        @Header("Authorization") auth: String,
+        @Query("market") market: String = "VN"
+        ): SavedTracks
+
     @GET("playlists/{playlist_id}/tracks")
     suspend fun getPlaylistItemsAsync(
         @Header("Authorization") auth: String,

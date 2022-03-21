@@ -1,15 +1,13 @@
 package com.example.tonezone
 
 import android.app.Activity
-import android.app.Application
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.spotify.sdk.android.auth.LoginActivity.REQUEST_CODE
 
-class MainViewModel(val activity: Activity): ViewModel() {
+class MainViewModel(private val activity: Activity): ViewModel() {
 
     var token = ""
 
@@ -24,6 +22,7 @@ class MainViewModel(val activity: Activity): ViewModel() {
             "playlist-read-private",
             "playlist-read-collaborative",
             "user-follow-read",
+            "user-library-read",
         ))
         val request = builder.build()
 

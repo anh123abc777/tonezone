@@ -90,6 +90,7 @@
                 android:orientation="vertical"
                 artistData="@{viewModel.followedArtists.items}"
                 playlistData="@{viewModel.userPlaylists.items}"
+                userSavedTracksData="@{viewModel.userSavedTracks.items}"
                 sortOption="@{viewModel.sortOption}"
                 android:nestedScrollingEnabled="true"
                 />

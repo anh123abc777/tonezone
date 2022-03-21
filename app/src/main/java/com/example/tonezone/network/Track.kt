@@ -4,6 +4,15 @@ data class Tracks(
     val items: List<Track>?= listOf()
 )
 
+data class SavedTracks(
+    val items: List<SavedTrack>? = listOf()
+)
+
+data class SavedTrack(
+    val track: Track,
+    val added_at: String
+)
+
 data class Track (
     val artists : List<Artist>? = listOf(),
     val disc_number : Int? = 0,

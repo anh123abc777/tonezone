@@ -1,6 +1,7 @@
 package com.example.tonezone.detailplaylist
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,9 @@ import com.example.tonezone.databinding.FragmentPlaylistDetailsBinding
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.ModalBottomSheet
+import com.example.tonezone.utils.ModalBottomSheetViewModel
 import com.example.tonezone.utils.ObjectRequest
+import com.example.tonezone.utils.convertSignalToText
 
 class PlaylistDetailsFragment : Fragment() {
 
@@ -27,6 +30,8 @@ class PlaylistDetailsFragment : Fragment() {
     private val viewModel: PlaylistDetailsViewModel by viewModels {
         PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo)
     }
+
+    private val modalBottomSheetViewModel: ModalBottomSheetViewModel by activityViewModels()
 
     private val playerViewModel : PlayerScreenViewModel by activityViewModels()
 
@@ -46,21 +51,28 @@ class PlaylistDetailsFragment : Fragment() {
         modalBottomSheet = ModalBottomSheet(ObjectRequest.PLAYLIST)
 
         binding.moreOption.setOnClickListener {
-            temp2()
+            showBottomSheet()
         }
-        tempOnClick()
+        handleSignalFromBottomSheet()
 
         return binding.root
     }
 
-    private fun tempOnClick(){
-        viewModel.onClick.observe(viewLifecycleOwner){
-            if(it)
-                Toast.makeText(context,it.toString(),Toast.LENGTH_SHORT).show()
+    private fun handleSignalFromBottomSheet(){
+
+        modalBottomSheetViewModel.signal.observe(viewLifecycleOwner){
+            when(it){
+                null -> Log.i("signal","unknown value")
+                else -> viewModel.receiveSignal(it)
+            }
+        }
+
+        viewModel.signal.observe(viewLifecycleOwner){
+            viewModel.handleSignal()
         }
     }
 
-    private fun temp2(){
+    private fun showBottomSheet(){
         modalBottomSheet.show(requireActivity().supportFragmentManager, ModalBottomSheet.TAG)
 
     }

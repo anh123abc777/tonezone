@@ -1,6 +1,7 @@
 package com.example.tonezone
 
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -14,6 +15,9 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.tonezone.adapter.*
 import com.example.tonezone.network.*
 import com.example.tonezone.player.PlayerScreenViewModel
+import com.example.tonezone.utils.Signal
+import com.example.tonezone.utils.convertSignalToIcon
+import com.example.tonezone.utils.convertSignalToText
 import com.example.tonezone.yourlibrary.SortOption
 import com.google.android.material.chip.Chip
 
@@ -54,17 +58,33 @@ fun bindPlaylistRecyclerview(recyclerView: RecyclerView, list: List<Playlist>?){
     }
 }
 
-@BindingAdapter(value = ["playlistData","artistData","trackData","sortOption"],requireAll = false)
+@BindingAdapter(value = ["playlistData","artistData","trackData","userSavedTracksData","sortOption"],requireAll = false)
 fun bindDataYourLibrary(recyclerView: RecyclerView,
                         playlistData: List<Playlist>?,
                         artistData: List<Artist>?,
                         trackData: List<Track>?,
+                        userSavedTracksData: List<SavedTrack>?,
                         sortOption: SortOption?){
+
     val adapter = recyclerView.adapter as LibraryAdapter
 
-    val playlists = playlistData ?: listOf()
+    val userSavedTracks =
+        if(!userSavedTracksData.isNullOrEmpty())
+            listOf(Playlist("userSavedTrack","liked Songs",
+            "", listOf(Image(null,url="https://picsum.photos/300/300",null)),"User's save songs",Owner(""),
+            0,false,"playlist",""))
+        else
+            listOf<Playlist>()
+
+    Log.i("bindAdapter",userSavedTracks.toString())
+
+    val playlists = if(playlistData!=null) userSavedTracks+playlistData else userSavedTracks
+
+    Log.i("bindAdapterPlaylist",playlists.toString())
     val tracks = trackData ?: listOf()
     val artists = artistData ?: listOf()
+
+    Log.i("bindAdapterPlaylist",tracks.toString())
 
     adapter.submitYourLibrary(playlists, artists, tracks)
     when(sortOption){
@@ -170,4 +190,14 @@ fun bindContentSearchForItem(textView: TextView,size: Int?){
         0,null -> textView.visibility = View.VISIBLE
         else -> textView.visibility = View.GONE
     }
+}
+
+@BindingAdapter("signal")
+fun setTextBottomSheetItem(textView: TextView, signal: Signal){
+    textView.text = convertSignalToText(signal)
+}
+
+@BindingAdapter("signalIcon")
+fun setIconBottomSheetItem(imageView: ImageView,signal: Signal){
+    imageView.setImageResource(convertSignalToIcon(signal))
 }
