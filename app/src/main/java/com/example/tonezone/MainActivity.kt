@@ -11,12 +11,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.example.tonezone.database.Token
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
+import com.example.tonezone.player.PlayerScreenViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -36,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         MainViewModelFactory(this)
     }
 
-
+    private val playerViewModel: PlayerScreenViewModel by viewModels()
 
     private lateinit var repository: TokenRepository
 
@@ -44,27 +43,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
+        binding.lifecycleOwner = this
+
         repository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
         setupNav()
-        temp()
+        setupMiniPlayer()
 
     }
 
-    private fun temp(){
+    private fun setupMiniPlayer(){
         val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
         bottomSheetBehavior.isHideable = false
-
-        Glide.with(binding.miniPlayer.thumbnail.context)
-            .load("https://picsum.photos/200/200")
-            .apply(
-                RequestOptions()
-                    .placeholder(R.drawable.ic_baseline_home_24)
-                    .error(R.drawable.ic_outline_search_24))
-            .into(binding.miniPlayer.thumbnail)
 
         binding.miniPlayer.miniPlayerFrame.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
+
+        binding.miniPlayer.playerViewModel = playerViewModel
     }
 
 

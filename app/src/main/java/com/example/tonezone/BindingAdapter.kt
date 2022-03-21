@@ -3,6 +3,7 @@ package com.example.tonezone
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
@@ -115,6 +116,12 @@ fun bindImage(imageView: ImageView,imageUrl: String?,listImageUrl: List<Image>?)
 //            .into(imageView)
 //    }
 //}
+
+@BindingAdapter("layoutVisibility")
+fun bindLayoutVisibility(relativeLayout: RelativeLayout, track: Track?){
+
+    relativeLayout.visibility = if(track!=Track() && track!=null) View.VISIBLE else View.GONE
+}
 
 @BindingAdapter("formatTime")
 fun bindTime(textView: TextView, timeInt : Long?){
