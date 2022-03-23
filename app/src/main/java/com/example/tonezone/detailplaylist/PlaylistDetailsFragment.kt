@@ -10,9 +10,11 @@ import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.example.tonezone.MainViewModel
+import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentPlaylistDetailsBinding
 import com.example.tonezone.network.PlaylistInfo
+import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.ModalBottomSheet
 import com.example.tonezone.utils.ModalBottomSheetViewModel
@@ -28,7 +30,7 @@ class PlaylistDetailsFragment : Fragment() {
     private lateinit var playlistInfo : PlaylistInfo
 
     private val viewModel: PlaylistDetailsViewModel by viewModels {
-        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo)
+        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.userProfile)
     }
 
     private val modalBottomSheetViewModel: ModalBottomSheetViewModel by activityViewModels()
@@ -48,11 +50,12 @@ class PlaylistDetailsFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        modalBottomSheet = ModalBottomSheet(ObjectRequest.PLAYLIST)
-
         binding.moreOption.setOnClickListener {
-            showBottomSheet()
+            showBottomSheet(binding.moreOption.id,playlistInfo.id)
         }
+
+        createAdapterPlaylist()
+
         handleSignalFromBottomSheet()
 
         return binding.root
@@ -63,36 +66,75 @@ class PlaylistDetailsFragment : Fragment() {
         modalBottomSheetViewModel.signal.observe(viewLifecycleOwner){
             when(it){
                 null -> Log.i("signal","unknown value")
-                else -> viewModel.receiveSignal(it)
+                else -> {
+                    viewModel.receiveSignal(it)
+                    Log.i("signal", convertSignalToText(it))
+                }
             }
         }
 
         viewModel.signal.observe(viewLifecycleOwner){
-            viewModel.handleSignal()
+            if (it!=null) {
+                modalBottomSheet.dismiss()
+                viewModel.handleSignal()
+                viewModel.handleSignalComplete()
+            }
         }
     }
 
-    private fun showBottomSheet(){
+    private fun showBottomSheet(buttonId: Int, objectId: String){
+        setUpBottomSheet(buttonId,objectId)
         modalBottomSheet.show(requireActivity().supportFragmentManager, ModalBottomSheet.TAG)
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        createAdapterPlaylist()
+    private fun setUpBottomSheet(buttonId: Int, objectId: String){
+        when(buttonId) {
+            R.id.more_option -> {
+                val isSaved = viewModel.checkIfUserFollowPlaylist()
+                modalBottomSheet = ModalBottomSheet(ObjectRequest.PLAYLIST,isSaved)
+
+            }
+
+            R.id.more_option_with_track -> {
+                val isSaved = viewModel.checkUserSavedTrack(objectId)
+                modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
+            }
+
+            else -> {
+                Toast.makeText(context,"WTF is this $buttonId",Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun createAdapterPlaylist(){
 
-        val adapter = LibraryAdapter(LibraryAdapter.OnClickListener {
-            val trackItem = it as LibraryAdapter.DataItem.TrackItem
-            val pos = viewModel.playlistItems.value!!.indexOf(trackItem.track)
-            playerViewModel.onPlay(playlistInfo.uri, pos)
+        val adapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, id ->
+            val trackItem = item as LibraryAdapter.DataItem.TrackItem
 
+            when(id) {
+                null -> {
+                    val pos = viewModel.playlistItems.value!!.indexOf(trackItem.track)
+                    playerViewModel.onPlay(playlistInfo.uri, pos)
+                }
+
+                else -> {
+                    showBottomSheet(id,item.id)
+                }
+            }
         })
 
         binding.playlist.adapter = adapter
 
+    }
+
+    private fun observeSelectedTrack(){
+        viewModel.selectedTrack.observe(viewLifecycleOwner){ track ->
+            if(track!= Track()){
+                val pos = viewModel.playlistItems.value!!.indexOf(track)
+                playerViewModel.onPlay(playlistInfo.uri,pos)
+            }
+        }
     }
 
 }
