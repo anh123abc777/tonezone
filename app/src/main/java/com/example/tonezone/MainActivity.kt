@@ -107,6 +107,7 @@ class MainActivity : AppCompatActivity() {
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
                     mainViewModel.token = response.accessToken
+                    mainViewModel.getUserProfileData()
                     navController.popBackStack()
                     navController.navigate(R.id.home)
                 }

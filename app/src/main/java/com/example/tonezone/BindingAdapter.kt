@@ -3,6 +3,7 @@ package com.example.tonezone
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -16,6 +17,7 @@ import com.example.tonezone.adapter.*
 import com.example.tonezone.network.*
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.Signal
+import com.example.tonezone.utils.convertDPtoInt
 import com.example.tonezone.utils.convertSignalToIcon
 import com.example.tonezone.utils.convertSignalToText
 import com.example.tonezone.yourlibrary.SortOption
@@ -74,7 +76,7 @@ fun bindDataYourLibrary(recyclerView: RecyclerView,
             "", listOf(Image(null,url="https://picsum.photos/300/300",null)),"User's save songs",Owner(""),
             0,false,"playlist",""))
         else
-            listOf<Playlist>()
+            listOf()
 
     Log.i("bindAdapter",userSavedTracks.toString())
 
@@ -168,13 +170,14 @@ fun bindStatePlayButton(button: AppCompatButton, state: PlayerScreenViewModel.Pl
     }
 }
 
-@BindingAdapter("isShuffling")
-fun bindColorShuffleButton(imageView: ImageView, isShuffling: Boolean){
-    if(isShuffling)
+@BindingAdapter("isChoose")
+fun bindColorShuffleButton(imageView: ImageView, isChoose: Boolean){
+    if(isChoose)
         imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.colorSecondary))
     else
         imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.gray))
 }
+
 
 @BindingAdapter("sizeList")
 fun bindChip(chip: Chip, sizeList: Int?){
@@ -193,11 +196,13 @@ fun bindContentSearchForItem(textView: TextView,size: Int?){
 }
 
 @BindingAdapter("signal")
-fun setTextBottomSheetItem(textView: TextView, signal: Signal){
-    textView.text = convertSignalToText(signal)
+fun setTextBottomSheetItem(button: Button, signal: Signal){
+    button.text = convertSignalToText(signal)
 }
 
 @BindingAdapter("signalIcon")
-fun setIconBottomSheetItem(imageView: ImageView,signal: Signal){
-    imageView.setImageResource(convertSignalToIcon(signal))
+fun setIconBottomSheetItem(button: Button,signal: Signal){
+    val drawable = ContextCompat.getDrawable(button.context,convertSignalToIcon(signal))
+    button.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable,null,null,null)
+    button.compoundDrawablePadding = 36
 }

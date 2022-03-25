@@ -139,8 +139,8 @@ class YourLibraryFragment : Fragment() {
 
     private fun setupYourLibraryAdapter() {
 
-        adapter = LibraryAdapter(LibraryAdapter.OnClickListener {
-            viewModel.displayPlaylistDetails(it)
+        adapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, _ ->
+            viewModel.displayPlaylistDetails(item)
         })
 
         binding.yourLibraryList.adapter = adapter

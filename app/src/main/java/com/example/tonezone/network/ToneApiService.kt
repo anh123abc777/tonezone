@@ -122,6 +122,54 @@ interface ToneApiService {
         @Query("country") country: String = "VN",
         @Query("offset") offset: Int = 9
         ): PlaylistsObject
+
+    @GET("playlists/{playlist_id}/followers/contains")
+    suspend fun checkUserFollowPlaylist(
+        @Header("Authorization") auth: String,
+        @Path("playlist_id") playlist_Id: String,
+        @Query("ids") ids: String
+        ): List<Boolean>
+
+    @PUT("playlists/{playlist_id}/followers")
+    suspend fun followPlaylist(
+        @Header("Authorization") auth: String,
+        @Path("playlist_id") playlist_Id: String,
+    )
+
+    @DELETE("playlists/{playlist_id}/followers")
+    suspend fun unfollowPlaylist(
+        @Header("Authorization") auth: String,
+        @Path("playlist_id") playlist_Id: String,
+    )
+
+    @GET("me")
+    suspend fun getUserProfile(
+        @Header("Authorization") auth: String,
+        ): UserProfile
+
+    @GET("me/tracks/contains")
+    suspend fun checkUserSavedTrack(
+        @Header("Authorization") auth: String,
+        @Query("ids") ids: String
+    ): List<Boolean>
+
+    @PUT("me/tracks")
+    suspend fun saveTracksForCurrentUser(
+        @Header("Authorization") auth: String,
+        @Query("ids") ids: String
+        )
+
+    @DELETE("me/tracks")
+    suspend fun removeTracksForCurrentUser(
+        @Header("Authorization") auth: String,
+        @Query("ids") ids: String
+    )
+
+    @GET("artists/{id}")
+    suspend fun getArtist(
+        @Header("Authorization") auth: String,
+        @Path("id") id: String
+    ): Artist
 }
 
 object ToneApi{

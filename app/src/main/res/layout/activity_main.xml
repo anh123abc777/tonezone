@@ -21,7 +21,7 @@
             app:defaultNavHost="true"
             app:navGraph="@navigation/main_navigation"
             android:layout_gravity="top"
-            android:layout_marginBottom="56dp"
+            android:paddingBottom="56dp"
             />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView

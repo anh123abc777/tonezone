@@ -173,6 +173,9 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         fun bind(track: Track, clickListener: OnClickListener){
             binding.track = track
             binding.clickListener = clickListener
+            binding.moreOptionWithTrack.setOnClickListener {
+                clickListener.onClickMoreOption(track,binding.moreOptionWithTrack.id)
+            }
             binding.executePendingBindings()
         }
 
@@ -233,10 +236,11 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         abstract val image: String?
     }
 
-    class OnClickListener(val clickListener: (dataItem: DataItem) -> Unit){
-        fun onClick(playlist: Playlist) = clickListener(DataItem.PlaylistItem(playlist))
-        fun onClick(artist: Artist) = clickListener(DataItem.ArtistItem(artist))
-        fun onClick(track: Track) = clickListener(DataItem.TrackItem(track))
+    class OnClickListener(val clickListener: (dataItem: DataItem, idButton: Int?) -> Unit){
+        fun onClick(playlist: Playlist) = clickListener(DataItem.PlaylistItem(playlist),null)
+        fun onClick(artist: Artist) = clickListener(DataItem.ArtistItem(artist),null)
+        fun onClick(track: Track) = clickListener(DataItem.TrackItem(track),null)
+        fun onClickMoreOption(track: Track, idButton: Int) = clickListener(DataItem.TrackItem(track),idButton)
     }
 
 }

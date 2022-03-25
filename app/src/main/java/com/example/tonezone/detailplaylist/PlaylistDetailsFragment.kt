@@ -13,13 +13,10 @@ import com.example.tonezone.MainViewModel
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentPlaylistDetailsBinding
+import com.example.tonezone.network.Artist
 import com.example.tonezone.network.PlaylistInfo
-import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
-import com.example.tonezone.utils.ModalBottomSheet
-import com.example.tonezone.utils.ModalBottomSheetViewModel
-import com.example.tonezone.utils.ObjectRequest
-import com.example.tonezone.utils.convertSignalToText
+import com.example.tonezone.utils.*
 
 class PlaylistDetailsFragment : Fragment() {
 
@@ -50,13 +47,13 @@ class PlaylistDetailsFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        binding.moreOption.setOnClickListener {
-            showBottomSheet(binding.moreOption.id,playlistInfo.id)
-        }
+        setupBottomSheet()
 
         createAdapterPlaylist()
 
         handleSignalFromBottomSheet()
+
+        setupShowingArtistsBottomSheet()
 
         return binding.root
     }
@@ -65,15 +62,15 @@ class PlaylistDetailsFragment : Fragment() {
 
         modalBottomSheetViewModel.signal.observe(viewLifecycleOwner){
             when(it){
-                null -> Log.i("signal","unknown value")
+                null -> Log.i("receivedSignal","unknown value")
                 else -> {
                     viewModel.receiveSignal(it)
-                    Log.i("signal", convertSignalToText(it))
+                    Log.i("receivedSignal", convertSignalToText(it))
                 }
             }
         }
 
-        viewModel.signal.observe(viewLifecycleOwner){
+        viewModel.receivedSignal.observe(viewLifecycleOwner){
             if (it!=null) {
                 modalBottomSheet.dismiss()
                 viewModel.handleSignal()
@@ -82,13 +79,18 @@ class PlaylistDetailsFragment : Fragment() {
         }
     }
 
-    private fun showBottomSheet(buttonId: Int, objectId: String){
-        setUpBottomSheet(buttonId,objectId)
-        modalBottomSheet.show(requireActivity().supportFragmentManager, ModalBottomSheet.TAG)
+    private fun setupBottomSheet(){
+
+        viewModel.selectedObjectID.observe(viewLifecycleOwner){
+            if(it!=null){
+                setUpItemsBottomSheet(it.first,it.second)
+                modalBottomSheet.show(requireActivity().supportFragmentManager, ModalBottomSheet.TAG)
+            }
+        }
 
     }
 
-    private fun setUpBottomSheet(buttonId: Int, objectId: String){
+    private fun setUpItemsBottomSheet(objectId: String, buttonId: Int){
         when(buttonId) {
             R.id.more_option -> {
                 val isSaved = viewModel.checkIfUserFollowPlaylist()
@@ -108,7 +110,6 @@ class PlaylistDetailsFragment : Fragment() {
     }
 
     private fun createAdapterPlaylist(){
-
         val adapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, id ->
             val trackItem = item as LibraryAdapter.DataItem.TrackItem
 
@@ -119,22 +120,48 @@ class PlaylistDetailsFragment : Fragment() {
                 }
 
                 else -> {
-                    showBottomSheet(id,item.id)
+                    viewModel.showBottomSheet(trackItem.track.id,id)
                 }
             }
         })
 
         binding.playlist.adapter = adapter
-
     }
 
-    private fun observeSelectedTrack(){
-        viewModel.selectedTrack.observe(viewLifecycleOwner){ track ->
-            if(track!= Track()){
-                val pos = viewModel.playlistItems.value!!.indexOf(track)
-                playerViewModel.onPlay(playlistInfo.uri,pos)
+    private fun setupShowingArtistsBottomSheet(){
+        viewModel.isShowingTrackDetails.observe(viewLifecycleOwner){
+            when (it) {
+
+                Signal.VIEW_ARTIST -> {
+                    modalBottomSheet.dismiss()
+                    val artistsOfTrack = viewModel.playlistItems.value?.find { track ->
+                        track.id == viewModel.selectedObjectID.value?.first
+                    }?.artists ?: listOf(Artist(), Artist())
+                    Log.i("setUpShowingArtists", artistsOfTrack.toString())
+                    val artistsModalBottomSheet = ArtistsModalBottomSheet(artistsOfTrack)
+                    artistsModalBottomSheet.show(
+                        requireActivity().supportFragmentManager,
+                        ArtistsModalBottomSheet.TAG
+                    )
+                    viewModel.showTracksDetailsComplete()
+                }
+
+                Signal.VIEW_ALBUM -> {
+//                    modalBottomSheet.dismiss()
+//                    val albumsOfTrack = listOf(viewModel.playlistItems.value?.find { track ->
+//                        track.id == viewModel.selectedObjectID.value?.first
+//                    }?.album)
+//                    Log.i("setUpShowingArtists", albumsOfTrack.toString())
+//                    val artistsModalBottomSheet = ArtistsModalBottomSheet(albumsOfTrack)
+//                    artistsModalBottomSheet.show(
+//                        requireActivity().supportFragmentManager,
+//                        ArtistsModalBottomSheet.TAG
+//                    )
+                    viewModel.showTracksDetailsComplete()
+                }
+
+                else -> Log.i("isShowingTrackDetails","Nothing")
             }
         }
     }
-
 }

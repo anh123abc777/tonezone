@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="signal"
+            type="com.example.tonezone.utils.Signal" />
+        <variable
+            name="clickListener"
+            type="com.example.tonezone.adapter.BottomSheetItemAdapter.OnClickListener" />
+    </data>
+
+    <Button
+        android:id="@+id/bottom_sheet_item_frame"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:layout_margin="4dp"
+        app:background="@color/white"
+        android:backgroundTint="@color/white"
+        android:onClick="@{() -> clickListener.onClick(signal)}"
+        signal="@{signal}"
+        signalIcon="@{signal}"
+        android:gravity="center_vertical"
+        android:elevation="0dp"
+        android:foregroundTint="@color/black"
+        android:textColor="@color/black"
+        android:drawablePadding="50dp"
+        />
+
+<!--    <ImageView-->
+<!--        android:id="@+id/item_image"-->
+<!--        android:layout_width="32dp"-->
+<!--        android:layout_height="32dp"-->
+<!--        android:src="@drawable/ic_add"-->
+<!--        signalIcon="@{receivedSignal}"-->
+<!--        android:layout_gravity="center"-->
+<!--        />-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/item_name"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:textSize="16sp"-->
+<!--        receivedSignal="@{receivedSignal}"-->
+<!--        android:layout_marginStart="8dp"-->
+<!--        />-->
+
+</layout>

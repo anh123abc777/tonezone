@@ -93,7 +93,7 @@ class SearchForItemFragment : Fragment() {
     }
 
     private fun observeSearchedItems(){
-        adapter = LibraryAdapter(LibraryAdapter.OnClickListener {})
+        adapter = LibraryAdapter(LibraryAdapter.OnClickListener { _, _ ->  })
         binding.searchedItems.adapter = adapter
         viewModel.searchedItems.observe(viewLifecycleOwner){
             if (it!=null)

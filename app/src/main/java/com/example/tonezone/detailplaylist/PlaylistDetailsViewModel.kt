@@ -1,17 +1,20 @@
 package com.example.tonezone.detailplaylist
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.tonezone.R
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.ToneApi
 import com.example.tonezone.network.Track
+import com.example.tonezone.network.UserProfile
 import com.example.tonezone.utils.Signal
 import kotlinx.coroutines.*
 
 class PlaylistDetailsViewModel
-    (val token: String,  var playlistInfo: PlaylistInfo) : ViewModel() {
+    (val token: String, var playlistInfo: PlaylistInfo, private val userProfile: UserProfile) : ViewModel() {
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
 
@@ -19,25 +22,49 @@ class PlaylistDetailsViewModel
     val playlistItems : LiveData<List<Track>>
         get() = _playlistItems
 
-    private var _signal = MutableLiveData<Signal>()
-    val signal : LiveData<Signal>
-        get() = _signal
+    private val _isUserFollowPlaylist = MutableLiveData<Boolean>()
+    val isUserFollowPlaylist : LiveData<Boolean>
+        get() = _isUserFollowPlaylist
+
+    private val _selectedObjectID = MutableLiveData<Pair<String,Int>>()
+    val selectedObjectID : LiveData<Pair<String,Int>>
+        get() = _selectedObjectID
+
+    private var _receivedSignal = MutableLiveData<Signal>()
+    val receivedSignal : LiveData<Signal>
+        get() = _receivedSignal
 
     init {
         getDataPlaylistItems()
+        checkIfUserFollowPlaylist()
     }
 
     private fun getDataPlaylistItems() {
         uiScope.launch(Dispatchers.Main) {
             _playlistItems.value =
                 when (playlistInfo.type) {
-                    "artist" -> getArtistTopTracks()
+                    "artist" -> {
+
+                        getArtistTopTracks()
+                    }
                     else -> {
                         if(playlistInfo.id=="userSavedTrack")
                             getUserSavedTracks()
                         else
                             getPlaylistTracks()
                     }
+                }
+        }
+    }
+
+    fun getImageArtist(){
+        uiScope.launch {
+            playlistInfo.image =
+                try {
+                    ToneApi.retrofitService.getArtist("Bearer $token",playlistInfo.id).images?.get(0)?.url
+                } catch (e: Exception){
+                    Log.i("getImageArtist","Failure ${e.message}")
+                    ""
                 }
         }
     }
@@ -80,24 +107,131 @@ class PlaylistDetailsViewModel
         }
     }
 
-    fun handleSignal(){
-        when(_signal.value){
-            null -> Log.i("signal","don't have happen")
+    fun checkIfUserFollowPlaylist(): Boolean  =
+        runBlocking {
+            _isUserFollowPlaylist.value = try {
+                ToneApi.retrofitService.checkUserFollowPlaylist(
+                    "Bearer $token",
+                    playlistInfo.id,
+                    userProfile.id!!
+                )[0]
+            } catch (e: Exception) {
+                false
+            }
+            _isUserFollowPlaylist.value!!
+        }
 
-            Signal.LIKE_TRACK -> likeTrack()
+    fun showBottomSheet(objectID: String, buttonID: Int ){
+        _selectedObjectID.value = Pair(objectID,buttonID)
+    }
+
+    fun showBottomSheet(){
+        _selectedObjectID.value = Pair(playlistInfo.id,R.id.more_option)
+    }
+
+    @SuppressLint("NullSafeMutableLiveData")
+    fun showBottomSheetComplete(){
+        _selectedObjectID.value = null
+    }
+
+    @SuppressLint("NullSafeMutableLiveData")
+    fun handleSignalComplete(){
+        _receivedSignal.value = null
+    }
+
+    fun handleSignal(){
+        when(_receivedSignal.value){
+            null -> Log.i("receivedSignal","don't have happen")
 
             Signal.LIKE_PLAYLIST -> likePlaylist()
 
+            Signal.LIKED_PLAYLIST -> likePlaylist()
+
+            Signal.LIKE_TRACK -> likeTrack()
+
+            Signal.LIKED_TRACK -> likeTrack()
+
             Signal.ADD_TO_QUEUE -> addToQueue()
+
+            Signal.VIEW_ARTIST -> showArtistsOfTrack()
+
+            Signal.VIEW_ALBUM -> showAlbumOfTrack()
+
+            else -> Log.i("receivedSignal","what is this???????")
         }
     }
 
-    private fun likeTrack(){
-        TODO()
+    private val _isShowingTracksDetails = MutableLiveData<Signal>()
+    val isShowingTrackDetails : LiveData<Signal>
+        get() = _isShowingTracksDetails
+
+    private fun showArtistsOfTrack(){
+        _isShowingTracksDetails.value = Signal.VIEW_ARTIST
     }
 
+    private fun showAlbumOfTrack(){
+        _isShowingTracksDetails.value = Signal.VIEW_ARTIST
+    }
+
+    @SuppressLint("NullSafeMutableLiveData")
+    fun showTracksDetailsComplete(){
+        _isShowingTracksDetails.value = null
+    }
+
+    private fun likeTrack(){
+        val isSaved = runBlocking {
+            _selectedObjectID.value?.let { checkUserSavedTrack(it.first) }
+        }?: false
+
+        uiScope.launch {
+            try {
+                if (isSaved) {
+                    ToneApi.retrofitService
+                        .removeTracksForCurrentUser(
+                            "Bearer $token"
+                            ,_selectedObjectID.value!!.first)
+                } else {
+                    ToneApi.retrofitService
+                        .saveTracksForCurrentUser(
+                            "Bearer $token"
+                            ,_selectedObjectID.value!!.first)
+                }
+            } catch (e: Exception){
+                Log.i("likeTrack","Failure id ${_selectedObjectID.value?.first.toString()} bool $isSaved ${e.message.toString()}")
+            }
+        }
+    }
+
+    fun checkUserSavedTrack(id: String): Boolean =
+        runBlocking {
+            try {
+                ToneApi.retrofitService.checkUserSavedTrack("Bearer $token", id)[0]
+            } catch (e: Exception){
+                false
+            }
+        }
+
     private fun likePlaylist(){
-        TODO()
+        uiScope.launch {
+            try {
+                if (_isUserFollowPlaylist.value == false) {
+
+                    ToneApi.retrofitService.followPlaylist("Bearer $token", playlistInfo.id)
+                    changeStateFollowPlaylist()
+                }
+                else {
+
+                    ToneApi.retrofitService.unfollowPlaylist("Bearer $token", playlistInfo.id)
+                    changeStateFollowPlaylist()
+                }
+            }catch (e: Exception){
+                Log.i("errorLikePlaylist",e.message.toString())
+            }
+        }
+    }
+
+    private fun changeStateFollowPlaylist(){
+        _isUserFollowPlaylist.value = !_isUserFollowPlaylist.value!!
     }
 
     private fun addToQueue(){
@@ -105,7 +239,7 @@ class PlaylistDetailsViewModel
     }
 
     fun receiveSignal(signal: Signal){
-        _signal.value = signal
+        _receivedSignal.value = signal
     }
 
     override fun onCleared() {

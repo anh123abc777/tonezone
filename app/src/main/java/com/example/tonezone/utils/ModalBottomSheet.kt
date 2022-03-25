@@ -1,69 +1,73 @@
 package com.example.tonezone.utils
 
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import com.example.tonezone.adapter.BottomSheetItemAdapter
 import com.example.tonezone.databinding.ModalBottomSheetContentBinding
-import com.example.tonezone.detailplaylist.PlaylistDetailsViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
-class ModalBottomSheet(private val objectRequest: ObjectRequest) : BottomSheetDialogFragment() {
+class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isFollowing: Boolean) : BottomSheetDialogFragment() {
 
     private lateinit var binding: ModalBottomSheetContentBinding
+
+    private val viewModel: ModalBottomSheetViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         binding = ModalBottomSheetContentBinding.inflate(inflater)
-        setupBottomSheetItems(objectRequest)
+
+        setupBottomSheetItems(objectRequest,isFollowing)
 
         return binding.root
 
     }
 
-    private fun setupBottomSheetItems(objectRequest: ObjectRequest){
+    private fun setupBottomSheetItems(objectRequest: ObjectRequest,isFollowing: Boolean){
         when(objectRequest){
-            ObjectRequest.ARTIST -> createBottomSheetItem(listOf())
-            ObjectRequest.PLAYLIST -> createBottomSheetItem(listOf("Like","Save","Dick"))
-            ObjectRequest.TRACK -> createBottomSheetItem(listOf())
-            ObjectRequest.YOUR_PLAYLIST -> createBottomSheetItem(listOf())
-        }
-    }
 
-    private fun createBottomSheetItem(itemNames: List<String>){
+            ObjectRequest.ARTIST -> submitBottomSheetList(listOf())
 
-        itemNames.forEachIndexed { index, s ->
-            val textView = TextView(context)
-            textView.text = s
-            var layoutParams = ViewGroup.MarginLayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+            ObjectRequest.PLAYLIST -> submitBottomSheetList(
+                if(isFollowing)
+                    listOf(Signal.LIKED_PLAYLIST)
+                else
+                    listOf(Signal.LIKE_PLAYLIST)
             )
-            layoutParams.setMargins(convertDPtoInt(8F),convertDPtoInt(8F),0,8)
-            binding.listOption.addView(textView,index)
 
+            ObjectRequest.TRACK -> {
+
+                val itemLike = if(isFollowing) listOf(Signal.LIKED_TRACK) else listOf(Signal.LIKE_TRACK)
+
+                submitBottomSheetList(
+                    itemLike + listOf(
+                                            Signal.HIDE_THIS_SONG,
+                                            Signal.ADD_TO_PLAYLIST,
+                                            Signal.VIEW_ARTIST,
+                                            Signal.VIEW_ALBUM,)
+                )
+            }
+
+            ObjectRequest.YOUR_PLAYLIST -> submitBottomSheetList(listOf())
+
+            else -> submitBottomSheetList(listOf())
         }
     }
 
-    private fun convertDPtoInt(value: Float): Int = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, value,
-            requireContext().resources.displayMetrics
-        ).toInt()
-
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val detailPlaylistViewModel = ViewModelProvider(requireActivity()).get(PlaylistDetailsViewModel::class.java)
-
+    private fun submitBottomSheetList(itemNames: List<Signal>){
+        val adapter = BottomSheetItemAdapter(BottomSheetItemAdapter.OnClickListener {
+            viewModel.sendSignal(it)
+            viewModel.sendSignalComplete()
+        })
+        adapter.submitList(itemNames)
+        binding.listOption.adapter = adapter
     }
 
     companion object{
