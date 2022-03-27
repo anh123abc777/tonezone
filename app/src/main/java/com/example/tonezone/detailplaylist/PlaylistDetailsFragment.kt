@@ -27,7 +27,9 @@ class PlaylistDetailsFragment : Fragment() {
     private lateinit var playlistInfo : PlaylistInfo
 
     private val viewModel: PlaylistDetailsViewModel by viewModels {
-        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.userProfile)
+        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,
+            mainViewModel.user.value!!
+        )
     }
 
     private val modalBottomSheetViewModel: ModalBottomSheetViewModel by activityViewModels()

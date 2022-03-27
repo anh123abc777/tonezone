@@ -46,9 +46,13 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
     val navigateToDetailPlaylist : LiveData<PlaylistInfo>
         get() = _navigateToDetailPlaylist
 
-    private val _isShowBottomSheet = MutableLiveData<ObjectRequest>()
-    val isShowBottomSheet : LiveData<ObjectRequest>
-        get() = _isShowBottomSheet
+    private val _objectShowBottomSheet = MutableLiveData<Pair<ObjectRequest,String>>()
+    val objectShowBottomSheet : LiveData<Pair<ObjectRequest,String>>
+        get() = _objectShowBottomSheet
+
+    private var _receivedSignal = MutableLiveData<Signal>()
+    val receivedSignal : LiveData<Signal>
+        get() = _receivedSignal
 
     init {
         getDataUserSavedTracks()
@@ -175,12 +179,85 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
         }
     }
 
-    fun showBottomSheet(objectRequest: ObjectRequest){
-        _isShowBottomSheet.value = objectRequest
+    fun showBottomSheet(objectRequest: ObjectRequest,itemId : String){
+        _objectShowBottomSheet.value = Pair(objectRequest,itemId)
     }
 
     @SuppressLint("NullSafeMutableLiveData")
     fun showBottomSheetComplete(){
-        _isShowBottomSheet.value = null
+        _objectShowBottomSheet.value = null
+    }
+
+    @SuppressLint("NullSafeMutableLiveData")
+    fun handleSignalComplete(){
+        _receivedSignal.value = null
+    }
+
+    fun handleSignal(){
+        when(_receivedSignal.value){
+            null -> Log.i("receivedSignal","don't have happen")
+
+            Signal.LIKED_PLAYLIST -> unlikePlaylist()
+
+            Signal.DELETE_PLAYLIST -> deletePlaylist()
+
+            Signal.STOP_FOLLOWING -> unfollowArtist()
+
+            else -> Log.i("receivedSignal","what is this???????")
+        }
+    }
+
+    private fun unfollowArtist(){
+        uiScope.launch {
+            try {
+                ToneApi.retrofitService
+                    .unfollowArtists(
+                        "Bearer $token",
+                    _objectShowBottomSheet.value!!.second)
+                Log.i("unfollowArtist","success")
+
+
+            }catch (e: Exception){
+                Log.i("unfollowArtist","Failure ${e.message.toString()}")
+            }
+        }
+        getDataFollowedArtists()
+
+    }
+
+    private fun unlikePlaylist(){
+        uiScope.launch {
+            try {
+                    ToneApi.retrofitService
+                        .unfollowPlaylist(
+                            "Bearer $token",
+                            _objectShowBottomSheet.value!!.second)
+                getDataUserPlaylists()
+            }catch (e: Exception){
+                Log.i("errorLikePlaylist",e.message.toString())
+            }
+        }
+    }
+
+    private fun deletePlaylist(){
+        uiScope.launch {
+            try {
+                ToneApi.retrofitService.unfollowPlaylist(
+                    "Bearer $token",
+                    _objectShowBottomSheet.value!!.second)
+                getDataUserPlaylists()
+            }catch (e: Exception){
+                Log.i("deletePlaylist",e.message.toString())
+            }
+        }
+    }
+
+    fun receiveSignal(signal: Signal){
+        _receivedSignal.value = signal
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        uiScope.cancel()
     }
 }

@@ -65,13 +65,13 @@ fun convertSignalToIcon(signal: Signal): Int =
         Signal.VIEW_ALBUM -> R.drawable.ic_view_album
         Signal.ADD_SONGS -> R.drawable.ic_grid
         Signal.EDIT_PLAYLIST -> R.drawable.ic_grid
-        Signal.DELETE_PLAYLIST -> R.drawable.ic_grid
+        Signal.DELETE_PLAYLIST -> R.drawable.ic_close
         Signal.LIKE_TRACK -> R.drawable.ic_unlike
         Signal.LIKED_TRACK -> R.drawable.ic_favorite
-        Signal.PIN_ARTIST -> R.drawable.ic_view_artist
-        Signal.UNPIN_ARTIST -> R.drawable.ic_view_artist
-        Signal.PIN_PLAYLIST -> R.drawable.ic_view_artist
-        Signal.UNPIN_PLAYLIST -> R.drawable.ic_view_artist
+        Signal.PIN_ARTIST -> R.drawable.ic_pin
+        Signal.UNPIN_ARTIST -> R.drawable.ic_pin
+        Signal.PIN_PLAYLIST -> R.drawable.ic_pin
+        Signal.UNPIN_PLAYLIST -> R.drawable.ic_pin
         Signal.SHARE -> R.drawable.ic_view_artist
-        Signal.STOP_FOLLOWING -> R.drawable.ic_view_artist
+        Signal.STOP_FOLLOWING -> R.drawable.ic_close
     }

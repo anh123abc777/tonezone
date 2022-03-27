@@ -9,12 +9,12 @@ import com.example.tonezone.R
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.ToneApi
 import com.example.tonezone.network.Track
-import com.example.tonezone.network.UserProfile
+import com.example.tonezone.network.User
 import com.example.tonezone.utils.Signal
 import kotlinx.coroutines.*
 
 class PlaylistDetailsViewModel
-    (val token: String, var playlistInfo: PlaylistInfo, private val userProfile: UserProfile) : ViewModel() {
+    (val token: String, var playlistInfo: PlaylistInfo, private val userProfile: User) : ViewModel() {
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
 
@@ -157,9 +157,31 @@ class PlaylistDetailsViewModel
 
             Signal.VIEW_ALBUM -> showAlbumOfTrack()
 
+            Signal.ADD_TO_PLAYLIST -> addToPlaylist()
+
             else -> Log.i("receivedSignal","what is this???????")
         }
     }
+
+    private fun addToPlaylist(){
+        uiScope.launch {
+            try {
+                val currentTrack = getCurrentTrack()
+                if(currentTrack!=null) {
+                    ToneApi.retrofitService.addItemsToPlaylist(
+                        "Bearer $token",
+                       "",
+                        currentTrack.uri)
+                }
+            } catch (e: Exception){
+                Log.i("addToPlaylist","Failure ${e.message}")
+            }
+        }
+    }
+
+    private fun getCurrentTrack(): Track? =
+        playlistItems.value!!.find { it.id == selectedObjectID.value!!.first }
+
 
     private val _isShowingTracksDetails = MutableLiveData<Signal>()
     val isShowingTrackDetails : LiveData<Signal>

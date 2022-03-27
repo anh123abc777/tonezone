@@ -15,7 +15,10 @@
         android:layout_height="match_parent"
         tools:context=".yourlibrary.YourLibraryFragment"
         android:orientation="vertical"
-        android:padding="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         >
 
 
@@ -92,7 +95,8 @@
                 playlistData="@{viewModel.userPlaylists.items}"
                 userSavedTracksData="@{viewModel.userSavedTracks.items}"
                 sortOption="@{viewModel.sortOption}"
-                android:nestedScrollingEnabled="true"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="112dp"
                 />
 
 

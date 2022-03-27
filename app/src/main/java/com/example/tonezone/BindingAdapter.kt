@@ -1,5 +1,9 @@
 package com.example.tonezone
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
@@ -17,11 +21,11 @@ import com.example.tonezone.adapter.*
 import com.example.tonezone.network.*
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.Signal
-import com.example.tonezone.utils.convertDPtoInt
 import com.example.tonezone.utils.convertSignalToIcon
 import com.example.tonezone.utils.convertSignalToText
 import com.example.tonezone.yourlibrary.SortOption
 import com.google.android.material.chip.Chip
+
 
 //@BindingAdapter("imageUrl")
 //fun bindImage(imgView : ImageView, imgUrl : String?){
@@ -78,15 +82,9 @@ fun bindDataYourLibrary(recyclerView: RecyclerView,
         else
             listOf()
 
-    Log.i("bindAdapter",userSavedTracks.toString())
-
     val playlists = if(playlistData!=null) userSavedTracks+playlistData else userSavedTracks
-
-    Log.i("bindAdapterPlaylist",playlists.toString())
     val tracks = trackData ?: listOf()
     val artists = artistData ?: listOf()
-
-    Log.i("bindAdapterPlaylist",tracks.toString())
 
     adapter.submitYourLibrary(playlists, artists, tracks)
     when(sortOption){
@@ -202,7 +200,7 @@ fun setTextBottomSheetItem(button: Button, signal: Signal){
 
 @BindingAdapter("signalIcon")
 fun setIconBottomSheetItem(button: Button,signal: Signal){
-    val drawable = ContextCompat.getDrawable(button.context,convertSignalToIcon(signal))
+    val drawable = ContextCompat.getDrawable(button.context,convertSignalToIcon(signal))!!
     button.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable,null,null,null)
     button.compoundDrawablePadding = 36
 }

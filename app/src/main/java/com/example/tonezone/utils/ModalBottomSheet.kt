@@ -58,13 +58,9 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
             ObjectRequest.YOUR_PLAYLIST -> submitBottomSheetList(listOf())
 
             ObjectRequest.PLAYLIST_FROM_LIBRARY -> {
-                val itemLike = if (isFollowing == true)
-                    listOf(Signal.LIKED_PLAYLIST)
-                else
-                    listOf(Signal.LIKE_PLAYLIST)
-
                 submitBottomSheetList(
-                    itemLike + listOf(
+                    listOf(
+                        Signal.LIKED_PLAYLIST,
                         Signal.PIN_PLAYLIST,
                         Signal.SHARE)
                 )

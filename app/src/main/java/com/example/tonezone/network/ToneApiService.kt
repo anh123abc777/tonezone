@@ -196,10 +196,12 @@ interface ToneApiService {
         @Body data: String
         ): Call<String>
 
-    @GET("playlists/3cEYpjA9oz9GiPac4AsH4n")
-    suspend fun getPlaylist(
+    @DELETE("me/following")
+    suspend fun unfollowArtists(
         @Header("Authorization") auth: String,
-        ): Playlist
+        @Query("ids") ids: String,
+        @Query("type") type: String = "artist",
+        ): Unit
 }
 
 object ToneApi{

@@ -23,7 +23,9 @@ import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
 import com.example.tonezone.utils.ModalBottomSheet
+import com.example.tonezone.utils.ModalBottomSheetViewModel
 import com.example.tonezone.utils.ObjectRequest
+import com.example.tonezone.utils.convertSignalToText
 
 
 @Suppress("DEPRECATION")
@@ -35,6 +37,9 @@ class YourLibraryFragment : Fragment() {
     private val viewModel: YourLibraryViewModel by viewModels {
         YourLibraryViewModelFactory(mainViewModel.token,mainViewModel.user.value!!)
     }
+
+    private val modalBottomSheetViewModel : ModalBottomSheetViewModel by activityViewModels()
+
     private val ARTIST = 2
     private val PLAYLIST = 1
 
@@ -62,11 +67,10 @@ class YourLibraryFragment : Fragment() {
         setupFilterType()
         handleRequestToCreatePlaylist()
         setupBottomSheet()
+        handleSignalFromBottomSheet()
 
         return binding.root
     }
-
-
 
         private fun setupFilterType() {
         viewModel.type.observe(viewLifecycleOwner) {
@@ -208,7 +212,7 @@ class YourLibraryFragment : Fragment() {
             when(idButton){
                 null -> viewModel.displayPlaylistDetails(item)
                 Int.MIN_VALUE -> {
-                    viewModel.showBottomSheet(getObjectRequestFromTypeItem(item))
+                    viewModel.showBottomSheet(getObjectRequestFromTypeItem(item), item.id!!)
                 }
                 else -> Log.i("libraryAdapter","Nothing")
                 }
@@ -231,12 +235,33 @@ class YourLibraryFragment : Fragment() {
         }
 
 
+    private fun handleSignalFromBottomSheet(){
+
+        modalBottomSheetViewModel.signal.observe(viewLifecycleOwner){
+            when(it){
+                null -> Log.i("receivedSignal","unknown value")
+                else -> {
+                    viewModel.receiveSignal(it)
+                    Log.i("receivedSignal", convertSignalToText(it))
+                }
+            }
+        }
+
+        viewModel.receivedSignal.observe(viewLifecycleOwner){
+            if (it!=null) {
+                modalBottomSheet.dismiss()
+                viewModel.handleSignal()
+                viewModel.handleSignalComplete()
+            }
+        }
+    }
+
     private fun setupBottomSheet(){
-        viewModel.isShowBottomSheet.observe(viewLifecycleOwner){
+        viewModel.objectShowBottomSheet.observe(viewLifecycleOwner){
             when(it){
                 null -> Log.i("setupBottomSheet","objectRequest null")
                 else -> {
-                    modalBottomSheet = ModalBottomSheet(it,null)
+                    modalBottomSheet = ModalBottomSheet(it.first,null)
                     modalBottomSheet.show(
                         requireActivity().supportFragmentManager,
                         ModalBottomSheet.TAG
