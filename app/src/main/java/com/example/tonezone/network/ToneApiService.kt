@@ -2,9 +2,12 @@ package com.example.tonezone.network
 
 import DataPlaylistItems
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Deferred
+import org.json.JSONObject
+import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -24,8 +27,16 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .build()
 
+private val retrofitDeferred = Retrofit.Builder()
+    .addConverterFactory(MoshiConverterFactory.create(moshi))
+    .addCallAdapterFactory(CoroutineCallAdapterFactory())
+    .baseUrl(BASE_URL)
+    .build()
+
+
 private val retrofitGetString = Retrofit.Builder()
     .addConverterFactory(ScalarsConverterFactory.create())
+    .addCallAdapterFactory(CoroutineCallAdapterFactory())
     .baseUrl(BASE_URL)
     .build()
 interface ToneApiService {
@@ -143,9 +154,9 @@ interface ToneApiService {
     )
 
     @GET("me")
-    suspend fun getUserProfile(
+    suspend fun getCurrentUserProfile(
         @Header("Authorization") auth: String,
-        ): UserProfile
+        ): User
 
     @GET("me/tracks/contains")
     suspend fun checkUserSavedTrack(
@@ -170,6 +181,25 @@ interface ToneApiService {
         @Header("Authorization") auth: String,
         @Path("id") id: String
     ): Artist
+
+    @POST("playlists/{playlist_id}/tracks")
+    suspend fun addItemsToPlaylist(
+        @Header("Authorization") auth: String,
+        @Path("playlist_id") playlist_Id: String,
+        @Query("uris") uris: String
+        )
+
+    @POST("users/{user_id}/playlists")
+    fun createPlaylist(
+        @Header("Authorization") auth: String,
+        @Path("user_id") user_Id: String,
+        @Body data: String
+        ): Call<String>
+
+    @GET("playlists/3cEYpjA9oz9GiPac4AsH4n")
+    suspend fun getPlaylist(
+        @Header("Authorization") auth: String,
+        ): Playlist
 }
 
 object ToneApi{
@@ -179,5 +209,9 @@ object ToneApi{
 
     val retrofitService2: ToneApiService by lazy {
         retrofitGetString.create(ToneApiService::class.java)
+    }
+
+    val retrofitServiceDeferred: ToneApiService by lazy {
+        retrofitDeferred.create(ToneApiService::class.java)
     }
 }

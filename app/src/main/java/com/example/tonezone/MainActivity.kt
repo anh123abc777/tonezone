@@ -107,9 +107,8 @@ class MainActivity : AppCompatActivity() {
             when (response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
                     mainViewModel.token = response.accessToken
-                    mainViewModel.getUserProfileData()
-                    navController.popBackStack()
-                    navController.navigate(R.id.home)
+                    mainViewModel.getCurrentUserProfileData()
+                    navigateToHome()
                 }
                 AuthorizationResponse.Type.ERROR -> {
                     mainViewModel.token =  "Not Found"
@@ -130,6 +129,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun navigateToHome(){
+        mainViewModel.user.observe(this) {
+            if(it!=null) {
+                navController.popBackStack()
+                navController.navigate(R.id.home)
+            }
+        }
+    }
 //    override fun onSupportNavigateUp(): Boolean {
 //        val navController = this.findNavController(R.id.nav_host)
 //        return navController.navigateUp()

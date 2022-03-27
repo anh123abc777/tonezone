@@ -15,6 +15,21 @@
         tools:context=".home.HomeFragment">
 
 
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:title="@{viewModel.user.display_name}"
+                />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_playlist"
             android:layout_width="match_parent"
@@ -23,6 +38,7 @@
             android:orientation="vertical"
             tools:listitem="@layout/item_group_playlist"
             groupPlaylists="@{viewModel.groupPlaylists}"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

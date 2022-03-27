@@ -1,13 +1,19 @@
 package com.example.tonezone.yourlibrary
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
+import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -16,19 +22,27 @@ import com.example.tonezone.MainViewModelFactory
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
+import com.example.tonezone.utils.ModalBottomSheet
+import com.example.tonezone.utils.ObjectRequest
 
+
+@Suppress("DEPRECATION")
 class YourLibraryFragment : Fragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels{
         MainViewModelFactory(requireActivity())
     }
     private val viewModel: YourLibraryViewModel by viewModels {
-        YourLibraryViewModelFactory(mainViewModel.token)
+        YourLibraryViewModelFactory(mainViewModel.token,mainViewModel.user.value!!)
     }
+    private val ARTIST = 2
+    private val PLAYLIST = 1
 
     private lateinit var adapter : LibraryAdapter
 
     private lateinit var binding: FragmentYourLibraryBinding
+
+    private lateinit var modalBottomSheet: ModalBottomSheet
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +60,8 @@ class YourLibraryFragment : Fragment() {
         setupSearchBar()
         setupSortOption()
         setupFilterType()
+        handleRequestToCreatePlaylist()
+        setupBottomSheet()
 
         return binding.root
     }
@@ -131,19 +147,104 @@ class YourLibraryFragment : Fragment() {
                         binding.displayOption.arrangementFrame.visibility = View.VISIBLE
                     }
                 }
+
+                R.id.add_playlist -> {
+                    viewModel.requestToCreatePlaylist()
+                }
             }
             true
         }
     }
 
+    private fun handleRequestToCreatePlaylist(){
+        viewModel.isCreatingPlaylist.observe(viewLifecycleOwner){
+            if (it){
+
+                val alert = AlertDialog.Builder(context)
+                val input = EditText(context)
+                input.inputType = InputType.TYPE_CLASS_TEXT
+                input.setBackgroundColor(Color.WHITE)
+                input.gravity = Gravity.CENTER
+
+                alert.setView(input)
+
+                alert.setPositiveButton("Skip"
+                ) { dialog, _ ->
+                    viewModel.createPlaylist(input.text.toString())
+                    dialog.dismiss()
+                }
+
+                alert.setNegativeButton("Cancel"){ dialog, _ ->
+                    dialog.cancel()
+                }
+
+                alert.show()
+
+//                input.setOnFocusChangeListener { _, b ->
+//                    if(b)
+//                        (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
+//                                InputMethodManager).toggleSoftInputFromWindow(
+//                            binding.root.windowToken,
+//                            InputMethodManager.SHOW_FORCED,
+//                            0
+//                        )
+//                    else{
+//                        (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
+//                                InputMethodManager).hideSoftInputFromWindow(
+//                            binding.root.windowToken,
+//                            0)
+//                    }
+//                }
+
+                input.requestFocus()
+                viewModel.requestToCreatePlaylistComplete()
+            }
+        }
+    }
 
     private fun setupYourLibraryAdapter() {
 
-        adapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, _ ->
-            viewModel.displayPlaylistDetails(item)
+        adapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, idButton ->
+            when(idButton){
+                null -> viewModel.displayPlaylistDetails(item)
+                Int.MIN_VALUE -> {
+                    viewModel.showBottomSheet(getObjectRequestFromTypeItem(item))
+                }
+                else -> Log.i("libraryAdapter","Nothing")
+                }
         })
 
         binding.yourLibraryList.adapter = adapter
+    }
+
+    private fun getObjectRequestFromTypeItem(dataItem: LibraryAdapter.DataItem): ObjectRequest
+        = when(dataItem.type){
+            ARTIST -> ObjectRequest.ARTIST_FROM_LIBRARY
+            PLAYLIST -> {
+                val playlist = (dataItem as LibraryAdapter.DataItem.PlaylistItem).playlist
+                if(playlist.owner.id==viewModel.user.id)
+                    ObjectRequest.OWNER_PLAYLIST_FROM_LIBRARY
+                else
+                    ObjectRequest.PLAYLIST_FROM_LIBRARY
+            }
+            else -> ObjectRequest.PLAYLIST_FROM_LIBRARY
+        }
+
+
+    private fun setupBottomSheet(){
+        viewModel.isShowBottomSheet.observe(viewLifecycleOwner){
+            when(it){
+                null -> Log.i("setupBottomSheet","objectRequest null")
+                else -> {
+                    modalBottomSheet = ModalBottomSheet(it,null)
+                    modalBottomSheet.show(
+                        requireActivity().supportFragmentManager,
+                        ModalBottomSheet.TAG
+                    )
+                }
+
+            }
+        }
     }
 
     private fun observeNavigateToPlaylistDetails() {

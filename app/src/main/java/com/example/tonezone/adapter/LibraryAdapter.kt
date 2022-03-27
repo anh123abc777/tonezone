@@ -1,8 +1,9 @@
 package com.example.tonezone.adapter
 
 import android.annotation.SuppressLint
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.gesture.Gesture
+import android.view.*
+import androidx.core.view.allViews
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -134,10 +135,20 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         private val binding: ItemArtistBinding
     ): RecyclerView.ViewHolder(binding.root){
 
+        @SuppressLint("ClickableViewAccessibility")
         fun bind(artist: Artist, clickListener: OnClickListener){
             binding.artist = artist
             binding.clickListener = clickListener
             binding.executePendingBindings()
+
+            val gesture = CustomGesture().createGesture(clickListener,DataItem.ArtistItem(artist),itemView)
+            itemView.allViews.all {
+                it.setOnTouchListener { _, motionEvent ->
+                    gesture.onTouchEvent(motionEvent)
+                    true
+                }
+                true
+            }
         }
 
         companion object{
@@ -152,10 +163,20 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     class PlaylistViewHolder private constructor
         (private val binding: ItemPlaylistInListBinding): RecyclerView.ViewHolder(binding.root) {
 
+        @SuppressLint("ClickableViewAccessibility")
         fun bind(playlist: Playlist, clickListener: OnClickListener){
             binding.playlist = playlist
             binding.clickListener = clickListener
             binding.executePendingBindings()
+
+            val gesture = CustomGesture().createGesture(clickListener,DataItem.PlaylistItem(playlist),itemView)
+            itemView.allViews.all {
+                    it.setOnTouchListener { _, motionEvent ->
+                        gesture.onTouchEvent(motionEvent)
+                        true
+                }
+                true
+            }
         }
 
         companion object{
@@ -170,13 +191,25 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     class TrackViewHolder private constructor
         (private val binding: ItemTrackBinding): RecyclerView.ViewHolder(binding.root) {
 
+        @SuppressLint("ClickableViewAccessibility")
         fun bind(track: Track, clickListener: OnClickListener){
             binding.track = track
-            binding.clickListener = clickListener
+
             binding.moreOptionWithTrack.setOnClickListener {
                 clickListener.onClickMoreOption(track,binding.moreOptionWithTrack.id)
             }
             binding.executePendingBindings()
+
+            val gesture = CustomGesture().createGesture(clickListener,DataItem.TrackItem(track),itemView)
+            itemView.allViews.all {
+                if(it.id!=binding.moreOptionWithTrack.id){
+                    it.setOnTouchListener { _, motionEvent ->
+                        gesture.onTouchEvent(motionEvent)
+                        true
+                    }
+                }
+                true
+            }
         }
 
         companion object{
@@ -188,7 +221,22 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         }
     }
 
-    sealed class DataItem{
+    class CustomGesture(){
+        fun createGesture(clickListener : OnClickListener, dataItem: DataItem, itemView: View) =
+            GestureDetector(itemView.context,object : GestureDetector.SimpleOnGestureListener() {
+
+                override fun onLongPress(e: MotionEvent?) {
+                    clickListener.onLongPress(dataItem)
+                }
+
+                override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+                    clickListener.onClick(dataItem)
+                    return true
+                }
+            })
+    }
+
+sealed class DataItem{
         data class PlaylistItem(val playlist: Playlist): DataItem(){
             override val id = playlist.id
             override val type = 1
@@ -240,7 +288,9 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         fun onClick(playlist: Playlist) = clickListener(DataItem.PlaylistItem(playlist),null)
         fun onClick(artist: Artist) = clickListener(DataItem.ArtistItem(artist),null)
         fun onClick(track: Track) = clickListener(DataItem.TrackItem(track),null)
+        fun onClick(dataItem: DataItem) = clickListener(dataItem,null)
         fun onClickMoreOption(track: Track, idButton: Int) = clickListener(DataItem.TrackItem(track),idButton)
+        fun onLongPress(dataItem: DataItem) = clickListener(dataItem,Int.MIN_VALUE)
     }
 
 }

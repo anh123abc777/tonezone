@@ -10,7 +10,7 @@ import com.example.tonezone.databinding.ModalBottomSheetContentBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
-class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isFollowing: Boolean) : BottomSheetDialogFragment() {
+class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isFollowing: Boolean?) : BottomSheetDialogFragment() {
 
     private lateinit var binding: ModalBottomSheetContentBinding
 
@@ -30,13 +30,13 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
 
     }
 
-    private fun setupBottomSheetItems(objectRequest: ObjectRequest,isFollowing: Boolean){
+    private fun setupBottomSheetItems(objectRequest: ObjectRequest,isFollowing: Boolean?){
         when(objectRequest){
 
             ObjectRequest.ARTIST -> submitBottomSheetList(listOf())
 
             ObjectRequest.PLAYLIST -> submitBottomSheetList(
-                if(isFollowing)
+                if(isFollowing == true)
                     listOf(Signal.LIKED_PLAYLIST)
                 else
                     listOf(Signal.LIKE_PLAYLIST)
@@ -44,7 +44,7 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
 
             ObjectRequest.TRACK -> {
 
-                val itemLike = if(isFollowing) listOf(Signal.LIKED_TRACK) else listOf(Signal.LIKE_TRACK)
+                val itemLike = if(isFollowing == true) listOf(Signal.LIKED_TRACK) else listOf(Signal.LIKE_TRACK)
 
                 submitBottomSheetList(
                     itemLike + listOf(
@@ -56,6 +56,39 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
             }
 
             ObjectRequest.YOUR_PLAYLIST -> submitBottomSheetList(listOf())
+
+            ObjectRequest.PLAYLIST_FROM_LIBRARY -> {
+                val itemLike = if (isFollowing == true)
+                    listOf(Signal.LIKED_PLAYLIST)
+                else
+                    listOf(Signal.LIKE_PLAYLIST)
+
+                submitBottomSheetList(
+                    itemLike + listOf(
+                        Signal.PIN_PLAYLIST,
+                        Signal.SHARE)
+                )
+            }
+
+            ObjectRequest.OWNER_PLAYLIST_FROM_LIBRARY -> {
+                submitBottomSheetList(
+                    listOf(
+                        Signal.PIN_PLAYLIST,
+                        Signal.DELETE_PLAYLIST,
+                        Signal.SHARE
+                    )
+                )
+            }
+
+            ObjectRequest.ARTIST_FROM_LIBRARY -> {
+                submitBottomSheetList(
+                    listOf(
+                        Signal.STOP_FOLLOWING,
+                        Signal.UNPIN_ARTIST,
+                    )
+                )
+            }
+
 
             else -> submitBottomSheetList(listOf())
         }

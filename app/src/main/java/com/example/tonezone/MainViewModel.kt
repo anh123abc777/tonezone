@@ -1,10 +1,12 @@
 package com.example.tonezone
 
 import android.app.Activity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tonezone.network.ToneApi
-import com.example.tonezone.network.UserProfile
+import com.example.tonezone.network.User
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -15,7 +17,9 @@ class MainViewModel(private val activity: Activity): ViewModel() {
 
     var token = ""
 
-    lateinit var userProfile : UserProfile
+    private val _user = MutableLiveData<User>()
+    val user : LiveData<User>
+        get() = _user
 
     private val builder =
         AuthorizationRequest.Builder(
@@ -39,12 +43,12 @@ class MainViewModel(private val activity: Activity): ViewModel() {
 
     }
 
-    fun getUserProfileData(){
+    fun getCurrentUserProfileData(){
         viewModelScope.launch {
-            userProfile = try {
-                ToneApi.retrofitService.getUserProfile("Bearer $token")
+            _user.value = try {
+                ToneApi.retrofitService.getCurrentUserProfile("Bearer $token")
             }catch (e: Exception){
-                UserProfile()
+                User()
             }
         }
     }

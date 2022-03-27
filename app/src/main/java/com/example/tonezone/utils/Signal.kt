@@ -19,7 +19,14 @@ enum class Signal {
     DELETE_PLAYLIST,
 
     LIKE_TRACK,
-    LIKED_TRACK
+    LIKED_TRACK,
+
+    PIN_ARTIST,
+    UNPIN_ARTIST,
+    PIN_PLAYLIST,
+    UNPIN_PLAYLIST,
+    STOP_FOLLOWING,
+    SHARE
 }
 
 fun convertSignalToText(signal: Signal): String =
@@ -37,6 +44,12 @@ fun convertSignalToText(signal: Signal): String =
         Signal.DELETE_PLAYLIST -> "Delete playlist"
         Signal.LIKE_TRACK -> "Like"
         Signal.LIKED_TRACK -> "Liked"
+        Signal.PIN_ARTIST -> "Pin artist"
+        Signal.UNPIN_ARTIST -> "Unpin artist"
+        Signal.PIN_PLAYLIST -> "Pin playlist"
+        Signal.UNPIN_PLAYLIST -> "Unpin playlist"
+        Signal.SHARE -> "Share"
+        Signal.STOP_FOLLOWING -> "Stop following"
 
     }
 
@@ -55,5 +68,10 @@ fun convertSignalToIcon(signal: Signal): Int =
         Signal.DELETE_PLAYLIST -> R.drawable.ic_grid
         Signal.LIKE_TRACK -> R.drawable.ic_unlike
         Signal.LIKED_TRACK -> R.drawable.ic_favorite
-
+        Signal.PIN_ARTIST -> R.drawable.ic_view_artist
+        Signal.UNPIN_ARTIST -> R.drawable.ic_view_artist
+        Signal.PIN_PLAYLIST -> R.drawable.ic_view_artist
+        Signal.UNPIN_PLAYLIST -> R.drawable.ic_view_artist
+        Signal.SHARE -> R.drawable.ic_view_artist
+        Signal.STOP_FOLLOWING -> R.drawable.ic_view_artist
     }

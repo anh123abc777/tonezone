@@ -7,9 +7,10 @@ import androidx.lifecycle.ViewModel
 import com.example.tonezone.network.GroupPlaylist
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.ToneApi
+import com.example.tonezone.network.User
 import kotlinx.coroutines.*
 
-class HomeViewModel(val token: String) : ViewModel() {
+class HomeViewModel(val token: String, val user: User) : ViewModel() {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
