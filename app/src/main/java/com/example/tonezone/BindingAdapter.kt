@@ -157,11 +157,11 @@ fun bindTextView(textView: TextView, list: List<Artist>){
 }
 
 @BindingAdapter("playerState")
-fun bindStatePlayButton(button: AppCompatButton, state: PlayerScreenViewModel.PlayerState){
+fun bindStatePlayButton(button: ImageButton, state: PlayerScreenViewModel.PlayerState){
     when(state){
-        PlayerScreenViewModel.PlayerState.PLAY -> button.setBackgroundResource(R.drawable.ic_custom_pause)
-        PlayerScreenViewModel.PlayerState.PAUSE -> button.setBackgroundResource(R.drawable.ic_custom_play)
-        else -> button.setBackgroundResource(R.drawable.ic_custom_play)
+        PlayerScreenViewModel.PlayerState.PLAY -> button.setImageResource(R.drawable.ic_custom_pause)
+        PlayerScreenViewModel.PlayerState.PAUSE -> button.setImageResource(R.drawable.ic_custom_play)
+        else -> button.setImageResource(R.drawable.ic_custom_play)
     }
 }
 

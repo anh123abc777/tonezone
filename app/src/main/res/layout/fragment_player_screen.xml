@@ -29,7 +29,7 @@
             />
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/thumbnail"
+            android:id="@+id/frameThumbnail"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:layout_marginLeft="16dp"
@@ -44,6 +44,7 @@
             >
 
             <ImageView
+                android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="360dp"
                 android:layout_gravity="center_horizontal"
@@ -59,13 +60,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginStart="16dp"
-            android:layout_below="@id/thumbnail"
+            android:layout_marginTop="8dp"
+            android:layout_below="@id/frameThumbnail"
             >
             <TextView
                 android:layout_width="268dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/songName"
                 android:textSize="20sp"
+                android:singleLine="true"
                 android:text="@{viewModel.currentTrack.name}"
                 />
 
@@ -74,6 +77,7 @@
                 android:layout_width="268dp"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
+                android:singleLine="true"
                 artists="@{viewModel.currentTrack.artists}"
                 />
 
@@ -82,8 +86,6 @@
         <LinearLayout
             android:id="@+id/fullSeekBar"
             android:layout_marginTop="16dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginLeft="8dp"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -143,59 +145,65 @@
             android:layout_marginBottom="8dp"
             >
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/shuffle"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@id/skip_previous"
-                android:layout_marginEnd="32dp"
+                android:layout_marginEnd="16dp"
                 android:src="@drawable/ic_shuffle_black_24dp"
                 android:onClick="@{() -> viewModel.onShuffle()}"
                 isChoose="@{viewModel.isShuffling}"
+                android:backgroundTint="@color/white"
                 />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <ImageButton
                 android:id="@+id/skip_previous"
-                android:layout_width="30dp"
-                android:layout_height="32dp"
-                android:background="@drawable/ic_previous"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_previous"
+                android:backgroundTint="@color/white"
                 android:layout_toLeftOf="@id/play"
-                android:layout_marginEnd="32dp"
+                android:layout_marginEnd="16dp"
                 android:layout_centerVertical="true"
                 android:onClick="@{() -> viewModel.onPrevious()}"
                 />
 
 
-            <androidx.appcompat.widget.AppCompatButton
+            <ImageButton
                 android:id="@+id/play"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:backgroundTint="@color/white"
+                android:backgroundTintMode="src_over"
                 playerState="@{viewModel.playerState}"
                 android:onClick="@{() -> viewModel.onChangeState()}"
                 />
 
 
-            <androidx.appcompat.widget.AppCompatButton
+            <ImageButton
                 android:id="@+id/skip_next"
-                android:layout_width="30dp"
-                android:layout_height="32dp"
-                android:background="@drawable/ic_next"
-                android:layout_toRightOf="@id/play"
-                android:layout_marginStart="32dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_next"
+                android:backgroundTint="@color/white"
+                android:layout_toEndOf="@id/play"
+                android:layout_marginStart="16dp"
                 android:layout_centerVertical="true"
                 android:onClick="@{() -> viewModel.onNext()}"
                 />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <ImageButton
                 android:id="@+id/queue"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/ic_library_music_black_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_library_music_black_24dp"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/skip_next"
-                android:layout_marginStart="32dp"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/white"
                 />
 
         </RelativeLayout>

@@ -29,7 +29,8 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
     private val tokenRepository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
     val token = runBlocking(Dispatchers.IO) { tokenRepository.token}
     private val viewModelJob = Job()
-    private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
+    private val uiScope = CoroutineScope( Dispatchers.Main)
+    private val uiSeekBarScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
     private var _currentTrack = MutableLiveData<Track>()
     val currentTrack : LiveData<Track>
@@ -83,26 +84,31 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
 
     }
 
-    fun initSeekBar()=
-        uiScope.launch {
-            var currentPosition = 0L
-            while (this.isActive){
-                if(_playerState.value == PlayerState.PLAY) {
-                    if (currentPosition != currentTrack.value!!.duration_ms) {
-                        mSpotifyAppRemote!!.playerApi
-                            .subscribeToPlayerState()
-                            .setEventCallback { state ->
-                                currentPosition = state.playbackPosition
-                                _progress.value = currentPosition
-                                _isShuffling.value = state.playbackOptions.isShuffling
-                            }
+     var jobs = uiSeekBarScope.coroutineContext.job
 
-                        delay(500L)
-                    }
-                } else{
-                    this.cancel()
-                }
-            }
+    fun initSeekBar(){
+         jobs = uiSeekBarScope.launch {
+
+             var currentPosition = 0L
+             while (this.isActive) {
+                 if (_playerState.value == PlayerState.PLAY) {
+                     if (currentPosition != currentTrack.value!!.duration_ms) {
+                         mSpotifyAppRemote!!.playerApi
+                             .subscribeToPlayerState()
+                             .setEventCallback { state ->
+                                 currentPosition = state.playbackPosition
+                                 _progress.value = currentPosition
+                                 _isShuffling.value = state.playbackOptions.isShuffling
+                             }
+                         Log.i("initSeekBar", "$this ${this.isActive}")
+                         delay(500L)
+                     }
+                 } else {
+                     this.cancel()
+                     Log.i("initSeekBar", "$this ${this.isActive}")
+                 }
+             }
+         }
         }
 
     fun getImageTrack() =  uiScope.launch {
@@ -139,22 +145,24 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
     private fun onPause() {
         mSpotifyAppRemote!!.playerApi.pause()
         _playerState.value = PlayerState.PAUSE
+        jobs.cancel()
     }
 
     private fun onResume(){
         mSpotifyAppRemote!!.playerApi.resume()
         _playerState.value = PlayerState.PLAY
-        initSeekBar().start()
+        initSeekBar()
     }
 
     fun onNext() {
-        _playerState.value = PlayerState.PAUSE
+        jobs.cancel()
         mSpotifyAppRemote!!.playerApi.skipNext()
         _playerState.value = PlayerState.PLAY
+
     }
 
     fun onPrevious(){
-        _playerState.value = PlayerState.PAUSE
+        jobs.cancel()
         mSpotifyAppRemote!!.playerApi.skipPrevious()
         _playerState.value = PlayerState.PLAY
     }
@@ -170,7 +178,7 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        uiScope.cancel()
+        viewModelJob.cancel()
     }
 
     enum class PlayerState{PLAY, PAUSE, NONE}

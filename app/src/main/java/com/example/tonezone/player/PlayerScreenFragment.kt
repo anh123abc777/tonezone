@@ -1,5 +1,6 @@
 package com.example.tonezone.player
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -30,13 +31,8 @@ class PlayerScreenFragment : Fragment() {
         observeCurrentTrack()
         observePlayerState()
         observeProgress()
-        binding.executePendingBindings()
 
         return binding.root
-    }
-
-    private fun observeShuffleIcon(){
-        viewModel.isShuffling.observe(viewLifecycleOwner){}
     }
 
     private fun observeProgress(){
@@ -51,11 +47,21 @@ class PlayerScreenFragment : Fragment() {
         var currentTrack = Track()
         viewModel.currentTrack.observe(viewLifecycleOwner){
             if(it!= Track() && currentTrack!=it){
-                viewModel.initSeekBar().start()
+                viewModel.initSeekBar()
                 currentTrack = it
             }
         }
     }
+
+
+//    private fun translater() {
+//        val animator = ObjectAnimator.ofFloat(binding.frameThumbnail, View.TRANSLATION_X,-800f)
+//        animator.repeatCount = 0
+//        animator.repeatMode = ObjectAnimator.RESTART
+//        animator.start()
+//    }
+
+
 
     private fun setupImageCurrentTrack(){
         viewModel.uriTrackResponse.observe(viewLifecycleOwner){

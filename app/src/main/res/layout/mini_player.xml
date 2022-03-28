@@ -38,6 +38,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
+            android:singleLine="true"
             android:text="@{playerViewModel.currentTrack.name}"
             />
 
@@ -50,17 +51,19 @@
             android:layout_alignParentBottom="true"
             android:layout_marginStart="8dp"
             android:layout_marginBottom="4dp"
+            android:singleLine="true"
             artists="@{playerViewModel.currentTrack.artists}"
             />
 
 
-        <androidx.appcompat.widget.AppCompatButton
+        <ImageButton
             android:id="@+id/play"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="48dp"
             android:layout_centerVertical="true"
+            android:backgroundTint="@color/white"
             android:onClick="@{() -> playerViewModel.onChangeState()}"
             playerState="@{playerViewModel.playerState}"
             />
