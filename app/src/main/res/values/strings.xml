@@ -13,4 +13,6 @@ Search for artist, songs and more</string>
     <string name="playlist">playlist</string>
     <string name="all">all</string>
     <string name="song">song</string>
+    <string name="search_for_playlist">Search for playlist</string>
+    <string name="new_playlist">New Playlist</string>
 </resources>

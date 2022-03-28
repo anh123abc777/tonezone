@@ -87,7 +87,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
                 }
             }
         }
-        if(query.isEmpty()) {
+        if(query.isNullOrEmpty()) {
             submitList(defaultData)
         }else{
             submitList(items)

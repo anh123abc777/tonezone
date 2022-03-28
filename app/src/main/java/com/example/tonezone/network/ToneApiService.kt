@@ -183,11 +183,11 @@ interface ToneApiService {
     ): Artist
 
     @POST("playlists/{playlist_id}/tracks")
-    suspend fun addItemsToPlaylist(
+    fun addItemsToPlaylist(
         @Header("Authorization") auth: String,
         @Path("playlist_id") playlist_Id: String,
         @Query("uris") uris: String
-        )
+        ): Call<String>
 
     @POST("users/{user_id}/playlists")
     fun createPlaylist(

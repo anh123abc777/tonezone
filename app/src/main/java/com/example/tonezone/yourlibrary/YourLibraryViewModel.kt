@@ -256,6 +256,30 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
         _receivedSignal.value = signal
     }
 
+    fun addItemToPlaylist(playlistID: String, trackUris: String){
+        Log.i("addItemToPlaylist","playlistID: $playlistID \n trackUris: $trackUris")
+        uiScope.launch {
+            try {
+                ToneApi.retrofitService2.addItemsToPlaylist(
+                    "Bearer $token",
+                    playlistID,
+                    trackUris
+                    ).enqueue(object: Callback<String>{
+                    override fun onResponse(call: Call<String>, response: Response<String>) {
+                        Log.i("addItemToPlaylist","success ${response.body()}")
+                    }
+
+                    override fun onFailure(call: Call<String>, t: Throwable) {
+                        Log.i("addItemToPlaylist","Failure s $t")
+
+                    }
+                })
+            }catch (e: Exception){
+                Log.i("addItemToPlaylist","Failure $e")
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         uiScope.cancel()

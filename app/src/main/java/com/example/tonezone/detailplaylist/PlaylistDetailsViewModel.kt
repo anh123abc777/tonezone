@@ -34,6 +34,10 @@ class PlaylistDetailsViewModel
     val receivedSignal : LiveData<Signal>
         get() = _receivedSignal
 
+    private val _navigateYourPlaylists = MutableLiveData<String>()
+    val navigateYourPlaylists : LiveData<String>
+        get() = _navigateYourPlaylists
+
     init {
         getDataPlaylistItems()
         checkIfUserFollowPlaylist()
@@ -164,19 +168,13 @@ class PlaylistDetailsViewModel
     }
 
     private fun addToPlaylist(){
-        uiScope.launch {
-            try {
-                val currentTrack = getCurrentTrack()
-                if(currentTrack!=null) {
-                    ToneApi.retrofitService.addItemsToPlaylist(
-                        "Bearer $token",
-                       "",
-                        currentTrack.uri)
-                }
-            } catch (e: Exception){
-                Log.i("addToPlaylist","Failure ${e.message}")
-            }
-        }
+        _navigateYourPlaylists.value =
+            _playlistItems.value?.find { it.id == selectedObjectID.value!!.first}!!.uri
+    }
+
+    @SuppressLint("NullSafeMutableLiveData")
+    fun addToPlaylistComplete(){
+        _navigateYourPlaylists.value = null
     }
 
     private fun getCurrentTrack(): Track? =

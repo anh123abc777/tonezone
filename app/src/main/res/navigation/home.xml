@@ -24,5 +24,19 @@
         <argument
             android:name="playlistInfo"
             app:argType="com.example.tonezone.network.PlaylistInfo" />
+        <action
+            android:id="@+id/action_playlistDetailsFragment_to_yourPlaylistFragment"
+            app:destination="@id/yourPlaylistFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/yourPlaylistFragment"
+        android:name="com.example.tonezone.yourplaylist.YourPlaylistFragment"
+        android:label="YourPlaylistFragment"
+        tools:layout="@layout/fragment_your_playlist"
+
+        >
+        <argument
+            android:name="trackID"
+            app:argType="string" />
     </fragment>
 </navigation>
