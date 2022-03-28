@@ -60,6 +60,16 @@ class PlaylistDetailsFragment : Fragment() {
 
         observeNavigateToYourPlaylists()
 
+        viewModel.currentPlaylist.observe(viewLifecycleOwner){
+            if (it!=null){
+                viewModel.handleLikeButtonVisibility()
+            }
+        }
+
+        binding.play.setOnClickListener {
+            playerViewModel.onPlay(playlistInfo.uri,0)
+        }
+
         return binding.root
     }
 

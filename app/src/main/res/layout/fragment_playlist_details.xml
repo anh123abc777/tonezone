@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             >
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/more_option"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -57,10 +57,11 @@
                 android:layout_centerVertical="true"
                 android:foregroundTint="@color/colorSecondary"
                 app:tint="@color/colorSecondary"
+                android:background="@color/colorPrimary"
                 android:onClick="@{() -> viewModel.showBottomSheet()}"
                 />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/like"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -69,14 +70,17 @@
                 android:layout_toRightOf="@id/more_option"
                 android:layout_marginStart="16dp"
                 app:tint="@color/colorSecondary"
+                android:background="@color/colorPrimary"
                 isChoose="@{viewModel.isUserFollowPlaylist()}"
+                isVisibility="@{viewModel.isLikeButtonVisibility}"
                 />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/play"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_custom_play"
+                android:background="@color/colorPrimary"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 />

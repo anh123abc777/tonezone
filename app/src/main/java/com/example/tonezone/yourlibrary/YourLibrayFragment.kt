@@ -123,9 +123,7 @@ class YourLibraryFragment : Fragment() {
             }
 
             override fun onTextChanged(query: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if(!query.isNullOrEmpty()) {
                     (binding.yourLibraryList.adapter as LibraryAdapter).filterQuery(query.toString())
-                }
             }
 
             override fun afterTextChanged(p0: Editable?) {

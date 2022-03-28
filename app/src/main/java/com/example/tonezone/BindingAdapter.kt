@@ -7,10 +7,7 @@ import android.graphics.drawable.Drawable
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
@@ -203,4 +200,12 @@ fun setIconBottomSheetItem(button: Button,signal: Signal){
     val drawable = ContextCompat.getDrawable(button.context,convertSignalToIcon(signal))!!
     button.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable,null,null,null)
     button.compoundDrawablePadding = 36
+}
+
+@BindingAdapter("isVisibility")
+fun setupButtonVisibility(imageButton: ImageButton, isShow: Boolean){
+    if(isShow){
+        imageButton.visibility = View.VISIBLE
+    }
+    else imageButton.visibility = View.GONE
 }

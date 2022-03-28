@@ -6,15 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tonezone.R
-import com.example.tonezone.network.PlaylistInfo
-import com.example.tonezone.network.ToneApi
-import com.example.tonezone.network.Track
-import com.example.tonezone.network.User
+import com.example.tonezone.network.*
 import com.example.tonezone.utils.Signal
 import kotlinx.coroutines.*
 
 class PlaylistDetailsViewModel
-    (val token: String, var playlistInfo: PlaylistInfo, private val userProfile: User) : ViewModel() {
+    (val token: String, var playlistInfo: PlaylistInfo, private val user: User) : ViewModel() {
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
 
@@ -38,9 +35,33 @@ class PlaylistDetailsViewModel
     val navigateYourPlaylists : LiveData<String>
         get() = _navigateYourPlaylists
 
+    private val _isLikeButtonVisibility = MutableLiveData<Boolean>()
+    val isLikeButtonVisibility : LiveData<Boolean>
+        get() = _isLikeButtonVisibility
+
+    private val _currentPlaylist = MutableLiveData<Playlist>()
+    val currentPlaylist : LiveData<Playlist>
+        get() = _currentPlaylist
+
     init {
+        getCurrentPlaylist()
         getDataPlaylistItems()
         checkIfUserFollowPlaylist()
+    }
+
+    private fun getCurrentPlaylist(){
+        uiScope.launch {
+                try {
+                    _currentPlaylist.value = ToneApi.retrofitService
+                        .getPlaylist(
+                            "Bearer $token",
+                            playlistInfo.id
+                            )
+                    Log.i("getCurrentPlaylist","success")
+                }catch (e: Exception){
+                    Log.i("getCurrentPlaylist","Failure $e")
+                }
+        }
     }
 
     private fun getDataPlaylistItems() {
@@ -57,18 +78,6 @@ class PlaylistDetailsViewModel
                         else
                             getPlaylistTracks()
                     }
-                }
-        }
-    }
-
-    fun getImageArtist(){
-        uiScope.launch {
-            playlistInfo.image =
-                try {
-                    ToneApi.retrofitService.getArtist("Bearer $token",playlistInfo.id).images?.get(0)?.url
-                } catch (e: Exception){
-                    Log.i("getImageArtist","Failure ${e.message}")
-                    ""
                 }
         }
     }
@@ -117,7 +126,7 @@ class PlaylistDetailsViewModel
                 ToneApi.retrofitService.checkUserFollowPlaylist(
                     "Bearer $token",
                     playlistInfo.id,
-                    userProfile.id!!
+                    user.id
                 )[0]
             } catch (e: Exception) {
                 false
@@ -260,6 +269,10 @@ class PlaylistDetailsViewModel
 
     fun receiveSignal(signal: Signal){
         _receivedSignal.value = signal
+    }
+
+    fun handleLikeButtonVisibility(){
+        _isLikeButtonVisibility.value = currentPlaylist.value!!.owner.id != user.id
     }
 
     override fun onCleared() {

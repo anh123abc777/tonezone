@@ -202,6 +202,12 @@ interface ToneApiService {
         @Query("ids") ids: String,
         @Query("type") type: String = "artist",
         ): Unit
+
+    @GET("playlists/{playlist_id}")
+    suspend fun getPlaylist(
+        @Header("Authorization") auth: String,
+        @Path("playlist_id") playlist_Id: String
+        ): Playlist
 }
 
 object ToneApi{
