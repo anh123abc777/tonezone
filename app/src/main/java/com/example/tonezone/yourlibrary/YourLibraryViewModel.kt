@@ -30,9 +30,13 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
     val followedArtists : LiveData<Artists>
         get() = _followedArtists
 
-    private val _userSavedTracks = MutableLiveData<SavedTracks>()
-    val userSavedTracks : LiveData<SavedTracks>
-        get() = _userSavedTracks
+    private val _savedTracks = MutableLiveData<SavedTracks>()
+    val savedTracks : LiveData<SavedTracks>
+        get() = _savedTracks
+
+    private val _savedAlbums = MutableLiveData<List<Album>>()
+    val saveAlbums : LiveData<List<Album>>
+        get() = _savedAlbums
 
     private val _sortOption = MutableLiveData<SortOption>()
     val sortOption : LiveData<SortOption>
@@ -58,6 +62,7 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
         getDataUserSavedTracks()
         getDataFollowedArtists()
         getDataUserPlaylists()
+        getDataSavedAlbums()
         _sortOption.value = SortOption.Alphabetical
         _type.value = TypeItemLibrary.All
 
@@ -90,11 +95,23 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
 
     private fun getDataUserSavedTracks(){
         viewModelScope.launch {
-            _userSavedTracks.value = try {
+            _savedTracks.value = try {
                 ToneApi.retrofitService.getUserSavedTracks("Bearer $token")
             }catch (e: Exception){
                 Log.i("errorUserSavedTracks",e.message.toString())
                 SavedTracks()
+            }
+        }
+    }
+
+    private fun getDataSavedAlbums(){
+        viewModelScope.launch {
+            _savedAlbums.value = try {
+                ToneApi.retrofitService.getSavedAlbums("Bearer $token").items.map { it.album }
+
+            }catch (e: Exception){
+                Log.i("getDataSavedAlbums","Failure $e")
+                listOf()
             }
         }
     }

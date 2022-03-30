@@ -1,7 +1,6 @@
 package com.example.tonezone.adapter
 
 import android.annotation.SuppressLint
-import android.gesture.Gesture
 import android.view.*
 import androidx.core.view.allViews
 import androidx.recyclerview.widget.DiffUtil
@@ -10,9 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.tonezone.databinding.ItemArtistBinding
 import com.example.tonezone.databinding.ItemPlaylistInListBinding
 import com.example.tonezone.databinding.ItemTrackBinding
-import com.example.tonezone.network.Artist
-import com.example.tonezone.network.Playlist
-import com.example.tonezone.network.Track
+import com.example.tonezone.network.*
 
 
 class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<LibraryAdapter.DataItem, RecyclerView.ViewHolder>(DiffCallBack) {
@@ -20,6 +17,8 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     private val ARTIST = 2
     private val PLAYLIST = 1
     private val TRACK = 3
+    private val ALBUM = 4
+    private var limit = -1
 
     companion object DiffCallBack: DiffUtil.ItemCallback<DataItem>() {
         override fun areItemsTheSame(oldItem: DataItem, newItem: DataItem): Boolean {
@@ -31,11 +30,27 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun setLimitItem(limit: Int){
+        this.limit = limit
+        notifyDataSetChanged()
+    }
+
+    override fun getItemCount(): Int {
+        return if (limit!=-1 && super.getItemCount()>limit){
+            limit
+        } else {
+            super.getItemCount()
+        }
+    }
+
     override fun getItemViewType(position: Int): Int {
-        return when(getItem(position)){
-            is DataItem.ArtistItem -> ARTIST
-            is DataItem.TrackItem -> TRACK
-            else -> PLAYLIST
+            return when (getItem(position)) {
+                is DataItem.ArtistItem -> ARTIST
+                is DataItem.TrackItem -> TRACK
+                is DataItem.AlbumItem -> ALBUM
+                else -> PLAYLIST
+
         }
     }
 
@@ -43,34 +58,43 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         return when(viewType){
             1 -> PlaylistViewHolder.from(parent)
             2 -> ArtistViewHolder.from(parent)
+            4 -> AlbumViewHolder.from(parent)
             else -> TrackViewHolder.from(parent)
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when(holder) {
-            is ArtistViewHolder -> {
-                val artistItem = getItem(position) as DataItem.ArtistItem
-                holder.bind(artistItem.artist,clickListener)
-            }
+            when (holder) {
+                is ArtistViewHolder -> {
+                    val artistItem = getItem(position) as DataItem.ArtistItem
+                    holder.bind(artistItem.artist, clickListener)
+                }
 
-            is PlaylistViewHolder -> {
-                val playlistItem = getItem(position) as DataItem.PlaylistItem
-                holder.bind(playlistItem.playlist,clickListener)
-            }
+                is PlaylistViewHolder -> {
+                    val playlistItem = getItem(position) as DataItem.PlaylistItem
+                    holder.bind(playlistItem.playlist, clickListener)
+                }
 
-            is TrackViewHolder -> {
-                val trackItem = getItem(position) as DataItem.TrackItem
-                holder.bind(trackItem.track,clickListener)
+                is TrackViewHolder -> {
+                    val trackItem = getItem(position) as DataItem.TrackItem
+                    holder.bind(trackItem.track, clickListener)
+                }
+
+                is AlbumViewHolder -> {
+                    val albumItem = getItem(position) as DataItem.AlbumItem
+                    holder.bind(albumItem.album, clickListener)
+                }
             }
         }
-    }
+
 
     private var defaultData = listOf<DataItem>()
-    fun submitYourLibrary(playlists: List<Playlist>?, artists: List<Artist>?, tracks: List<Track>?){
-        val items = (artists?.map { DataItem.ArtistItem(it) }
-            ?: listOf()) + (playlists?.map { DataItem.PlaylistItem(it) } ?: listOf())+
-                (tracks?.map { DataItem.TrackItem(it) } ?: listOf())
+    fun submitYourLibrary(playlists: List<Playlist>?, artists: List<Artist>?, tracks: List<Track>?, albums: List<Album>?){
+        val items =
+                    (artists?.map { DataItem.ArtistItem(it) } ?: listOf()) +
+                    (playlists?.map { DataItem.PlaylistItem(it) } ?: listOf()) +
+                    (tracks?.map { DataItem.TrackItem(it) } ?: listOf())  +
+                    (albums?.map { DataItem.AlbumItem(it) } ?: listOf())
 
             defaultData = items
 
@@ -221,6 +245,45 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         }
     }
 
+    class AlbumViewHolder private constructor
+        (private val binding: ItemPlaylistInListBinding): RecyclerView.ViewHolder(binding.root) {
+
+        @SuppressLint("ClickableViewAccessibility")
+        fun bind(album: Album, clickListener: OnClickListener){
+            val playlist = Playlist(false,
+                album.id!!,
+                "",
+                "",
+                album.images,
+                album.name!!,
+                Owner(),
+                null,
+                false,
+                album.type!!,
+                album.uri!!)
+            binding.playlist = playlist
+            binding.clickListener = clickListener
+            binding.executePendingBindings()
+
+            val gesture = CustomGesture().createGesture(clickListener,DataItem.PlaylistItem(playlist),itemView)
+            itemView.allViews.all {
+                it.setOnTouchListener { _, motionEvent ->
+                    gesture.onTouchEvent(motionEvent)
+                    true
+                }
+                true
+            }
+        }
+
+        companion object{
+            fun from(parent: ViewGroup): AlbumViewHolder{
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val binding = ItemPlaylistInListBinding.inflate(layoutInflater,parent,false)
+                return AlbumViewHolder(binding)
+            }
+        }
+    }
+
     class CustomGesture(){
         fun createGesture(clickListener : OnClickListener, dataItem: DataItem, itemView: View) =
             GestureDetector(itemView.context,object : GestureDetector.SimpleOnGestureListener() {
@@ -236,7 +299,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             })
     }
 
-sealed class DataItem{
+    sealed class DataItem{
         data class PlaylistItem(val playlist: Playlist): DataItem(){
             override val id = playlist.id
             override val type = 1
@@ -272,6 +335,19 @@ sealed class DataItem{
             override val uri = track.uri
             override val description = ""
             override val image = track.album?.uri
+
+        }
+
+        data class AlbumItem( val album: Album): DataItem(){
+            override val id = album.id
+            override val type = 4
+            override val name = album.name
+            override val typeName = album.type
+            override val uri = album.uri
+            override val description = ""
+            override val image = if(album.images?.size!=0)
+                album.images?.get(0)?.url
+            else ""
 
         }
 

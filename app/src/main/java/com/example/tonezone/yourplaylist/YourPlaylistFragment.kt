@@ -69,7 +69,7 @@ class YourPlaylistFragment : Fragment() {
                 val listYourPlaylists = playlists.items?.filter { it.owner.id == yourLibraryViewModel.user.id }
                 val adapter = (binding.listYourPlaylist.adapter as LibraryAdapter)
                 adapter.apply {
-                    submitYourLibrary(listYourPlaylists, null, null)
+                    submitYourLibrary(listYourPlaylists, null, null,null)
                     sortByDefault()
                 }
 

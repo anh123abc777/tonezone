@@ -1,5 +1,6 @@
 package com.example.tonezone
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -61,11 +62,12 @@ fun bindPlaylistRecyclerview(recyclerView: RecyclerView, list: List<Playlist>?){
     }
 }
 
-@BindingAdapter(value = ["playlistData","artistData","trackData","userSavedTracksData","sortOption"],requireAll = false)
+@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userSavedTracksData","sortOption"],requireAll = false)
 fun bindDataYourLibrary(recyclerView: RecyclerView,
                         playlistData: List<Playlist>?,
                         artistData: List<Artist>?,
                         trackData: List<Track>?,
+                        albumData: List<Album>?,
                         userSavedTracksData: List<SavedTrack>?,
                         sortOption: SortOption?){
 
@@ -82,8 +84,12 @@ fun bindDataYourLibrary(recyclerView: RecyclerView,
     val playlists = if(playlistData!=null) userSavedTracks+playlistData else userSavedTracks
     val tracks = trackData ?: listOf()
     val artists = artistData ?: listOf()
+    val albums = albumData ?: listOf()
 
-    adapter.submitYourLibrary(playlists, artists, tracks)
+    Log.i("albumsBindingAdapter","$albums")
+    Log.i("albumsBindingAdapter","albumdata $albumData")
+
+    adapter.submitYourLibrary(playlists, artists, tracks, albums)
     when(sortOption){
         SortOption.Alphabetical -> adapter.sortByAlphabetical()
         SortOption.Creator -> adapter.sortByCreator()
@@ -208,4 +214,20 @@ fun setupButtonVisibility(imageButton: ImageButton, isShow: Boolean){
         imageButton.visibility = View.VISIBLE
     }
     else imageButton.visibility = View.GONE
+}
+
+@BindingAdapter("isFollowing")
+fun bindTextButton(button: Button,isFollowing: Boolean){
+    if(isFollowing){
+        button.text = "following"
+    }else
+        button.tag = "follow"
+}
+
+@BindingAdapter("profileVisibility")
+fun bindPlaylistProfile(linearLayout: LinearLayout,playlistInfo: PlaylistInfo){
+    if(playlistInfo.type!="artist")
+        linearLayout.visibility = View.VISIBLE
+    else
+        linearLayout.visibility = View.GONE
 }

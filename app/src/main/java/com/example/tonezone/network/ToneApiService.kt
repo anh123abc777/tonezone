@@ -135,7 +135,7 @@ interface ToneApiService {
         ): PlaylistsObject
 
     @GET("playlists/{playlist_id}/followers/contains")
-    suspend fun checkUserFollowPlaylist(
+    suspend fun checkUserIsFollowingPlaylist(
         @Header("Authorization") auth: String,
         @Path("playlist_id") playlist_Id: String,
         @Query("ids") ids: String
@@ -208,6 +208,38 @@ interface ToneApiService {
         @Header("Authorization") auth: String,
         @Path("playlist_id") playlist_Id: String
         ): Playlist
+
+    @GET("artists/{id}/albums")
+    suspend fun getArtistAlbums(
+        @Header("Authorization") auth: String,
+        @Path("id") id: String
+    ): Albums
+
+    @GET("me/following/contains")
+    suspend fun checkUserIsFollowingArtist(
+        @Header("Authorization") auth: String,
+        @Query("ids") ids: String,
+        @Query("type") type: String = "artist"
+        ): List<Boolean>
+
+    @PUT("me/following")
+    suspend fun followArtist(
+        @Header("Authorization") auth: String,
+        @Query("ids") ids: String,
+        @Query("type") type: String = "artist"
+    ): Unit
+
+    @DELETE("me/following")
+    suspend fun unfollowArtist(
+        @Header("Authorization") auth: String,
+        @Query("ids") ids: String,
+        @Query("type") type: String = "artist"
+    ): Unit
+
+    @GET("me/albums")
+    suspend fun getSavedAlbums(
+        @Header("Authorization") auth: String,
+        ): SavedAlbums
 }
 
 object ToneApi{

@@ -14,10 +14,13 @@
         <action
             android:id="@+id/action_yourLibraryFragment2_to_playlistDetailsFragment"
             app:destination="@id/playlistDetailsFragment" />
+        <action
+            android:id="@+id/action_yourLibraryFragment_to_artistDetailsFragment"
+            app:destination="@id/artistDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/playlistDetailsFragment"
-        android:name="com.example.tonezone.detailplaylist.PlaylistDetailsFragment"
+        android:name="com.example.tonezone.playlistdetails.PlaylistDetailsFragment"
         android:label="PlaylistDetailsFragment"
         tools:layout="@layout/fragment_playlist_details"
         >
@@ -36,6 +39,31 @@
         >
         <argument
             android:name="trackID"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/artistDetailsFragment"
+        android:name="com.example.tonezone.artistdetails.ArtistDetailsFragment"
+        android:label="ArtistDetailsFragment"
+        tools:layout="@layout/fragment_artist_details"
+        >
+        <argument android:name="playlistInfo"
+            app:argType="com.example.tonezone.network.PlaylistInfo" />
+        <action
+            android:id="@+id/action_artistDetailsFragment_to_playlistDetailsFragment"
+            app:destination="@id/playlistDetailsFragment" />
+        <action
+            android:id="@+id/action_artistDetailsFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="com.example.tonezone.search.result.ResultFragment"
+        android:label="ResultFragment"
+        tools:layout="@layout/fragment_result"
+        >
+        <argument
+            android:name="genreName"
             app:argType="string" />
     </fragment>
 </navigation>

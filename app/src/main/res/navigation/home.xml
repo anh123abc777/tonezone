@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/playlistDetailsFragment"
-        android:name="com.example.tonezone.detailplaylist.PlaylistDetailsFragment"
+        android:name="com.example.tonezone.playlistdetails.PlaylistDetailsFragment"
         android:label="PlaylistDetailsFragment"
         tools:layout="@layout/fragment_playlist_details"
         >

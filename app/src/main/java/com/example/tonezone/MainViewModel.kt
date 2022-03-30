@@ -36,7 +36,7 @@ class MainViewModel(private val activity: Activity): ViewModel() {
             "playlist-modify-private",
             "playlist-modify-public",
             "user-library-modify",
-            "user-follow-modify"
+            "user-follow-modify",
         ))
         val request = builder.build()
 

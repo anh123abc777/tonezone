@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.tonezone.artistdetails.ArtistDetailsViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".artistdetails.ArtistDetailsFragment">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
+            android:background="@color/colorPrimary"
+            >
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/collapsing_toolbar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                >
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    app:layout_collapseMode="pin"
+                    app:titleTextColor="@color/white"
+                    app:title="@{viewModel.artist.name}"
+                    app:navigationIcon="@drawable/ic_arrow_back"
+                    android:background="@color/white"
+                    />
+
+                <ImageView
+                    android:id="@+id/background_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    listImageUrl="@{viewModel.artist.images}"
+                    android:scaleType="fitXY"
+                    />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+            
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/play_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/exo_controls_play"
+            android:backgroundTint="@color/colorPrimary"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_gravity="end|top"
+            tools:ignore="ContentDescription"
+            app:elevation="10dp"
+            />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:clipToPadding="false"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="112dp"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            >
+
+            <LinearLayout
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                >
+
+                <Button
+                    android:id="@+id/following_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    isFollowing="@{viewModel.isFollowingArtist}"
+                    android:textColor="@color/black"
+                    android:textAllCaps="false"
+                    android:background="@color/colorPrimary"
+                    android:padding="0dp"
+                    android:onClick="@{() -> viewModel.changeStateFollowArtist()}"
+                    />
+
+                <TextView
+                    android:id="@+id/tracks_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/songs"
+                    android:layout_marginTop="8dp"
+                    android:textSize="16sp"
+                    android:textAllCaps="false"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/press_button"
+                    android:textColor="@color/black"
+                    />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/artist_top_tracks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:orientation="vertical"
+                    tools:listitem="@layout/item_track"
+                    tools:itemCount="6"
+                    android:layout_marginTop="8dp"
+                    trackData="@{viewModel.artistTopTracks}"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    />
+
+                <Button
+                    android:id="@+id/more_track"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="more tracks"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="8dp"
+                    android:padding="0dp"
+                    android:layout_gravity="center_horizontal"
+                    android:textAllCaps="false"
+                    android:onClick="@{() -> viewModel.navigateToMoreTracks()}"
+                    />
+
+
+                <TextView
+                    android:id="@+id/albums_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/albums"
+                    android:layout_marginTop="8dp"
+                    android:textSize="16sp"
+                    android:textAllCaps="false"
+                    android:gravity="center_vertical"
+                    android:background="@color/colorPrimary"
+                    android:textColor="@color/black"
+                    />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/artist_albums"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:orientation="vertical"
+                    tools:listitem="@layout/item_playlist_in_list"
+                    tools:itemCount="6"
+                    android:layout_marginTop="8dp"
+                    albumData="@{viewModel.artistAlbums}"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    />
+
+                <Button
+                    android:id="@+id/more_album"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="more album"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="8dp"
+                    android:padding="0dp"
+                    android:layout_gravity="center_horizontal"
+                    android:textAllCaps="false"
+                    android:onClick="@{() -> viewModel.isNavigateToMoreAlbums()}"
+                    />
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

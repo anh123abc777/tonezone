@@ -1,4 +1,4 @@
-package com.example.tonezone.detailplaylist
+package com.example.tonezone.playlistdetails
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -123,7 +123,7 @@ class PlaylistDetailsViewModel
     fun checkIfUserFollowPlaylist(): Boolean  =
         runBlocking {
             _isUserFollowPlaylist.value = try {
-                ToneApi.retrofitService.checkUserFollowPlaylist(
+                ToneApi.retrofitService.checkUserIsFollowingPlaylist(
                     "Bearer $token",
                     playlistInfo.id,
                     user.id

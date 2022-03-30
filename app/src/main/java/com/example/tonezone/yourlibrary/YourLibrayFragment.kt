@@ -273,12 +273,18 @@ class YourLibraryFragment : Fragment() {
     private fun observeNavigateToPlaylistDetails() {
         viewModel.navigateToDetailPlaylist.observe(viewLifecycleOwner) {
             if (it!=null){
+                when(it.type) {
+                    "playlist","album" -> this.findNavController()
+                        .navigate(
+                            YourLibraryFragmentDirections
+                                .actionYourLibraryFragment2ToPlaylistDetailsFragment(it)
+                        )
 
-                this.findNavController()
-                    .navigate(YourLibraryFragmentDirections
-                        .actionYourLibraryFragment2ToPlaylistDetailsFragment(it))
+                    "artist" -> this.findNavController()
+                        .navigate(YourLibraryFragmentDirections
+                            .actionYourLibraryFragmentToArtistDetailsFragment(it))
 
-
+                }
                 viewModel.displayPlaylistDetailsComplete()
             }
         }

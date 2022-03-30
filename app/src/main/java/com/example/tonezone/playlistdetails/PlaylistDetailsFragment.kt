@@ -1,4 +1,4 @@
-package com.example.tonezone.detailplaylist
+package com.example.tonezone.playlistdetails
 
 import android.os.Bundle
 import android.util.Log
@@ -95,14 +95,12 @@ class PlaylistDetailsFragment : Fragment() {
     }
 
     private fun setupBottomSheet(){
-
         viewModel.selectedObjectID.observe(viewLifecycleOwner){
             if(it!=null){
                 setUpItemsBottomSheet(it.first,it.second)
                 modalBottomSheet.show(requireActivity().supportFragmentManager, ModalBottomSheet.TAG)
             }
         }
-
     }
 
     private fun setUpItemsBottomSheet(objectId: String, buttonId: Int){
@@ -110,7 +108,6 @@ class PlaylistDetailsFragment : Fragment() {
             R.id.more_option -> {
                 val isSaved = viewModel.checkIfUserFollowPlaylist()
                 modalBottomSheet = ModalBottomSheet(ObjectRequest.PLAYLIST,isSaved)
-
             }
 
             R.id.more_option_with_track -> {

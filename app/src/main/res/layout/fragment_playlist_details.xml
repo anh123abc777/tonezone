@@ -6,102 +6,122 @@
     <data>
         <variable
             name="viewModel"
-            type="com.example.tonezone.detailplaylist.PlaylistDetailsViewModel" />
+            type="com.example.tonezone.playlistdetails.PlaylistDetailsViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".detailplaylist.PlaylistDetailsFragment"
-        android:orientation="vertical"
-        android:padding="8dp"
-        >
 
-        <ImageView
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:src="@drawable/ic_custom_play"
-            android:layout_gravity="center_horizontal"
-            imageUrl="@{viewModel.playlistInfo.image}"
-            />
-
-        <TextView
-            android:id="@+id/playlist_name"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:text="@{viewModel.playlistInfo.name}"
-            android:textSize="16dp"
-            />
-
-        <TextView
-            android:id="@+id/description"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:text="@{viewModel.playlistInfo.description}"
-            />
-
-        <RelativeLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             >
+            <LinearLayout
+                android:id="@+id/content_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".playlistdetails.PlaylistDetailsFragment"
+                android:orientation="vertical"
+                android:padding="8dp"
+                >
+                <LinearLayout
+                    android:id="@+id/playlist_profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    profileVisibility="@{viewModel.playlistInfo}"
+                    >
+                    <ImageView
+                        android:id="@+id/thumbnail"
+                        android:layout_width="300dp"
+                        android:layout_height="300dp"
+                        android:src="@drawable/ic_custom_play"
+                        android:layout_gravity="center_horizontal"
+                        imageUrl="@{viewModel.playlistInfo.image}"
+                        />
 
-            <ImageButton
-                android:id="@+id/more_option"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_ver_more"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:foregroundTint="@color/colorSecondary"
-                app:tint="@color/colorSecondary"
-                android:background="@color/colorPrimary"
-                android:onClick="@{() -> viewModel.showBottomSheet()}"
-                />
+                    <TextView
+                        android:id="@+id/playlist_name"
+                        android:layout_width="300dp"
+                        android:layout_height="wrap_content"
+                        android:text="@{viewModel.playlistInfo.name}"
+                        android:textSize="16dp"
+                        />
 
-            <ImageButton
-                android:id="@+id/like"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_favorite"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/more_option"
-                android:layout_marginStart="16dp"
-                app:tint="@color/colorSecondary"
-                android:background="@color/colorPrimary"
-                isChoose="@{viewModel.isUserFollowPlaylist()}"
-                isVisibility="@{viewModel.isLikeButtonVisibility}"
-                />
+                    <TextView
+                        android:id="@+id/description"
+                        android:layout_width="300dp"
+                        android:layout_height="wrap_content"
+                        android:text="@{viewModel.playlistInfo.description}"
+                        />
 
-            <ImageButton
-                android:id="@+id/play"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_custom_play"
-                android:background="@color/colorPrimary"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                />
+                    <RelativeLayout
+                        android:id="@+id/controller_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        >
 
-        </RelativeLayout>
+                        <ImageButton
+                            android:id="@+id/more_option"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_ver_more"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:foregroundTint="@color/colorSecondary"
+                            app:tint="@color/colorSecondary"
+                            android:background="@color/colorPrimary"
+                            android:onClick="@{() -> viewModel.showBottomSheet()}"
+                            />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/playlist"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:orientation="vertical"
-            tools:listitem="@layout/item_track"
-            android:layout_marginTop="8dp"
-            android:paddingBottom="100dp"
-            trackData="@{viewModel.playlistItems}"
-            android:nestedScrollingEnabled="false"
-            android:clipToPadding="false"
-            />
+                        <ImageButton
+                            android:id="@+id/like"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_favorite"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@id/more_option"
+                            android:layout_marginStart="16dp"
+                            app:tint="@color/colorSecondary"
+                            android:background="@color/colorPrimary"
+                            isChoose="@{viewModel.isUserFollowPlaylist()}"
+                            isVisibility="@{viewModel.isLikeButtonVisibility}"
+                            />
 
-    </LinearLayout>
+                        <ImageButton
+                            android:id="@+id/play"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_custom_play"
+                            android:background="@color/colorPrimary"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            />
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/playlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:orientation="vertical"
+                    tools:listitem="@layout/item_track"
+                    android:layout_marginTop="8dp"
+                    android:paddingBottom="100dp"
+                    trackData="@{viewModel.playlistItems}"
+                    android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
+                    />
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
