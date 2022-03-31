@@ -277,7 +277,7 @@ class YourLibraryFragment : Fragment() {
                     "playlist","album" -> this.findNavController()
                         .navigate(
                             YourLibraryFragmentDirections
-                                .actionYourLibraryFragment2ToPlaylistDetailsFragment(it)
+                                .actionYourLibraryFragmentToPlaylistDetailsFragment(it)
                         )
 
                     "artist" -> this.findNavController()

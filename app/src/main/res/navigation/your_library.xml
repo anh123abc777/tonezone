@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_your_library"
         >
         <action
-            android:id="@+id/action_yourLibraryFragment2_to_playlistDetailsFragment"
+            android:id="@+id/action_yourLibraryFragment_to_playlistDetailsFragment"
             app:destination="@id/playlistDetailsFragment" />
         <action
             android:id="@+id/action_yourLibraryFragment_to_artistDetailsFragment"
@@ -30,6 +30,9 @@
         <action
             android:id="@+id/action_playlistDetailsFragment_to_yourPlaylistFragment"
             app:destination="@id/yourPlaylistFragment" />
+        <action
+            android:id="@+id/action_playlistDetailsFragment_to_artistDetailsFragment2"
+            app:destination="@id/artistDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/yourPlaylistFragment"
