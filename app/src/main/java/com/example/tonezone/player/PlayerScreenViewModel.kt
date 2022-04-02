@@ -48,6 +48,10 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
     val uriTrackResponse : LiveData<String>
         get() = _uriTrackResponse
 
+    private var _currentPlaylist = MutableLiveData<List<Track>>()
+    val currentPlaylist : LiveData<List<Track>>
+        get() = _currentPlaylist
+
     private var _isShuffling = MutableLiveData<Boolean>()
     val isShuffling : LiveData<Boolean>
         get() = _isShuffling
@@ -72,8 +76,13 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
             })
     }
 
-    fun onPlay(uriPlaylist: String?, pos: Int) {
-        mSpotifyAppRemote!!.playerApi.skipToIndex(uriPlaylist,pos)
+    fun onPlay(uriPlaylist: String?, pos: Int?,listTrack : List<Track>?=listOf()) {
+
+        _currentPlaylist.value = listTrack!!
+        if(pos==null){
+            mSpotifyAppRemote!!.playerApi.play(uriPlaylist)
+        }else
+            mSpotifyAppRemote!!.playerApi.skipToIndex(uriPlaylist,pos)
         mSpotifyAppRemote!!.playerApi
             .subscribeToPlayerState()
             .setEventCallback { playerState ->

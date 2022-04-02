@@ -10,4 +10,6 @@
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorSecondary">#8AB1C2</color>
     <color name="gray">#707070</color>
+    <color name="light_gray">#d3d3d3</color>
+    <color name="white_opaque">#19000000</color>
 </resources>

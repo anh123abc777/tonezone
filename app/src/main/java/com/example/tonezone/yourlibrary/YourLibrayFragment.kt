@@ -22,6 +22,7 @@ import com.example.tonezone.MainViewModelFactory
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
+import com.example.tonezone.network.Albums
 import com.example.tonezone.utils.ModalBottomSheet
 import com.example.tonezone.utils.ModalBottomSheetViewModel
 import com.example.tonezone.utils.ObjectRequest
@@ -58,6 +59,8 @@ class YourLibraryFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
+        viewModel.getDataUserPlaylists()
+
         setupYourLibraryAdapter()
         observeNavigateToPlaylistDetails()
         setupMenuAppbarOnClick()
@@ -78,6 +81,7 @@ class YourLibraryFragment : Fragment() {
                 TypeItemLibrary.All -> adapter.filterType("all")
                 TypeItemLibrary.Playlist -> adapter.filterType("playlist")
                 TypeItemLibrary.Artist -> adapter.filterType("artist")
+                TypeItemLibrary.Album -> adapter.filterType("album")
                 else -> throw IllegalArgumentException("unknown value")
             }
         }
@@ -101,11 +105,15 @@ class YourLibraryFragment : Fragment() {
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
 
         viewModel.followedArtists.observe(viewLifecycleOwner) {
-            binding.chipGroup.artistData = viewModel.followedArtists.value
+            binding.chipGroup.artistData = it
         }
 
         viewModel.userPlaylists.observe(viewLifecycleOwner) {
-            binding.chipGroup.playlistData = viewModel.userPlaylists.value
+            binding.chipGroup.playlistData = it
+        }
+
+        viewModel.saveAlbums.observe(viewLifecycleOwner){
+            binding.chipGroup.albumData = Albums(it)
         }
 
         binding.chipGroup.filterTypeChipGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -113,6 +121,8 @@ class YourLibraryFragment : Fragment() {
                 R.id.all_type -> viewModel.filterType(TypeItemLibrary.All)
                 R.id.playlist_type -> viewModel.filterType(TypeItemLibrary.Playlist)
                 R.id.artist_type -> viewModel.filterType(TypeItemLibrary.Artist)
+                R.id.albums_type -> viewModel.filterType(TypeItemLibrary.Album)
+                else -> viewModel.filterType(TypeItemLibrary.All)
             }
         }
     }
@@ -123,7 +133,9 @@ class YourLibraryFragment : Fragment() {
             }
 
             override fun onTextChanged(query: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                if(query!=null && query.isNotBlank()) {
                     (binding.yourLibraryList.adapter as LibraryAdapter).filterQuery(query.toString())
+                }
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -158,19 +170,20 @@ class YourLibraryFragment : Fragment() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun handleRequestToCreatePlaylist(){
         viewModel.isCreatingPlaylist.observe(viewLifecycleOwner){
             if (it){
 
-                val alert = AlertDialog.Builder(context)
+                val alert = AlertDialog.Builder(context,R.style.AlertDialogTheme)
                 val input = EditText(context)
                 input.inputType = InputType.TYPE_CLASS_TEXT
                 input.setBackgroundColor(Color.WHITE)
                 input.gravity = Gravity.CENTER
-
+                input.setText("Playlist")
                 alert.setView(input)
 
-                alert.setPositiveButton("Skip"
+                alert.setPositiveButton("Ok"
                 ) { dialog, _ ->
                     viewModel.createPlaylist(input.text.toString())
                     dialog.dismiss()

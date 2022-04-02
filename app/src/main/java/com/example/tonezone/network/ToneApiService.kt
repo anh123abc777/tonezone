@@ -40,17 +40,6 @@ private val retrofitGetString = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .build()
 interface ToneApiService {
-    @GET("albums/4aawyAB9vmqN3uQ7FjRGTy/tracks")
-    fun getAlbumTracksAsync(
-        @Header("Authorization") auth: String,
-        @Query("market") market: String) : Deferred<SpotifyData>
-
-//    @PUT("me/player/play")
-//    fun play(
-//        @Header("Authorization") auth: String,
-//        @Body context_uri: String,
-//        @Query("device_id") device_id: String
-//    ): Deferred<String>
 
     @GET("recommendations/available-genre-seeds")
     suspend fun getGenresAsync(
@@ -97,7 +86,7 @@ interface ToneApiService {
     suspend fun searchForItemAsync(
         @Header("Authorization") auth: String,
         @Query("q") query: String,
-        @Query("type") type: String = "track,artist,playlist",
+        @Query("type") type: String = "track,artist,playlist,album",
         @Query("market") market: String = "VN",
         ): SearchedItem
 
@@ -115,7 +104,7 @@ interface ToneApiService {
         ): PlaylistsObject
 
     @GET("browse/new-releases")
-    suspend fun getNewReleasesAsync(
+    suspend fun getNewAlbumReleases(
         @Header("Authorization") auth: String,
         @Query("country") country: String = "VN"
     ): AlbumsObject
@@ -233,13 +222,19 @@ interface ToneApiService {
     suspend fun unfollowArtist(
         @Header("Authorization") auth: String,
         @Query("ids") ids: String,
-        @Query("type") type: String = "artist"
+        @Query("type") type: String = "artist",
     ): Unit
 
     @GET("me/albums")
     suspend fun getSavedAlbums(
         @Header("Authorization") auth: String,
         ): SavedAlbums
+
+    @GET("albums/{id}/tracks")
+    suspend fun getAlbumTracks(
+        @Header("Authorization") auth: String,
+        @Path("id") id: String
+        ): Tracks
 }
 
 object ToneApi{

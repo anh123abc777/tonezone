@@ -15,8 +15,8 @@
             android:id="@+id/action_searchFragment_to_searchForItemFragment"
             app:destination="@id/searchForItemFragment" />
         <action
-            android:id="@+id/action_searchFragment_to_resultFragment"
-            app:destination="@id/resultFragment" />
+            android:id="@+id/action_searchFragment_to_playlistsFragment"
+            app:destination="@id/playlistsFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchForItemFragment"
@@ -32,17 +32,17 @@
             app:destination="@id/artistDetailsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/resultFragment"
-        android:name="com.example.tonezone.search.result.ResultFragment"
-        android:label="ResultFragment"
-        tools:layout="@layout/fragment_result"
+        android:id="@+id/playlistsFragment"
+        android:name="com.example.tonezone.playlists.PlaylistsFragment"
+        android:label="PlaylistsFragment"
+        tools:layout="@layout/fragment_playlists"
         >
         <action
-            android:id="@+id/action_resultFragment_to_playlistDetailsFragment"
+            android:id="@+id/action_playlistsFragment_to_playlistDetailsFragment"
             app:destination="@id/playlistDetailsFragment" />
         <argument
-            android:name="genreName"
-            app:argType="string" />
+            android:name="playlistInfo"
+            app:argType="com.example.tonezone.network.PlaylistInfo" />
     </fragment>
     <fragment
         android:id="@+id/playlistDetailsFragment"
@@ -75,13 +75,13 @@
             android:name="playlistInfo"
             app:argType="com.example.tonezone.network.PlaylistInfo" />
         <action
-            android:id="@+id/action_artistDetailsFragment_to_playlistDetailsFragment2"
+            android:id="@+id/action_artistDetailsFragment_to_playlistDetailsFragment"
             app:destination="@id/playlistDetailsFragment" />
         <action
-            android:id="@+id/action_artistDetailsFragment_to_yourPlaylistFragment2"
+            android:id="@+id/action_artistDetailsFragment_to_yourPlaylistFragment"
             app:destination="@id/yourPlaylistFragment" />
         <action
-            android:id="@+id/action_artistDetailsFragment_to_resultFragment2"
-            app:destination="@id/resultFragment" />
+            android:id="@+id/action_artistDetailsFragment_to_playlistsFragment"
+            app:destination="@id/playlistsFragment" />
     </fragment>
 </navigation>

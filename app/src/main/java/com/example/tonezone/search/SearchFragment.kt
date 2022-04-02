@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.tonezone.MainViewModel
 import com.example.tonezone.adapter.GenreAdapter
 import com.example.tonezone.databinding.FragmentSearchBinding
+import com.example.tonezone.network.PlaylistInfo
 
 
 class SearchFragment : Fragment() {
@@ -48,7 +49,8 @@ class SearchFragment : Fragment() {
     private fun setupAdapterGenres(){
         val adapter = GenreAdapter(GenreAdapter.OnClickListener {
             findNavController().navigate(SearchFragmentDirections
-                .actionSearchFragmentToResultFragment(it.id))
+                .actionSearchFragmentToPlaylistsFragment(
+                    PlaylistInfo(it.id,it.name,"","","","genre")))
         })
         binding.genre.adapter = adapter
         viewModel.categories.observe(viewLifecycleOwner){

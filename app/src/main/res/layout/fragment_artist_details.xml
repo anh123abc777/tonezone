@@ -20,7 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
-            android:background="@color/colorPrimary"
+            android:elevation="-1dp"
+            app:elevation="1dp"
             >
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -28,17 +29,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                android:elevation="-1dp"
+                app:title="@{viewModel.artist.name}"
+                app:titleCollapseMode="fade"
+                app:navigationIcon="@drawable/ic_arrow_back"
                 >
 
-                <androidx.appcompat.widget.Toolbar
+                <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:layout_collapseMode="pin"
-                    app:titleTextColor="@color/white"
-                    app:title="@{viewModel.artist.name}"
                     app:navigationIcon="@drawable/ic_arrow_back"
-                    android:background="@color/white"
                     />
 
                 <ImageView
@@ -47,6 +49,7 @@
                     android:layout_height="match_parent"
                     listImageUrl="@{viewModel.artist.images}"
                     android:scaleType="fitXY"
+                    android:elevation="-1dp"
                     />
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -58,7 +61,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/exo_controls_play"
-            android:backgroundTint="@color/colorPrimary"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             android:layout_gravity="end|top"
             tools:ignore="ContentDescription"
@@ -74,6 +76,8 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:paddingBottom="112dp"
+            app:elevation="10dp"
+            android:background="@color/colorPrimary"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             >
 
@@ -94,6 +98,7 @@
                     android:textAllCaps="false"
                     android:background="@color/colorPrimary"
                     android:padding="0dp"
+                    android:layout_marginStart="8dp"
                     android:onClick="@{() -> viewModel.changeStateFollowArtist()}"
                     />
 
@@ -178,7 +183,7 @@
                     android:padding="0dp"
                     android:layout_gravity="center_horizontal"
                     android:textAllCaps="false"
-                    android:onClick="@{() -> viewModel.isNavigateToMoreAlbums()}"
+                    android:onClick="@{() -> viewModel.navigateToMoreAlbums()}"
                     />
 
             </LinearLayout>

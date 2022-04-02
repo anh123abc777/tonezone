@@ -7,31 +7,39 @@
         <variable
             name="viewModel"
             type="com.example.tonezone.search.searchfoitem.SearchForItemViewModel" />
+        <variable
+            name="sortOption"
+            type="com.example.tonezone.yourlibrary.SortOption" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".search.searchfoitem.SearchForItemFragment"
         android:orientation="vertical">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
             >
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/collapsing_toolbar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 >
 
                 <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                 >
 
                     <LinearLayout
+                        android:id="@+id/search_bar_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -41,8 +49,9 @@
                             android:id="@+id/back_search_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/ic_arrow_back"
+                            android:src="@drawable/ic_clear_text"
                             android:layout_marginEnd="8dp"
+                            android:background="@drawable/press_button"
                             />
 
                         <androidx.appcompat.widget.AppCompatEditText
@@ -72,6 +81,7 @@
         </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
@@ -88,6 +98,9 @@
             playlistData="@{viewModel.searchedItems.playlists.items}"
             artistData="@{viewModel.searchedItems.artists.items}"
             trackData="@{viewModel.searchedItems.tracks.items}"
+            albumData="@{viewModel.searchedItems.albums.items}"
+            sortOption="@{sortOption.MostRelate}"
+            keyWord="@{viewModel.searchKey}"
             />
     </androidx.core.widget.NestedScrollView>
 

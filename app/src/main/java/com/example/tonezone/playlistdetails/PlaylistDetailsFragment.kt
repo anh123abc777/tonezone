@@ -60,17 +60,25 @@ class PlaylistDetailsFragment : Fragment() {
 
         observeNavigateToYourPlaylists()
 
-        viewModel.currentPlaylist.observe(viewLifecycleOwner){
-            if (it!=null){
-                viewModel.handleLikeButtonVisibility()
-            }
-        }
+        handleLikeButtonVisibility()
 
+        handlePlayPlaylist()
+
+        return binding.root
+    }
+
+    private fun handlePlayPlaylist(){
         binding.play.setOnClickListener {
             playerViewModel.onPlay(playlistInfo.uri,0)
         }
+    }
 
-        return binding.root
+    private fun handleLikeButtonVisibility(){
+        viewModel.currentPlaylist.observe(viewLifecycleOwner){
+            if (it!=null){
+                viewModel.checkIsOwnedByUser()
+            }
+        }
     }
 
     private fun handleSignalFromBottomSheet(){
@@ -90,6 +98,9 @@ class PlaylistDetailsFragment : Fragment() {
                 modalBottomSheet.dismiss()
                 viewModel.handleSignal()
                 viewModel.handleSignalComplete()
+                if (it==Signal.DELETE_PLAYLIST){
+                    requireActivity().onBackPressed()
+                }
             }
         }
     }
@@ -107,7 +118,11 @@ class PlaylistDetailsFragment : Fragment() {
         when(buttonId) {
             R.id.more_option -> {
                 val isSaved = viewModel.checkIfUserFollowPlaylist()
-                modalBottomSheet = ModalBottomSheet(ObjectRequest.PLAYLIST,isSaved)
+                val isOwned = viewModel.isOwnedByUser.value
+                modalBottomSheet = if (isOwned == true)
+                    ModalBottomSheet(ObjectRequest.YOUR_PLAYLIST,isSaved)
+                else
+                    ModalBottomSheet(ObjectRequest.PLAYLIST,isSaved)
             }
 
             R.id.more_option_with_track -> {

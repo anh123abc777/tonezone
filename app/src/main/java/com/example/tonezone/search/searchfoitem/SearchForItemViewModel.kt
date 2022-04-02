@@ -1,5 +1,6 @@
 package com.example.tonezone.search.searchfoitem
 
+import android.text.Editable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,19 +22,32 @@ class SearchForItemViewModel(val token: String): ViewModel() {
     val searchedItems : LiveData<SearchedItem>
         get() = _searchedItems
 
-    fun search(query: String) {
-        uiScope.launch {
-            _searchedItems.value = try {
+    private val _searchKey = MutableLiveData<String>()
+    val searchKey : LiveData<String>
+        get() = _searchKey
 
-               ToneApi.retrofitService
-                    .searchForItemAsync("Bearer $token", query)
+    fun search(query: Editable?) {
+        if (query != null)
+            if(query.isNotBlank() && query.isNotEmpty()){
+                _searchKey.value = query.toString()
+                uiScope.launch {
+                    _searchedItems.value = try {
 
-            } catch (e: Exception) {
+                        ToneApi.retrofitService
+                            .searchForItemAsync("Bearer $token", _searchKey.value!!)
 
-                SearchedItem()
+                    } catch (e: Exception) {
 
+                        SearchedItem()
+
+                    }
+                }
             }
-        }
+            else
+                _searchedItems.value = SearchedItem()
+
+        else
+            _searchedItems.value = SearchedItem()
     }
 
     fun filterType(type: TypeItemLibrary){

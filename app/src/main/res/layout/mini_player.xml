@@ -63,7 +63,8 @@
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="48dp"
             android:layout_centerVertical="true"
-            android:backgroundTint="@color/white"
+            android:padding="8dp"
+            android:background="@drawable/press_button"
             android:onClick="@{() -> playerViewModel.onChangeState()}"
             playerState="@{playerViewModel.playerState}"
             />

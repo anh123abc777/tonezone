@@ -11,6 +11,10 @@
         <variable
             name="trackData"
             type="com.example.tonezone.network.Tracks" />
+
+        <variable
+            name="albumData"
+            type="com.example.tonezone.network.Albums" />
     </data>
 
     <com.google.android.material.chip.ChipGroup
@@ -51,6 +55,15 @@
             />
 <!--        android:onClick="@{() -> viewModel.filterType(type.Artist)}"-->
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/albums_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/album"
+            android:background="@color/white"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            sizeList="@{albumData.items.size()}"
+            />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/track_type"
@@ -61,6 +74,8 @@
             style="@style/Widget.MaterialComponents.Chip.Filter"
             sizeList="@{trackData.items.size()}"
             />
+
+
 
     </com.google.android.material.chip.ChipGroup>
 </layout>

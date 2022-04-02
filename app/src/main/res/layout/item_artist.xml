@@ -13,8 +13,9 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_marginTop="8dp"
+        android:paddingStart="8dp"
         android:onClick="@{() -> clickListener.onClick(artist)}"
         >
         <!--        android:onClick="@{() -> clickListener.onClick(playlist)}"-->
@@ -43,25 +44,25 @@
 
         <TextView
             android:id="@+id/name_playlist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="290sp"
+            android:layout_height="20dp"
             android:layout_toRightOf="@id/thumbnail"
             android:layout_alignParentTop="true"
             android:text="@{artist.name}"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
             />
 
         <TextView
             android:id="@+id/type"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="290sp"
+            android:layout_height="20dp"
             android:layout_toRightOf="@id/thumbnail"
             android:layout_below="@id/name_playlist"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
             android:textSize="14sp"
             android:text="@{artist.type}"
             android:textColor="@android:color/darker_gray"

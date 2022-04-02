@@ -31,7 +31,7 @@
             android:id="@+id/action_playlistDetailsFragment_to_yourPlaylistFragment"
             app:destination="@id/yourPlaylistFragment" />
         <action
-            android:id="@+id/action_playlistDetailsFragment_to_artistDetailsFragment2"
+            android:id="@+id/action_playlistDetailsFragment_to_artistDetailsFragment"
             app:destination="@id/artistDetailsFragment" />
     </fragment>
     <fragment
@@ -56,17 +56,16 @@
             android:id="@+id/action_artistDetailsFragment_to_playlistDetailsFragment"
             app:destination="@id/playlistDetailsFragment" />
         <action
-            android:id="@+id/action_artistDetailsFragment_to_resultFragment"
-            app:destination="@id/resultFragment" />
+            android:id="@+id/action_artistDetailsFragment_to_playlistsFragment"
+            app:destination="@id/playlistsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/resultFragment"
-        android:name="com.example.tonezone.search.result.ResultFragment"
-        android:label="ResultFragment"
-        tools:layout="@layout/fragment_result"
-        >
+        android:id="@+id/playlistsFragment"
+        android:name="com.example.tonezone.playlists.PlaylistsFragment"
+        android:label="PlaylistsFragment"
+        tools:layout="@layout/fragment_playlists">
         <argument
-            android:name="genreName"
-            app:argType="string" />
+            android:name="playlistInfo"
+            app:argType="com.example.tonezone.network.PlaylistInfo" />
     </fragment>
 </navigation>

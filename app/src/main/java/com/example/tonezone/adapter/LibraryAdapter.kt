@@ -1,6 +1,7 @@
 package com.example.tonezone.adapter
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.*
 import androidx.core.view.allViews
 import androidx.recyclerview.widget.DiffUtil
@@ -10,6 +11,8 @@ import com.example.tonezone.databinding.ItemArtistBinding
 import com.example.tonezone.databinding.ItemPlaylistInListBinding
 import com.example.tonezone.databinding.ItemTrackBinding
 import com.example.tonezone.network.*
+import kotlin.math.abs
+import kotlin.math.min
 
 
 class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<LibraryAdapter.DataItem, RecyclerView.ViewHolder>(DiffCallBack) {
@@ -100,7 +103,6 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
     }
 
-
     @SuppressLint("NotifyDataSetChanged")
     fun filterQuery(query: String) {
         val items = mutableListOf<DataItem>()
@@ -145,9 +147,21 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         updateData(defaultData)
     }
 
+    fun sortByMostRelate(keyWord: String){
+        Log.i("keyWord",keyWord.toString())
+        defaultData = defaultData.sortedBy {
+            val similarityName =
+            abs(it.name!!.lowercase().compareTo(keyWord))
+            val similarityDescription = abs(it.description!!.lowercase().compareTo(keyWord))
+            min(similarityName,similarityDescription)
+        }
+        updateData(defaultData)
+    }
+
     fun sortByDefault(){
         updateData(defaultData)
     }
+
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateData(data: List<DataItem>){
@@ -306,7 +320,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val name = playlist.name
             override val typeName = playlist.type
             override val uri = playlist.uri
-            override val description = playlist.description
+            override val description = playlist.owner.display_name
             override val image =
                 if(playlist.images?.size!=0)
                 playlist.images?.get(0)?.url
@@ -333,7 +347,15 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val name = track.name
             override val typeName = "Track"
             override val uri = track.uri
-            override val description = ""
+            override val description =
+                if(!track.artists.isNullOrEmpty()) {
+                    var artistsDisplay = ""
+                    track.artists.forEachIndexed { index, artist ->
+                        artistsDisplay += artist.name + if (index != track.artists.size - 1) ", " else ""
+                    }
+                    artistsDisplay
+                }
+                else ""
             override val image = track.album?.uri
 
         }
@@ -344,7 +366,13 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val name = album.name
             override val typeName = album.type
             override val uri = album.uri
-            override val description = ""
+            override val description =
+                if(!album.artists.isNullOrEmpty()){
+                    val artistsDisplay = ""
+                    album.artists.forEach {artistsDisplay.plus(it.name+" ")  }
+                    artistsDisplay
+                }
+                else ""
             override val image = if(album.images?.size!=0)
                 album.images?.get(0)?.url
             else ""

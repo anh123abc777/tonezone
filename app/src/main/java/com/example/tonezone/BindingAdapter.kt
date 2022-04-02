@@ -1,15 +1,9 @@
 package com.example.tonezone
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -62,14 +56,16 @@ fun bindPlaylistRecyclerview(recyclerView: RecyclerView, list: List<Playlist>?){
     }
 }
 
-@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userSavedTracksData","sortOption"],requireAll = false)
+@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userSavedTracksData","sortOption","keyWord"],requireAll = false)
 fun bindDataYourLibrary(recyclerView: RecyclerView,
                         playlistData: List<Playlist>?,
                         artistData: List<Artist>?,
                         trackData: List<Track>?,
                         albumData: List<Album>?,
                         userSavedTracksData: List<SavedTrack>?,
-                        sortOption: SortOption?){
+                        sortOption: SortOption?,
+                        keyWord: String?
+                        ){
 
     val adapter = recyclerView.adapter as LibraryAdapter
 
@@ -86,13 +82,11 @@ fun bindDataYourLibrary(recyclerView: RecyclerView,
     val artists = artistData ?: listOf()
     val albums = albumData ?: listOf()
 
-    Log.i("albumsBindingAdapter","$albums")
-    Log.i("albumsBindingAdapter","albumdata $albumData")
-
     adapter.submitYourLibrary(playlists, artists, tracks, albums)
     when(sortOption){
         SortOption.Alphabetical -> adapter.sortByAlphabetical()
         SortOption.Creator -> adapter.sortByCreator()
+        SortOption.MostRelate -> keyWord?.let { adapter.sortByMostRelate(it) }
         null -> adapter.sortByDefault()
     }
 
@@ -209,19 +203,23 @@ fun setIconBottomSheetItem(button: Button,signal: Signal){
 }
 
 @BindingAdapter("isVisibility")
-fun setupButtonVisibility(imageButton: ImageButton, isShow: Boolean){
-    if(isShow){
-        imageButton.visibility = View.VISIBLE
+fun setupButtonVisibility(imageButton: ImageButton, isOwned: Boolean){
+    if(isOwned){
+        imageButton.visibility = View.GONE
     }
-    else imageButton.visibility = View.GONE
+    else imageButton.visibility = View.VISIBLE
 }
 
 @BindingAdapter("isFollowing")
 fun bindTextButton(button: Button,isFollowing: Boolean){
     if(isFollowing){
         button.text = "following"
-    }else
-        button.tag = "follow"
+        button.setBackgroundColor(ContextCompat.getColor(button.context,R.color.colorSecondary))
+    }else {
+        button.text = "follow"
+        button.setBackgroundColor(ContextCompat.getColor(button.context,R.color.colorPrimary))
+
+    }
 }
 
 @BindingAdapter("profileVisibility")
@@ -230,4 +228,12 @@ fun bindPlaylistProfile(linearLayout: LinearLayout,playlistInfo: PlaylistInfo){
         linearLayout.visibility = View.VISIBLE
     else
         linearLayout.visibility = View.GONE
+}
+
+@BindingAdapter("imageProfileVisibility")
+fun bindImageProfile(imageView: ImageView,playlistInfo: PlaylistInfo){
+    if(playlistInfo.type!="artist")
+        imageView.visibility = View.VISIBLE
+    else
+        imageView.visibility = View.GONE
 }

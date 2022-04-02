@@ -1,4 +1,4 @@
-package com.example.tonezone.search.result
+package com.example.tonezone.playlists
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.tonezone.network.*
 import kotlinx.coroutines.*
 
-class ResultViewModel(val token: String,val genreName: String) : ViewModel() {
+class PlaylistsViewModel(val token: String, val playlistInfo: PlaylistInfo) : ViewModel() {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -17,14 +17,16 @@ class ResultViewModel(val token: String,val genreName: String) : ViewModel() {
         get() = _categoryPlaylists
 
     init {
-        getSearchResultData()
+        if(playlistInfo.type=="genre") {
+            getSearchResultData()
+        }
     }
 
     private fun getSearchResultData() {
         uiScope.launch {
             _categoryPlaylists.value = try {
                ToneApi.retrofitService
-                    .getCategoryPlaylistsAsync("Bearer $token", genreName).playlists.items
+                    .getCategoryPlaylistsAsync("Bearer $token", playlistInfo.id).playlists.items
 
             } catch (e: Exception) {
                 Log.i("result", e.message!!)

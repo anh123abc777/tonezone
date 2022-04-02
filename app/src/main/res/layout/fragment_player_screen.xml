@@ -155,7 +155,8 @@
                 android:src="@drawable/ic_shuffle_black_24dp"
                 android:onClick="@{() -> viewModel.onShuffle()}"
                 isChoose="@{viewModel.isShuffling}"
-                android:backgroundTint="@color/white"
+                android:padding="8dp"
+                android:background="@drawable/press_button"
                 />
 
             <ImageButton
@@ -163,7 +164,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_previous"
-                android:backgroundTint="@color/white"
+                android:padding="8dp"
+                android:background="@drawable/press_button"
                 android:layout_toLeftOf="@id/play"
                 android:layout_marginEnd="16dp"
                 android:layout_centerVertical="true"
@@ -176,7 +178,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:backgroundTint="@color/white"
+                android:padding="8dp"
+                android:background="@drawable/press_button"
                 android:backgroundTintMode="src_over"
                 playerState="@{viewModel.playerState}"
                 android:onClick="@{() -> viewModel.onChangeState()}"
@@ -188,7 +191,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_next"
-                android:backgroundTint="@color/white"
+                android:padding="8dp"
+                android:background="@drawable/press_button"
                 android:layout_toEndOf="@id/play"
                 android:layout_marginStart="16dp"
                 android:layout_centerVertical="true"
@@ -203,7 +207,8 @@
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/skip_next"
                 android:layout_marginStart="16dp"
-                android:backgroundTint="@color/white"
+                android:padding="8dp"
+                android:background="@drawable/press_button"
                 />
 
         </RelativeLayout>

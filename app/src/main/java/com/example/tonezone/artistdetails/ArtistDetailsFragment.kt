@@ -61,8 +61,16 @@ class ArtistDetailsFragment : Fragment() {
         setupBottomSheet()
         handleSignalFromBottomSheet()
         setupShowingArtistsBottomSheet()
+        handleNavigateToPlaylistDetails()
+        handleBackPress()
 
         return binding.root
+    }
+
+    private fun handleBackPress(){
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressed()
+        }
     }
 
     private fun handleOnPlay(){
@@ -72,17 +80,17 @@ class ArtistDetailsFragment : Fragment() {
     }
 
     private fun createArtistTopTracksAdapter(){
-        val tracksAdapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, id ->
+        val tracksAdapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, idButton ->
             val trackItem = item as LibraryAdapter.DataItem.TrackItem
 
-            when(id) {
+            when(idButton) {
                 null -> {
                     val pos = playlistDetailsViewModel.playlistItems.value!!.indexOf(trackItem.track)
                     playerViewModel.onPlay(playlistInfo.uri, pos)
                 }
 
                 else -> {
-                    playlistDetailsViewModel.showBottomSheet(trackItem.track.id,id)
+                    playlistDetailsViewModel.showBottomSheet(trackItem.track.id,idButton)
                 }
             }
         })
@@ -92,9 +100,25 @@ class ArtistDetailsFragment : Fragment() {
 
     private fun createArtistAlbumsAdapter(){
         val albumsAdapter = LibraryAdapter(LibraryAdapter
-            .OnClickListener{dataItem, idButton ->  })
+            .OnClickListener{ item, _ ->
+                viewModel.displayPlaylistDetails(item)
+            })
         albumsAdapter.setLimitItem(6)
         binding.artistAlbums.adapter = albumsAdapter
+    }
+
+    private fun handleNavigateToPlaylistDetails() {
+        viewModel.navigateToDetailPlaylist.observe(viewLifecycleOwner) {
+            if (it!=null){
+                   this.findNavController()
+                        .navigate(
+                            ArtistDetailsFragmentDirections
+                                .actionArtistDetailsFragmentToPlaylistDetailsFragment(it)
+                        )
+
+                viewModel.displayPlaylistDetailsComplete()
+            }
+        }
     }
 
     private fun setupShowMoreTracks(){
@@ -111,6 +135,9 @@ class ArtistDetailsFragment : Fragment() {
     private fun setupShowMoreAlbums(){
         viewModel.isNavigateToMoreAlbums.observe(viewLifecycleOwner){
             if (it!=null){
+                findNavController()
+                    .navigate(ArtistDetailsFragmentDirections
+                        .actionArtistDetailsFragmentToPlaylistsFragment(it))
                 viewModel.navigateToMoreAlbumsComplete()
             }
         }
@@ -158,7 +185,8 @@ class ArtistDetailsFragment : Fragment() {
             }
 
             else -> {
-                Toast.makeText(context,"WTF is this $buttonId", Toast.LENGTH_SHORT).show()
+                val isSaved = playlistDetailsViewModel.checkUserSavedTrack(objectId)
+                modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
             }
         }
     }

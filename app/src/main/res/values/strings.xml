@@ -17,4 +17,5 @@ Search for artist, songs and more</string>
     <string name="new_playlist">New Playlist</string>
     <string name="songs">songs</string>
     <string name="albums">albums</string>
+    <string name="album">album</string>
 </resources>

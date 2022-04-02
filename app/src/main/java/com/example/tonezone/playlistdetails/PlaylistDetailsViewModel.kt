@@ -35,9 +35,9 @@ class PlaylistDetailsViewModel
     val navigateYourPlaylists : LiveData<String>
         get() = _navigateYourPlaylists
 
-    private val _isLikeButtonVisibility = MutableLiveData<Boolean>()
-    val isLikeButtonVisibility : LiveData<Boolean>
-        get() = _isLikeButtonVisibility
+    private val _isOwnedByUser = MutableLiveData<Boolean>()
+    val isOwnedByUser : LiveData<Boolean>
+        get() = _isOwnedByUser
 
     private val _currentPlaylist = MutableLiveData<Playlist>()
     val currentPlaylist : LiveData<Playlist>
@@ -72,6 +72,11 @@ class PlaylistDetailsViewModel
 
                         getArtistTopTracks()
                     }
+
+                    "album" -> {
+                        getAlbumTracks()
+                    }
+
                     else -> {
                         if(playlistInfo.id=="userSavedTrack")
                             getUserSavedTracks()
@@ -79,6 +84,18 @@ class PlaylistDetailsViewModel
                             getPlaylistTracks()
                     }
                 }
+        }
+    }
+
+    private suspend fun getAlbumTracks(): List<Track>{
+        return try {
+            ToneApi.retrofitService
+                .getAlbumTracks(
+                    "Bearer $token",
+                    playlistInfo.id
+                ).items!!
+        }catch (e: Exception){
+            listOf()
         }
     }
 
@@ -172,7 +189,27 @@ class PlaylistDetailsViewModel
 
             Signal.ADD_TO_PLAYLIST -> addToPlaylist()
 
+            Signal.DELETE_PLAYLIST -> deletePlaylist()
+
+            Signal.ADD_SONGS -> TODO()
+
+            Signal.EDIT_PLAYLIST -> TODO()
+
+            Signal.SHARE -> TODO()
+
             else -> Log.i("receivedSignal","what is this???????")
+        }
+    }
+
+    private fun deletePlaylist(){
+        uiScope.launch {
+            try {
+                ToneApi.retrofitService.unfollowPlaylist(
+                    "Bearer $token",
+                    _selectedObjectID.value!!.first)
+            }catch (e: Exception){
+                Log.i("deletePlaylist",e.message.toString())
+            }
         }
     }
 
@@ -271,8 +308,8 @@ class PlaylistDetailsViewModel
         _receivedSignal.value = signal
     }
 
-    fun handleLikeButtonVisibility(){
-        _isLikeButtonVisibility.value = currentPlaylist.value!!.owner.id != user.id
+    fun checkIsOwnedByUser(){
+        _isOwnedByUser.value = currentPlaylist.value!!.owner.id == user.id
     }
 
     override fun onCleared() {

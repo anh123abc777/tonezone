@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tonezone.network.GroupPlaylist
-import com.example.tonezone.network.PlaylistInfo
-import com.example.tonezone.network.ToneApi
-import com.example.tonezone.network.User
+import com.example.tonezone.network.*
 import kotlinx.coroutines.*
 
 class HomeViewModel(val token: String, val user: User) : ViewModel() {
@@ -31,24 +28,42 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
         uiScope.launch {
 
             _groupPlaylists.value = try {
-                val featuredPlaylistsDeferred= ToneApi.retrofitService
-                    .getFeaturedPlaylistsAsync("Bearer $token")
+                val featuredPlaylists = ToneApi.retrofitService
+                    .getFeaturedPlaylistsAsync("Bearer $token").playlists.items
 
-                val chartsDeferred = ToneApi.retrofitService
-                    .getChartsAsync("Bearer $token")
+                val charts = ToneApi.retrofitService
+                    .getChartsAsync("Bearer $token").playlists.items
+
+                val albumReleases = ToneApi.retrofitService
+                    .getNewAlbumReleases("Bearer $token").albums.items
 
                 listOf(
-                    GroupPlaylist(
-                        "feature playlist",
-                        featuredPlaylistsDeferred.playlists.items
-                    ),
-                    GroupPlaylist("charts", chartsDeferred.playlists.items)
+                    GroupPlaylist("feature playlist", featuredPlaylists),
+                    GroupPlaylist("charts", charts),
+                    GroupPlaylist("new releases",convertAlbumsToPlaylists((albumReleases)))
                 )
+
             } catch (e: Exception) {
                 listOf()
             }
         }
     }
+
+    fun convertAlbumsToPlaylists(albums: List<Album>): List<Playlist> =
+        albums.map {
+            Playlist(
+                id = it.id!!,
+                description = it.album_group!!,
+                href = "",
+                images = it.images,
+                name = it.name!!,
+                owner = Owner(),
+                public = false,
+                type = it.type!!,
+                uri = it.uri!!
+            )
+        }
+
 
      fun displayPlaylistDetails(playlistInfo: PlaylistInfo){
         _navigateToPlaylistDetails.value = playlistInfo

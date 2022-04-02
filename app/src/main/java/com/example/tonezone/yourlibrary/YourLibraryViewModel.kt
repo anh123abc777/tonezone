@@ -68,7 +68,7 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
 
     }
 
-    private fun getDataUserPlaylists(){
+     fun getDataUserPlaylists(){
         viewModelScope.launch {
             try {
                 _userPlaylists.value = ToneApi.retrofitService
