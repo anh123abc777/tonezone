@@ -49,7 +49,7 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
         }
     }
 
-    fun convertAlbumsToPlaylists(albums: List<Album>): List<Playlist> =
+    private fun convertAlbumsToPlaylists(albums: List<Album>): List<Playlist> =
         albums.map {
             Playlist(
                 id = it.id!!,
@@ -74,4 +74,8 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
         _navigateToPlaylistDetails.value = null
     }
 
+    override fun onCleared() {
+        uiScope.cancel()
+        super.onCleared()
+    }
 }

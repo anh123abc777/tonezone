@@ -9,6 +9,10 @@ import com.example.tonezone.R
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.Signal
 import kotlinx.coroutines.*
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 
 class PlaylistDetailsViewModel
     (val token: String, var playlistInfo: PlaylistInfo, private val user: User) : ViewModel() {
@@ -42,6 +46,8 @@ class PlaylistDetailsViewModel
     private val _currentPlaylist = MutableLiveData<Playlist>()
     val currentPlaylist : LiveData<Playlist>
         get() = _currentPlaylist
+
+    private val firebaseAnalytics = Firebase.analytics
 
     init {
         getCurrentPlaylist()
@@ -227,21 +233,21 @@ class PlaylistDetailsViewModel
         playlistItems.value!!.find { it.id == selectedObjectID.value!!.first }
 
 
-    private val _isShowingTracksDetails = MutableLiveData<Signal>()
+    private val _isShowingTrackDetails = MutableLiveData<Signal>()
     val isShowingTrackDetails : LiveData<Signal>
-        get() = _isShowingTracksDetails
+        get() = _isShowingTrackDetails
 
     private fun showArtistsOfTrack(){
-        _isShowingTracksDetails.value = Signal.VIEW_ARTIST
+        _isShowingTrackDetails.value = Signal.VIEW_ARTIST
     }
 
     private fun showAlbumOfTrack(){
-        _isShowingTracksDetails.value = Signal.VIEW_ARTIST
+        _isShowingTrackDetails.value = Signal.VIEW_ARTIST
     }
 
     @SuppressLint("NullSafeMutableLiveData")
     fun showTracksDetailsComplete(){
-        _isShowingTracksDetails.value = null
+        _isShowingTrackDetails.value = null
     }
 
     private fun likeTrack(){
@@ -261,10 +267,17 @@ class PlaylistDetailsViewModel
                         .saveTracksForCurrentUser(
                             "Bearer $token"
                             ,_selectedObjectID.value!!.first)
+                    logAnalyticsEvent(_selectedObjectID.value!!.first)
                 }
             } catch (e: Exception){
                 Log.i("likeTrack","Failure id ${_selectedObjectID.value?.first.toString()} bool $isSaved ${e.message.toString()}")
             }
+        }
+    }
+
+    private fun logAnalyticsEvent(id: String){
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM){
+            param(FirebaseAnalytics.Param.ITEM_ID,id)
         }
     }
 
