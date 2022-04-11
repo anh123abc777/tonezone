@@ -186,6 +186,9 @@
                     android:onClick="@{() -> viewModel.navigateToMoreAlbums()}"
                     />
 
+
+
+
             </LinearLayout>
 
         </androidx.core.widget.NestedScrollView>

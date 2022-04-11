@@ -81,7 +81,7 @@ class ArtistDetailsFragment : Fragment() {
 
     private fun handleOnPlay(){
         binding.playButton.setOnClickListener {
-//            playerViewModel.onPlay(playlistInfo,0)
+//            playerViewModel.onInit(playlistInfo,0)
         }
     }
 
@@ -92,7 +92,7 @@ class ArtistDetailsFragment : Fragment() {
             when(idButton) {
                 null -> {
                     val pos = playlistDetailsViewModel.playlistItems.value!!.indexOf(trackItem.track)
-//                    playerViewModel.onPlay(playlistInfo.uri, pos)
+//                    playerViewModel.onInit(playlistInfo.uri, pos)
                 }
 
                 else -> {

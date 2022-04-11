@@ -236,6 +236,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             binding.moreOptionWithTrack.setOnClickListener {
                 clickListener.onClickMoreOption(track,binding.moreOptionWithTrack.id)
             }
+
             binding.executePendingBindings()
 
             val gesture = CustomGesture().createGesture(clickListener,DataItem.TrackItem(track),itemView)

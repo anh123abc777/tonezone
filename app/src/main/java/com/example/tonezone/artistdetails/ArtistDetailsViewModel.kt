@@ -44,6 +44,10 @@ class ArtistDetailsViewModel(
     val navigateToDetailPlaylist : LiveData<PlaylistInfo>
         get() = _navigateToDetailPlaylist
 
+    private val _relateArtists = firebaseRepo.getRelateArtist(playlistInfo.id)
+    val relateArtists : LiveData<List<Artist>>
+        get() = _relateArtists
+
     private val job = Job()
     private val uiScope = CoroutineScope(job + Dispatchers.Main)
 

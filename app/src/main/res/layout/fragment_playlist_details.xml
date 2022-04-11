@@ -40,7 +40,6 @@
                     android:layout_height="56dp"
                     app:layout_collapseMode="pin"
                     app:navigationIcon="@drawable/ic_arrow_back"
-                    app:title="@{viewModel.playlistInfo.name}"
                     />
 
                 <ImageView

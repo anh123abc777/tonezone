@@ -126,7 +126,7 @@ class SearchForItemFragment : Fragment() {
 
                 "track" -> {
                     Toast.makeText(context,item.name.toString(),Toast.LENGTH_SHORT).show()
-//                    playerViewModel.onPlay(item.uri,null)
+//                    playerViewModel.onInit(item.uri,null)
                 }
             }
         })

@@ -12,7 +12,7 @@
         android:id="@+id/miniPlayerFrame"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@color/white"
+        android:background="@drawable/mini_player_background"
         android:elevation="8dp"
         tools:ignore="ExtraText"
         layoutVisibility="@{playerViewModel.currentTrack}"
@@ -44,7 +44,7 @@
 
         <TextView
             android:id="@+id/artists"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:layout_toEndOf="@+id/thumbnail"

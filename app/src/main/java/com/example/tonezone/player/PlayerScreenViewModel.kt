@@ -9,6 +9,11 @@ import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.network.ToneApi
 import com.example.tonezone.network.Track
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+import com.google.android.exoplayer2.extractor.ts.DefaultTsPayloadReaderFactory
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
@@ -55,42 +60,91 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
     private var _isShuffling = MutableLiveData<Boolean>()
     val isShuffling : LiveData<Boolean>
         get() = _isShuffling
+
+    private val extractorsFactory = DefaultExtractorsFactory()
+        .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES)
+        .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS)
+
+    private var exoPlayer = SimpleExoPlayer.Builder(application.applicationContext!!)
+        .setMediaSourceFactory(
+            DefaultMediaSourceFactory(
+                application.applicationContext,
+                extractorsFactory)).build()
+
     init {
-        onStart()
         _currentTrack.value = Track()
         _playerState.value = PlayerState.NONE
         _progress.value = 0L
         _isShuffling.value = false
     }
 
-    private fun onStart(){
-        SpotifyAppRemote.connect(application, connectionParams,
-            object : Connector.ConnectionListener {
-                override fun onConnected(spotifyAppRemote: SpotifyAppRemote) {
-                    mSpotifyAppRemote = spotifyAppRemote
-                    Log.d("MainActivity", "Connected! Yay!")
+
+    fun onInit(pos: Int, listTrack : List<Track>?=listOf()) {
+
+        exoPlayer.clearMediaItems()
+        runBlocking {
+            launch {
+                listTrack!!.forEach { song ->
+                    exoPlayer.addMediaItem(
+                        MediaItem.fromUri(
+                            song.preview_url!!
+                        )
+                    )
                 }
-                override fun onFailure(throwable: Throwable) {
-                    Log.e("MyActivity", throwable.message, throwable)
-                }
-            })
+            }
+            _currentPlaylist.value = listTrack!!
+            _currentTrack.value = listTrack[pos]
+        }
     }
 
-    fun onPlay(uriPlaylist: String?, pos: Int?,listTrack : List<Track>?=listOf()) {
-
-        _currentPlaylist.value = listTrack!!
-        if(pos==null){
-            mSpotifyAppRemote!!.playerApi.play(uriPlaylist)
-        }else
-            mSpotifyAppRemote!!.playerApi.skipToIndex(uriPlaylist,pos)
-        mSpotifyAppRemote!!.playerApi
-            .subscribeToPlayerState()
-            .setEventCallback { playerState ->
-                if(playerState.track.uri!=null)
-                _uriTrackResponse.value = playerState.track.uri
-            }
+    fun onPlay(){
+        exoPlayer.stop()
+        exoPlayer.seekTo(posSongSelectedInGroup(),0L)
+        exoPlayer.prepare()
+        exoPlayer.play()
         _playerState.value = PlayerState.PLAY
+    }
 
+    fun onChangeState(){
+        if(exoPlayer.isPlaying){
+            onPause()
+        } else{
+            onResume()
+        }
+    }
+
+    private fun onPause() {
+        exoPlayer.pause()
+        _playerState.value = PlayerState.PAUSE
+        jobs.cancel()
+    }
+
+    private fun onResume(){
+        exoPlayer.play()
+        _playerState.value = PlayerState.PLAY
+        initSeekBar()
+    }
+
+    fun onNext() {
+        jobs.cancel()
+        if(exoPlayer.hasNextWindow()){
+            exoPlayer.seekTo(exoPlayer.currentWindowIndex + 1, 0L)
+            _currentTrack.value = _currentPlaylist.value!![posSongSelectedInGroup()+1]
+            _playerState.value = PlayerState.PLAY
+        }
+    }
+
+    fun onPrevious(){
+        jobs.cancel()
+        if (exoPlayer.hasPreviousWindow()) {
+            exoPlayer.seekTo(exoPlayer.currentWindowIndex - 1, 0L)
+            _currentTrack.value = _currentPlaylist.value!![posSongSelectedInGroup() - 1]
+            _playerState.value = PlayerState.PLAY
+        }
+    }
+
+    private fun posSongSelectedInGroup() = _currentPlaylist.value!!.indexOfFirst {
+        it.id == currentTrack.value!!.id
     }
 
      var jobs = uiSeekBarScope.coroutineContext.job
@@ -101,14 +155,9 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
              var currentPosition = 0L
              while (this.isActive) {
                  if (_playerState.value == PlayerState.PLAY) {
-                     if (currentPosition != currentTrack.value!!.duration_ms) {
-                         mSpotifyAppRemote!!.playerApi
-                             .subscribeToPlayerState()
-                             .setEventCallback { state ->
-                                 currentPosition = state.playbackPosition
+                     if (currentPosition != 30000L) {
+                                 currentPosition = exoPlayer.currentPosition
                                  _progress.value = currentPosition
-                                 _isShuffling.value = state.playbackOptions.isShuffling
-                             }
                          Log.i("initSeekBar", "$this ${this.isActive}")
                          delay(500L)
                      }
@@ -120,20 +169,10 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
          }
         }
 
-    fun getImageTrack() =  uiScope.launch {
-        _currentTrack.value = try {
-            val id = _uriTrackResponse.value
-                ?.substring(_uriTrackResponse.value!!.lastIndexOf(":")+1, _uriTrackResponse.value!!.length)
-
-            ToneApi.retrofitService
-                .getTrackAsync("Bearer ${token.value!!.value}", id!!)
-
-        }catch (e: Exception){
-            Track()
-        }
-
+    fun seekTo(progress : Long){
+        _progress.value = progress
+        exoPlayer.seekTo(progress.toLong()*1000)
     }
-
 
     fun onShuffle(){
         mSpotifyAppRemote!!.playerApi.setShuffle(!_isShuffling.value!!)
@@ -141,43 +180,6 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
 
     fun onRepeat(){
         mSpotifyAppRemote!!.playerApi.setRepeat(1)
-    }
-
-    fun onChangeState(){
-        when(_playerState.value){
-            PlayerState.PAUSE -> onResume()
-            PlayerState.PLAY -> onPause()
-            else -> throw IllegalArgumentException("nothing")
-        }
-    }
-
-    private fun onPause() {
-        mSpotifyAppRemote!!.playerApi.pause()
-        _playerState.value = PlayerState.PAUSE
-        jobs.cancel()
-    }
-
-    private fun onResume(){
-        mSpotifyAppRemote!!.playerApi.resume()
-        _playerState.value = PlayerState.PLAY
-        initSeekBar()
-    }
-
-    fun onNext() {
-        jobs.cancel()
-        mSpotifyAppRemote!!.playerApi.skipNext()
-        _playerState.value = PlayerState.PLAY
-
-    }
-
-    fun onPrevious(){
-        jobs.cancel()
-        mSpotifyAppRemote!!.playerApi.skipPrevious()
-        _playerState.value = PlayerState.PLAY
-    }
-
-    fun seekTo(posMs: Long){
-        mSpotifyAppRemote!!.playerApi.seekTo(posMs)
     }
 
     fun disconnect(){

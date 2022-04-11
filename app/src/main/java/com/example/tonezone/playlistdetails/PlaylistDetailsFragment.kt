@@ -70,12 +70,14 @@ class PlaylistDetailsFragment : Fragment() {
             }
         }
 
+
         return binding.root
     }
 
     private fun handlePlayPlaylist(){
         binding.play.setOnClickListener {
-//            playerViewModel.onPlay(playlistInfo.uri,0)
+            playerViewModel.onInit(0,viewModel.playlistItems.value)
+
         }
     }
 
@@ -137,6 +139,8 @@ class PlaylistDetailsFragment : Fragment() {
             }
 
             else -> {
+                val isSaved = viewModel.checkedTrackIsLiked()
+                modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
                 Toast.makeText(context,"WTF is this $buttonId",Toast.LENGTH_SHORT).show()
             }
         }
@@ -149,7 +153,7 @@ class PlaylistDetailsFragment : Fragment() {
             when(id) {
                 null -> {
                     val pos = viewModel.playlistItems.value!!.indexOf(trackItem.track)
-//                    playerViewModel.onPlay(playlistInfo.uri, pos)
+                    playerViewModel.onInit(pos,viewModel.playlistItems.value)
                 }
 
                 else -> {

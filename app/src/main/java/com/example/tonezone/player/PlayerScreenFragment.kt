@@ -1,6 +1,5 @@
 package com.example.tonezone.player
 
-import android.animation.ObjectAnimator
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -27,28 +26,18 @@ class PlayerScreenFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = activity
 
-        setupImageCurrentTrack()
-        observeCurrentTrack()
-        observePlayerState()
-        observeProgress()
+        handlePlayingTrack()
 
         return binding.root
     }
 
-    private fun observeProgress(){
-        viewModel.progress.observe(viewLifecycleOwner){}
-    }
-
-    private fun observePlayerState(){
-        viewModel.playerState.observe(viewLifecycleOwner){}
-    }
-
-    private fun observeCurrentTrack(){
+    private fun handlePlayingTrack(){
         var currentTrack = Track()
         viewModel.currentTrack.observe(viewLifecycleOwner){
             if(it!= Track() && currentTrack!=it){
                 viewModel.initSeekBar()
                 currentTrack = it
+                viewModel.onPlay()
             }
         }
     }
@@ -61,17 +50,6 @@ class PlayerScreenFragment : Fragment() {
 //        animator.start()
 //    }
 
-
-
-    private fun setupImageCurrentTrack(){
-        viewModel.uriTrackResponse.observe(viewLifecycleOwner){
-            viewModel.token.observe(viewLifecycleOwner){
-                if(it!=null){
-                    viewModel.getImageTrack()
-                }
-            }
-        }
-    }
 
     override fun onDestroy() {
         viewModel.disconnect()

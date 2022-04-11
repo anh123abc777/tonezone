@@ -823,9 +823,34 @@ class FirebaseRepository {
 
     /** Genre **/
     fun insertGenre(genres : List<String>){
-            db.collection("Genre")
-                .document()
-                .set(hashMapOf("genres" to genres), SetOptions.merge())
+        db.collection("Genre")
+            .document()
+            .set(hashMapOf("genres" to genres), SetOptions.merge())
+    }
+
+    /** Recommendation **/
+
+    fun getRelateArtist(id: String): MutableLiveData<List<Artist>>{
+
+        val relateArtists = MutableLiveData<List<Artist>>()
+
+        db.collection("Artist")
+            .document(id)
+            .get()
+            .addOnSuccessListener { artistDoc ->
+                if(artistDoc!=null){
+                    val genres = artistDoc.get("genres") as List<*>
+                    db.collection("Artist")
+                        .whereArrayContainsAny("genres",genres)
+                        .get()
+                        .addOnSuccessListener { relateArtistsDoc ->
+                            if (relateArtistsDoc!=null){
+                                relateArtists.value = relateArtistsDoc.toObjects(Artist::class.java)
+                            }
+                        }
+                }
+            }
+        return relateArtists
     }
 
 }

@@ -198,7 +198,7 @@ class PlaylistDetailsViewModel
     fun checkedTrackIsLiked(): Boolean{
         val indexOfTrack = _playlistItems.value!!
             .indexOfFirst { it.id == _selectedObjectID.value!!.first }
-        return _stateLikedOfTracks.value!![indexOfTrack]
+        return _stateLikedOfTracks.value?.get(indexOfTrack) ?: false
     }
 
     private fun likePlaylist(){
