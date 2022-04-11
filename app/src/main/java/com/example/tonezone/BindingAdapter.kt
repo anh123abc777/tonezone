@@ -1,7 +1,6 @@
 package com.example.tonezone
 
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
@@ -56,13 +55,13 @@ fun bindPlaylistRecyclerview(recyclerView: RecyclerView, list: List<Playlist>?){
     }
 }
 
-@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userSavedTracksData","sortOption","keyWord"],requireAll = false)
+@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userTracksDatumSaveds","sortOption","keyWord"],requireAll = false)
 fun bindDataYourLibrary(recyclerView: RecyclerView,
                         playlistData: List<Playlist>?,
                         artistData: List<Artist>?,
                         trackData: List<Track>?,
                         albumData: List<Album>?,
-                        userSavedTracksData: List<SavedTrack>?,
+                        userTracksDatumSaveds: List<SavedTrack>?,
                         sortOption: SortOption?,
                         keyWord: String?
                         ){
@@ -70,10 +69,10 @@ fun bindDataYourLibrary(recyclerView: RecyclerView,
     val adapter = recyclerView.adapter as LibraryAdapter
 
     val userSavedTracks =
-        if(!userSavedTracksData.isNullOrEmpty())
-            listOf(Playlist(false,"userSavedTrack","liked Songs",
-            "", listOf(Image(null,url="https://picsum.photos/300/300",null)),"User's save songs",Owner(""),
-            0,false,"playlist",""))
+        if(!userTracksDatumSaveds.isNullOrEmpty())
+            listOf(Playlist("userSavedTrack","liked Songs",
+             listOf(Image(null,url="https://picsum.photos/300/300",null)),"User's save songs",Owner(""),
+            false,"playlist", listOf()))
         else
             listOf()
 

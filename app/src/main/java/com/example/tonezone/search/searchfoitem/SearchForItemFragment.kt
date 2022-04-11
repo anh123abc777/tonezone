@@ -51,14 +51,6 @@ class SearchForItemFragment : Fragment() {
 
         return binding.root
     }
-//
-//    @SuppressLint("Recycle")
-//    private fun temp(){
-//        val scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X,4f)
-//        val scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y,4f)
-//
-//        val animator
-//    }
 
     private fun setupSearchbar(){
         binding.searchBar.addTextChangedListener(object: TextWatcher{
@@ -134,7 +126,7 @@ class SearchForItemFragment : Fragment() {
 
                 "track" -> {
                     Toast.makeText(context,item.name.toString(),Toast.LENGTH_SHORT).show()
-                    playerViewModel.onPlay(item.uri,null)
+//                    playerViewModel.onPlay(item.uri,null)
                 }
             }
         })
@@ -151,7 +143,6 @@ class SearchForItemFragment : Fragment() {
             item.name!!,
             item.description!!,
             item.image,
-            item.uri!!,
             item.typeName!!
         )
 

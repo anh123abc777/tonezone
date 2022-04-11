@@ -93,7 +93,8 @@ interface ToneApiService {
     @GET("browse/categories")
     suspend fun getCategoriesAsync(
         @Header("Authorization") auth: String,
-        @Query("country") country: String = "VN"
+        @Query("country") country: String = "VN",
+        @Query("limit") limit: Int = 50
         ): CategoriesObject
 
     @GET("browse/categories/{category_id}/playlists")

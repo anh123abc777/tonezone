@@ -23,6 +23,8 @@ import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
 import com.example.tonezone.network.Albums
+import com.example.tonezone.network.Artists
+import com.example.tonezone.network.Playlists
 import com.example.tonezone.utils.ModalBottomSheet
 import com.example.tonezone.utils.ModalBottomSheetViewModel
 import com.example.tonezone.utils.ObjectRequest
@@ -105,11 +107,11 @@ class YourLibraryFragment : Fragment() {
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
 
         viewModel.followedArtists.observe(viewLifecycleOwner) {
-            binding.chipGroup.artistData = it
+            binding.chipGroup.artistData = Artists(it)
         }
 
         viewModel.userPlaylists.observe(viewLifecycleOwner) {
-            binding.chipGroup.playlistData = it
+            binding.chipGroup.playlistData = Playlists(it)
         }
 
         viewModel.saveAlbums.observe(viewLifecycleOwner){
@@ -237,7 +239,7 @@ class YourLibraryFragment : Fragment() {
             ARTIST -> ObjectRequest.ARTIST_FROM_LIBRARY
             PLAYLIST -> {
                 val playlist = (dataItem as LibraryAdapter.DataItem.PlaylistItem).playlist
-                if(playlist.owner.id==viewModel.user.id)
+                if(playlist.owner!!.id==viewModel.user.id)
                     ObjectRequest.OWNER_PLAYLIST_FROM_LIBRARY
                 else
                     ObjectRequest.PLAYLIST_FROM_LIBRARY

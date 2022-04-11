@@ -116,7 +116,7 @@
                     />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/artist_top_tracks"
+                    android:id="@+id/top_tracks_of_artist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

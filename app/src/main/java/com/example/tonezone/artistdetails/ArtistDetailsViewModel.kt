@@ -14,7 +14,9 @@ class ArtistDetailsViewModel(
     val playlistInfo: PlaylistInfo,
     val user: User): ViewModel() {
 
-    private val _artistTopTracks = MutableLiveData<List<Track>>()
+    private val firebaseRepo = FirebaseRepository()
+
+    private val _artistTopTracks = firebaseRepo.getTracksOfArtist(playlistInfo.id,playlistInfo.name)
     val artistTopTracks : LiveData<List<Track>>
         get() = _artistTopTracks
 
@@ -22,11 +24,11 @@ class ArtistDetailsViewModel(
     val artist : LiveData<Artist>
         get() = _artist
 
-    private val _artistAlbums = MutableLiveData<List<Album>>()
+    private var _artistAlbums = firebaseRepo.getAlbumsOfArtist(playlistInfo.id)
     val artistAlbums : LiveData<List<Album>>
         get() = _artistAlbums
 
-    private val _isFollowingArtist = MutableLiveData<Boolean>()
+    private val _isFollowingArtist = firebaseRepo.checkObjectIsFollowed(user.id,playlistInfo.id,"artist")
     val isFollowingArtist : LiveData<Boolean>
         get() = _isFollowingArtist
 
@@ -46,10 +48,9 @@ class ArtistDetailsViewModel(
     private val uiScope = CoroutineScope(job + Dispatchers.Main)
 
     init {
-        getArtistTopTracks()
         getArtistProfile()
-        getArtistAlbums()
-        checkIsFollowingArtist()
+        getArtistAlbumsData()
+//        checkIsFollowingArtist()
     }
 
     private fun getArtistTopTracks() {
@@ -71,31 +72,28 @@ class ArtistDetailsViewModel(
 
     private fun getArtistProfile(){
         uiScope.launch {
-           _artist.value =
                try {
-                   ToneApi.retrofitService
+                   _artist.value = ToneApi.retrofitService
                        .getArtist(
                            "Bearer $token",
                            playlistInfo.id)
+                   firebaseRepo.insertArtist(_artist.value!!)
+                   Log.i("getArtist","Failure ${_artist.value}")
                }catch (e: Exception){
                    Log.i("getArtist","Failure $e")
-                   Artist()
+
                }
         }
     }
 
-    private fun getArtistAlbums(){
+    private fun getArtistAlbumsData(){
         uiScope.launch {
-            _artistAlbums.value =
-                try{
-                    ToneApi.retrofitService
-                    .getArtistAlbums(
-                        "Bearer $token",
-                        playlistInfo.id
-                    ).items
+            try {
+                _artistAlbums.value = ToneApi.retrofitService
+                    .getArtistAlbums("Bearer $token",
+                    playlistInfo.id).items
+                firebaseRepo.insertAlbums(_artistAlbums.value!!)
             }catch (e: Exception){
-                Log.i("getArtistAlbums","Failure $e")
-                listOf()
             }
         }
     }
@@ -125,6 +123,7 @@ class ArtistDetailsViewModel(
     }
 
     private fun unfollowArtist(){
+        firebaseRepo.unfollowObject(user.id,playlistInfo.id,"artist")
         uiScope.launch {
             try {
                 ToneApi.retrofitService
@@ -139,6 +138,7 @@ class ArtistDetailsViewModel(
     }
 
     private fun followArtist(){
+        firebaseRepo.followObject(user.id,playlistInfo.id,"artist")
         uiScope.launch {
             try {
                 ToneApi.retrofitService
@@ -173,7 +173,6 @@ class ArtistDetailsViewModel(
             dataItem.name.toString(),
             dataItem.description.toString(),
             dataItem.image,
-            dataItem.uri.toString(),
             dataItem.typeName.toString()
         )
     }

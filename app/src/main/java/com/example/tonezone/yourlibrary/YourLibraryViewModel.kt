@@ -10,31 +10,28 @@ import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.ObjectRequest
 import com.example.tonezone.utils.Signal
-import com.google.gson.Gson
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
 
     private val job = Job()
     private val uiScope = CoroutineScope(job + Dispatchers.Main)
+    private val firebaseRepo = FirebaseRepository()
 
-    private val _userPlaylists = MutableLiveData<Playlists>()
-    val userPlaylists : LiveData<Playlists>
+    private var _userPlaylists = MutableLiveData<List<Playlist>>()
+    val userPlaylists : LiveData<List<Playlist>>
         get() = _userPlaylists
 
-     private val _followedArtists = MutableLiveData<Artists>()
-    val followedArtists : LiveData<Artists>
+     private var _followedArtists = firebaseRepo.getFollowedArtists(user.id)
+    val followedArtists : LiveData<List<Artist>>
         get() = _followedArtists
 
-    private val _savedTracks = MutableLiveData<SavedTracks>()
-    val savedTracks : LiveData<SavedTracks>
+    private val _savedTracks = firebaseRepo.getLikedTracks(user.id)
+    val savedTracks : LiveData<List<Track>>
         get() = _savedTracks
 
-    private val _savedAlbums = MutableLiveData<List<Album>>()
+    private var _savedAlbums = MutableLiveData<List<Album>>()
     val saveAlbums : LiveData<List<Album>>
         get() = _savedAlbums
 
@@ -59,8 +56,7 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
         get() = _receivedSignal
 
     init {
-        getDataUserSavedTracks()
-        getDataFollowedArtists()
+//        getDataFollowedArtists()
         getDataUserPlaylists()
         getDataSavedAlbums()
         _sortOption.value = SortOption.Alphabetical
@@ -69,51 +65,15 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
     }
 
      fun getDataUserPlaylists(){
-        viewModelScope.launch {
-            try {
-                _userPlaylists.value = ToneApi.retrofitService
-                    .getCurrentUserPlaylistsAsync("Bearer $token")
-
-            } catch (e: Exception) {
-                Log.i("error", e.message!!)
-            }
-        }
+         _userPlaylists = firebaseRepo.getLikedPlaylists(user.id)
     }
 
     private fun getDataFollowedArtists(){
-        viewModelScope.launch {
-            try {
-                _followedArtists.value = ToneApi.retrofitService
-                    .getFollowedArtistsAsync("Bearer $token", "artist").artists!!
-
-            } catch (e: Exception) {
-                Log.i("errorFollowedArtists", e.message!!)
-                _followedArtists.value = Artists()
-            }
-        }
-    }
-
-    private fun getDataUserSavedTracks(){
-        viewModelScope.launch {
-            _savedTracks.value = try {
-                ToneApi.retrofitService.getUserSavedTracks("Bearer $token")
-            }catch (e: Exception){
-                Log.i("errorUserSavedTracks",e.message.toString())
-                SavedTracks()
-            }
-        }
+        _followedArtists = firebaseRepo.getFollowedArtists(user.id)
     }
 
     private fun getDataSavedAlbums(){
-        viewModelScope.launch {
-            _savedAlbums.value = try {
-                ToneApi.retrofitService.getSavedAlbums("Bearer $token").items.map { it.album }
-
-            }catch (e: Exception){
-                Log.i("getDataSavedAlbums","Failure $e")
-                listOf()
-            }
-        }
+        _savedAlbums = firebaseRepo.getFollowedAlbums(user.id)
     }
 
     fun changeSortOption(){
@@ -133,21 +93,19 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
             dataItem.name.toString(),
             dataItem.description.toString(),
             dataItem.image,
-            dataItem.uri.toString(),
             dataItem.typeName.toString()
         )
     }
 
-    fun displayPlaylistDetails(playlist: Playlist){
+    private fun displayPlaylistDetails(playlist: Playlist){
         _navigateToDetailPlaylist.value = PlaylistInfo(
-            playlist.id,
-            playlist.name,
-            playlist.description,
+            playlist.id!!,
+            playlist.name!!,
+            playlist.description!!,
             if (playlist.images?.isNotEmpty() == true)
-                playlist.images[0].url
+                playlist.images!![0].url
             else "",
-            playlist.uri,
-            playlist.type
+            playlist.type!!
         )
     }
 
@@ -169,31 +127,11 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
     }
 
     fun createPlaylist(playlistName: String){
-        uiScope.launch {
-            try {
 
-                ToneApi.retrofitService2
-                    .createPlaylist("Bearer $token",
-                        user.id,
-                        "{\"name\":\"$playlistName\"," +
-                                "\"description\":\"New playlist description\"," +
-                                "\"public\":false}").enqueue(object : Callback<String> {
-                        override fun onResponse(call: Call<String>, response: Response<String>) {
-                            val gson = Gson()
-                            val playlist = gson.fromJson(response.body(),Playlist::class.java)
-                            getDataUserPlaylists()
-                            displayPlaylistDetails(playlist)
-                            Log.i("createPlaylist",playlist.toString())
-                        }
-                        override fun onFailure(call: Call<String>, t: Throwable) {
-                            Log.i("createPlaylist","Failure + ${t.message}")
-                        }
-                    })
-            } catch (e: Exception){
+        val playlist = firebaseRepo.createPlaylist(playlistName,user)
+        getDataUserPlaylists()
+        displayPlaylistDetails(playlist)
 
-                Log.i("createPlaylist","Failure + $e")
-            }
-        }
     }
 
     fun showBottomSheet(objectRequest: ObjectRequest,itemId : String){
@@ -225,76 +163,22 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
     }
 
     private fun unfollowArtist(){
-        uiScope.launch {
-            try {
-                ToneApi.retrofitService
-                    .unfollowArtists(
-                        "Bearer $token",
-                    _objectShowBottomSheet.value!!.second)
-                Log.i("unfollowArtist","success")
-
-
-            }catch (e: Exception){
-                Log.i("unfollowArtist","Failure ${e.message.toString()}")
-            }
-        }
+        firebaseRepo
+            .unfollowObject(user.id,_objectShowBottomSheet.value!!.second,"artist")
         getDataFollowedArtists()
-
     }
 
     private fun unlikePlaylist(){
-        uiScope.launch {
-            try {
-                    ToneApi.retrofitService
-                        .unfollowPlaylist(
-                            "Bearer $token",
-                            _objectShowBottomSheet.value!!.second)
-                getDataUserPlaylists()
-            }catch (e: Exception){
-                Log.i("errorLikePlaylist",e.message.toString())
-            }
-        }
+        firebaseRepo.unfollowObject(user.id,_objectShowBottomSheet.value!!.second,"playlist")
     }
 
     private fun deletePlaylist(){
-        uiScope.launch {
-            try {
-                ToneApi.retrofitService.unfollowPlaylist(
-                    "Bearer $token",
-                    _objectShowBottomSheet.value!!.second)
-                getDataUserPlaylists()
-            }catch (e: Exception){
-                Log.i("deletePlaylist",e.message.toString())
-            }
-        }
+        firebaseRepo.deletePlaylist(user.id,_objectShowBottomSheet.value!!.second)
+        getDataUserPlaylists()
     }
 
     fun receiveSignal(signal: Signal){
         _receivedSignal.value = signal
-    }
-
-    fun addItemToPlaylist(playlistID: String, trackUris: String){
-        Log.i("addItemToPlaylist","playlistID: $playlistID \n trackUris: $trackUris")
-        uiScope.launch {
-            try {
-                ToneApi.retrofitService2.addItemsToPlaylist(
-                    "Bearer $token",
-                    playlistID,
-                    trackUris
-                    ).enqueue(object: Callback<String>{
-                    override fun onResponse(call: Call<String>, response: Response<String>) {
-                        Log.i("addItemToPlaylist","success ${response.body()}")
-                    }
-
-                    override fun onFailure(call: Call<String>, t: Throwable) {
-                        Log.i("addItemToPlaylist","Failure s $t")
-
-                    }
-                })
-            }catch (e: Exception){
-                Log.i("addItemToPlaylist","Failure $e")
-            }
-        }
     }
 
     override fun onCleared() {

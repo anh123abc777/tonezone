@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -15,6 +14,7 @@ import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentArtistDetailsBinding
 import com.example.tonezone.network.Artist
+import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.playlistdetails.PlaylistDetailsViewModel
@@ -64,6 +64,12 @@ class ArtistDetailsFragment : Fragment() {
         handleNavigateToPlaylistDetails()
         handleBackPress()
 
+        viewModel.artist.observe(viewLifecycleOwner){
+            if (it!=null){
+                Log.i("getArtist","$it")
+            }
+        }
+
         return binding.root
     }
 
@@ -75,7 +81,7 @@ class ArtistDetailsFragment : Fragment() {
 
     private fun handleOnPlay(){
         binding.playButton.setOnClickListener {
-            playerViewModel.onPlay(playlistInfo.uri,0)
+//            playerViewModel.onPlay(playlistInfo,0)
         }
     }
 
@@ -86,7 +92,7 @@ class ArtistDetailsFragment : Fragment() {
             when(idButton) {
                 null -> {
                     val pos = playlistDetailsViewModel.playlistItems.value!!.indexOf(trackItem.track)
-                    playerViewModel.onPlay(playlistInfo.uri, pos)
+//                    playerViewModel.onPlay(playlistInfo.uri, pos)
                 }
 
                 else -> {
@@ -95,7 +101,7 @@ class ArtistDetailsFragment : Fragment() {
             }
         })
         tracksAdapter.setLimitItem(6)
-        binding.artistTopTracks.adapter = tracksAdapter
+        binding.topTracksOfArtist.adapter = tracksAdapter
     }
 
     private fun createArtistAlbumsAdapter(){
@@ -175,17 +181,16 @@ class ArtistDetailsFragment : Fragment() {
     private fun setUpItemsBottomSheet(objectId: String, buttonId: Int){
         when(buttonId) {
             R.id.more_option -> {
-                val isSaved = playlistDetailsViewModel.checkIfUserFollowPlaylist()
-                modalBottomSheet = ModalBottomSheet(ObjectRequest.PLAYLIST,isSaved)
+                modalBottomSheet = ModalBottomSheet(ObjectRequest.PLAYLIST,playlistDetailsViewModel.isUserPlaylistFollowed.value)
             }
 
             R.id.more_option_with_track -> {
-                val isSaved = playlistDetailsViewModel.checkUserSavedTrack(objectId)
+                val isSaved = playlistDetailsViewModel.checkedTrackIsLiked()
                 modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
             }
 
             else -> {
-                val isSaved = playlistDetailsViewModel.checkUserSavedTrack(objectId)
+                val isSaved = playlistDetailsViewModel.checkedTrackIsLiked()
                 modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
             }
         }

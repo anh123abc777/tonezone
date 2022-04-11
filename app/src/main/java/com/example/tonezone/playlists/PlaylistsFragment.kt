@@ -55,12 +55,11 @@ class PlaylistsFragment : Fragment() {
         binding.dataSearch.adapter = PlaylistAdapter(PlaylistAdapter.OnClickListener {
             findNavController().navigate(PlaylistsFragmentDirections.actionPlaylistsFragmentToPlaylistDetailsFragment(
                 PlaylistInfo(
-                    it.id,
-                    it.name,
-                    it.description,
+                    it.id!!,
+                    it.name!!,
+                    it.description!!,
                     it.images?.get(0)!!.url,
-                    it.uri,
-                    it.type
+                    it.type!!
                 )
             ))
         })
@@ -80,12 +79,10 @@ class PlaylistsFragment : Fragment() {
                     val list = albums.map { Playlist(
                         id = it.id!!,
                         description = it.album_group.toString(),
-                        images = it.images,
+                        images = it.images?: listOf(),
                         name = it.name!!,
                         owner = Owner(),
-                        uri = it.uri!!,
                         type = it.type!!,
-                        href = "",
                         public = true
                     ) }
 

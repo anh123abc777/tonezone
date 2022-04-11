@@ -11,26 +11,27 @@ class PlaylistsViewModel(val token: String, val playlistInfo: PlaylistInfo) : Vi
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+    private val firebaseRepo = FirebaseRepository()
 
-    private var _categoryPlaylists = MutableLiveData<List<Playlist>>()
+    private var _categoryPlaylists : MutableLiveData<List<Playlist>>
+    = firebaseRepo.getPlaylistsOfCategory(playlistInfo.id)
     val categoryPlaylists : LiveData<List<Playlist>>
         get() = _categoryPlaylists
 
-    init {
-        if(playlistInfo.type=="genre") {
-            getSearchResultData()
-        }
-    }
 
-    private fun getSearchResultData() {
+    private fun getPlaylistsOfCategory() {
+        _categoryPlaylists = firebaseRepo.getPlaylistsOfCategory(playlistInfo.id)
         uiScope.launch {
-            _categoryPlaylists.value = try {
-               ToneApi.retrofitService
-                    .getCategoryPlaylistsAsync("Bearer $token", playlistInfo.id).playlists.items
-
+            try {
+//                _categoryPlaylists.value = ToneApi.retrofitService
+//                    .getCategoryPlaylistsAsync("Bearer $token", playlistInfo.id).playlists.items!!
+//                val playlistIDs = _categoryPlaylists.value!!.map { it.id!! }
+//
+//                firebaseRepo.insertItemsToCategory(playlistInfo.id,playlistIDs)
+//                firebaseRepo.insertPlaylist(_categoryPlaylists.value!!)
+//
             } catch (e: Exception) {
                 Log.i("result", e.message!!)
-                listOf()
             }
         }
     }

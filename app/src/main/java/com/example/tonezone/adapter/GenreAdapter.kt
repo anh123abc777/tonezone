@@ -46,9 +46,10 @@ class GenreAdapter(val clickListener: OnClickListener): ListAdapter<Category, Ge
         holder.bind(getItem(position),clickListener)
     }
 
-    override fun getItemCount(): Int {
-        return currentList.size.coerceAtMost(20)
-    }
+//    override fun getItemCount(): Int {
+//        return currentList.size.coerceAtMost(20)
+//    }
+
     class OnClickListener(val clickListener : (category: Category) -> Unit) {
 
         fun onClick(category: Category) = clickListener(category)

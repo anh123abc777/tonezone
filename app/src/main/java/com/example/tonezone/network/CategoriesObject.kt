@@ -9,7 +9,8 @@ data class Categories(
 )
 
 data class Category(
-    val id: String,
-    val name: String,
-    val icons: List<Image>?= listOf()
+    val id: String?="",
+    val name: String?="",
+    val icons: List<Image>?= listOf(),
+//    val playlists: List<String>?= listOf()
 )

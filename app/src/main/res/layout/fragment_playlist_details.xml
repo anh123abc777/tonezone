@@ -116,7 +116,7 @@
 
                         <ImageButton
                             android:id="@+id/like"
-                            isChoose="@{viewModel.isUserFollowPlaylist()}"
+                            isChoose="@{viewModel.isUserPlaylistFollowed()}"
                             isVisibility="@{viewModel.isOwnedByUser}"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

@@ -32,28 +32,22 @@ class HomeFragment : Fragment() {
     ): View {
 
         binding = FragmentHomeBinding.inflate(inflater)
-
-            return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
         createAdapterGroupPlaylist()
         observeNavigateToPlaylistDetails()
-        binding.lifecycleOwner = this
 
+        return binding.root
     }
 
     private fun createAdapterGroupPlaylist(){
         val adapter = GroupPlaylistAdapter(PlaylistAdapter.OnClickListener {
            viewModel.displayPlaylistDetails(PlaylistInfo(
-                    it.id,
-                    it.name,
-                    it.description,
+               it.id!!,
+               it.name!!,
+               it.description!!,
                     it.images?.get(0)?.url,
-                    it.uri,
-                    it.type
+               it.type!!
                 ))
         })
         binding.groupPlaylist.adapter = adapter

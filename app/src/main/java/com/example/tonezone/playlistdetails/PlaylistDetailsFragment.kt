@@ -64,12 +64,18 @@ class PlaylistDetailsFragment : Fragment() {
 
         handlePlayPlaylist()
 
+        viewModel.playlistItems.observe(viewLifecycleOwner){
+            if (it!=null){
+                viewModel.getStateItemsLiked()
+            }
+        }
+
         return binding.root
     }
 
     private fun handlePlayPlaylist(){
         binding.play.setOnClickListener {
-            playerViewModel.onPlay(playlistInfo.uri,0)
+//            playerViewModel.onPlay(playlistInfo.uri,0)
         }
     }
 
@@ -117,7 +123,7 @@ class PlaylistDetailsFragment : Fragment() {
     private fun setUpItemsBottomSheet(objectId: String, buttonId: Int){
         when(buttonId) {
             R.id.more_option -> {
-                val isSaved = viewModel.checkIfUserFollowPlaylist()
+                val isSaved = viewModel.isUserPlaylistFollowed.value
                 val isOwned = viewModel.isOwnedByUser.value
                 modalBottomSheet = if (isOwned == true)
                     ModalBottomSheet(ObjectRequest.YOUR_PLAYLIST,isSaved)
@@ -126,7 +132,7 @@ class PlaylistDetailsFragment : Fragment() {
             }
 
             R.id.more_option_with_track -> {
-                val isSaved = viewModel.checkUserSavedTrack(objectId)
+                val isSaved = viewModel.checkedTrackIsLiked()
                 modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
             }
 
@@ -143,7 +149,7 @@ class PlaylistDetailsFragment : Fragment() {
             when(id) {
                 null -> {
                     val pos = viewModel.playlistItems.value!!.indexOf(trackItem.track)
-                    playerViewModel.onPlay(playlistInfo.uri, pos)
+//                    playerViewModel.onPlay(playlistInfo.uri, pos)
                 }
 
                 else -> {
@@ -163,13 +169,15 @@ class PlaylistDetailsFragment : Fragment() {
                     modalBottomSheet.dismiss()
                     val artistsOfTrack = viewModel.playlistItems.value?.find { track ->
                         track.id == viewModel.selectedObjectID.value?.first
-                    }?.artists ?: listOf(Artist(), Artist())
-                    Log.i("setUpShowingArtists", artistsOfTrack.toString())
+                    }?.artists ?: listOf()
+
                     val artistsModalBottomSheet = ArtistsModalBottomSheet(artistsOfTrack)
+
                     artistsModalBottomSheet.show(
                         requireActivity().supportFragmentManager,
                         ArtistsModalBottomSheet.TAG
                     )
+
                     viewModel.showTracksDetailsComplete()
                 }
 

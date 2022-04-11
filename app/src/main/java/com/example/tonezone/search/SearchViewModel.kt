@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tonezone.network.Category
+import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.ToneApi
 import kotlinx.coroutines.*
 
@@ -17,20 +18,15 @@ class SearchViewModel(private val token: String) : ViewModel() {
     val categories : LiveData<List<Category>>
         get() = _categories
 
+    private val firebaseRepo = FirebaseRepository()
+
     init {
         getGenres()
     }
 
-    fun getGenres(){
-        uiScope.launch {
-            _categories.value = try {
-                ToneApi.retrofitService
-                    .getCategoriesAsync("Bearer $token").categories.items
-            } catch (e: Exception) {
-                Log.i("error", e.message.toString())
-                listOf()
-            }
-        }
+    private fun getGenres(){
+        _categories = firebaseRepo.getCategories()
+
     }
 
     override fun onCleared() {

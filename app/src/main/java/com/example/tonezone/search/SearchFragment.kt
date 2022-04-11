@@ -50,7 +50,7 @@ class SearchFragment : Fragment() {
         val adapter = GenreAdapter(GenreAdapter.OnClickListener {
             findNavController().navigate(SearchFragmentDirections
                 .actionSearchFragmentToPlaylistsFragment(
-                    PlaylistInfo(it.id,it.name,"","","","genre")))
+                    PlaylistInfo(it.id!!, it.name!!,"","","genre")))
         })
         binding.genre.adapter = adapter
         viewModel.categories.observe(viewLifecycleOwner){

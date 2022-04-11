@@ -264,17 +264,15 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
         @SuppressLint("ClickableViewAccessibility")
         fun bind(album: Album, clickListener: OnClickListener){
-            val playlist = Playlist(false,
+            val playlist = Playlist(
                 album.id!!,
                 "",
-                "",
-                album.images,
+                album.images!!,
                 album.name!!,
                 Owner(),
-                null,
                 false,
                 album.type!!,
-                album.uri!!)
+                listOf())
             binding.playlist = playlist
             binding.clickListener = clickListener
             binding.executePendingBindings()
@@ -319,8 +317,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val type = 1
             override val name = playlist.name
             override val typeName = playlist.type
-            override val uri = playlist.uri
-            override val description = playlist.owner.display_name
+            override val description = playlist.owner?.display_name
             override val image =
                 if(playlist.images?.size!=0)
                 playlist.images?.get(0)?.url
@@ -332,7 +329,6 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val type = 2
             override val name = artist.name
             override val typeName = artist.type
-            override val uri = artist.uri
             override val description = artist.type
             override val image =
                 if(artist.images?.size!=0)
@@ -346,7 +342,6 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val type = 3
             override val name = track.name
             override val typeName = "Track"
-            override val uri = track.uri
             override val description =
                 if(!track.artists.isNullOrEmpty()) {
                     var artistsDisplay = ""
@@ -365,7 +360,6 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val type = 4
             override val name = album.name
             override val typeName = album.type
-            override val uri = album.uri
             override val description =
                 if(!album.artists.isNullOrEmpty()){
                     val artistsDisplay = ""
@@ -383,7 +377,6 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         abstract val type: Int
         abstract val name: String?
         abstract val typeName: String?
-        abstract val uri: String?
         abstract val description: String?
         abstract val image: String?
     }

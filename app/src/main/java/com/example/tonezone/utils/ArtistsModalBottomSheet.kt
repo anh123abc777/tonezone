@@ -13,10 +13,7 @@ import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.ModalBottomSheetContentBinding
 import com.example.tonezone.network.Artist
 import com.example.tonezone.network.PlaylistInfo
-import com.example.tonezone.network.ToneApi
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class ArtistsModalBottomSheet (private val list: List<Artist>) : BottomSheetDialogFragment() {
 
@@ -46,12 +43,11 @@ class ArtistsModalBottomSheet (private val list: List<Artist>) : BottomSheetDial
                 item.name.toString(),
                 item.description.toString(),
                 item.image,
-                item.uri.toString(),
                 item.description.toString()
             )
             Log.i("artists",playlistInfo.toString())
             val bundle = bundleOf("playlistInfo" to playlistInfo)
-            findNavController().navigate(R.id.playlistDetailsFragment,bundle)
+            findNavController().navigate(R.id.artistDetailsFragment,bundle)
             this.dismiss()
         })
 

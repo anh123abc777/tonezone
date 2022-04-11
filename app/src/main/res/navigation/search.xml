@@ -56,6 +56,9 @@
         <action
             android:id="@+id/action_playlistDetailsFragment_to_yourPlaylistFragment"
             app:destination="@id/yourPlaylistFragment" />
+        <action
+            android:id="@+id/action_playlistDetailsFragment_to_artistDetailsFragment"
+            app:destination="@id/artistDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/yourPlaylistFragment"

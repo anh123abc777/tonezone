@@ -9,23 +9,20 @@ import com.example.tonezone.R
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.Signal
 import kotlinx.coroutines.*
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.ktx.Firebase
 
 class PlaylistDetailsViewModel
     (val token: String, var playlistInfo: PlaylistInfo, private val user: User) : ViewModel() {
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
+    private val firebaseRepo = FirebaseRepository()
 
-    private val _playlistItems = MutableLiveData<List<Track>>()
+    private var _playlistItems = getDataPlaylistItems()
     val playlistItems : LiveData<List<Track>>
         get() = _playlistItems
 
-    private val _isUserFollowPlaylist = MutableLiveData<Boolean>()
-    val isUserFollowPlaylist : LiveData<Boolean>
-        get() = _isUserFollowPlaylist
+    private var _isPlaylistFollowed = firebaseRepo.checkObjectIsFollowed(user.id,playlistInfo.id,"playlist")
+    val isUserPlaylistFollowed : LiveData<Boolean>
+        get() = _isPlaylistFollowed
 
     private val _selectedObjectID = MutableLiveData<Pair<String,Int>>()
     val selectedObjectID : LiveData<Pair<String,Int>>
@@ -43,119 +40,57 @@ class PlaylistDetailsViewModel
     val isOwnedByUser : LiveData<Boolean>
         get() = _isOwnedByUser
 
-    private val _currentPlaylist = MutableLiveData<Playlist>()
+    private var _currentPlaylist = firebaseRepo.getPlaylist(playlistInfo.id)
     val currentPlaylist : LiveData<Playlist>
         get() = _currentPlaylist
 
-    private val firebaseAnalytics = Firebase.analytics
+    private var _stateLikedOfTracks = MutableLiveData<List<Boolean>>()
+    val stateLikedOfTracks : LiveData<List<Boolean>>
+        get() = _stateLikedOfTracks
 
-    init {
-        getCurrentPlaylist()
-        getDataPlaylistItems()
-        checkIfUserFollowPlaylist()
-    }
 
-    private fun getCurrentPlaylist(){
-        uiScope.launch {
-                try {
-                    _currentPlaylist.value = ToneApi.retrofitService
-                        .getPlaylist(
-                            "Bearer $token",
-                            playlistInfo.id
-                            )
-                    Log.i("getCurrentPlaylist","success")
-                }catch (e: Exception){
-                    Log.i("getCurrentPlaylist","Failure $e")
+    private fun getDataPlaylistItems(): MutableLiveData<List<Track>> {
+
+        return when (playlistInfo.type) {
+                "artist" -> {
+                    getArtistTopTracks()
                 }
-        }
-    }
 
-    private fun getDataPlaylistItems() {
-        uiScope.launch(Dispatchers.Main) {
-            _playlistItems.value =
-                when (playlistInfo.type) {
-                    "artist" -> {
-
-                        getArtistTopTracks()
-                    }
-
-                    "album" -> {
-                        getAlbumTracks()
-                    }
-
-                    else -> {
-                        if(playlistInfo.id=="userSavedTrack")
-                            getUserSavedTracks()
-                        else
-                            getPlaylistTracks()
-                    }
+                "album" -> {
+                    getAlbumTracks()
                 }
-        }
-    }
 
-    private suspend fun getAlbumTracks(): List<Track>{
-        return try {
-            ToneApi.retrofitService
-                .getAlbumTracks(
-                    "Bearer $token",
-                    playlistInfo.id
-                ).items!!
-        }catch (e: Exception){
-            listOf()
-        }
-    }
-
-    private suspend fun getPlaylistTracks(): List<Track> {
-        return try {
-            val playlistItemsDeferred = ToneApi.retrofitService
-                .getPlaylistItemsAsync("Bearer $token", playlistInfo.id)
-            val dataPlaylistItems = playlistItemsDeferred.items
-            dataPlaylistItems.map {
-                it.track
+                else -> {
+                    if(playlistInfo.id=="userSavedTrack")
+                        getUserSavedTracks()
+                    else
+                        getPlaylistTracks()
+                }
             }
-        } catch (e: Exception) {
-            Log.i("error", e.message!! )
-            listOf()
-        }
     }
 
-    private suspend fun getUserSavedTracks(): List<Track>{
-        return try {
-                ToneApi.retrofitService
-                    .getUserSavedTracks("Bearer $token").items?.map { it.track }?: listOf()
-            }catch (e: Exception){
-                listOf()
-            }
+    private fun getAlbumTracks(): MutableLiveData<List<Track>>{
+        return firebaseRepo.getTracksOfAlbum(playlistInfo.id)
+    }
+
+    private fun getPlaylistTracks(): MutableLiveData<List<Track>>{
+        return firebaseRepo.getTracksOfPlaylist(playlistInfo.id)
+    }
+
+    private fun getUserSavedTracks(): MutableLiveData<List<Track>>{
+        return firebaseRepo.getLikedTracks(user.id)
 
     }
 
-    private suspend fun getArtistTopTracks(): List<Track> {
-        return try {
-            val artistTopTracksDeferred = ToneApi.retrofitService
-                .getArtistTopTracksAsync(
-                    "Bearer $token",
-                    playlistInfo.id,
-                    "VN")
-            artistTopTracksDeferred.tracks!!
-        } catch (e: Exception) {
-            Log.i("error", e.message!! )
-            listOf()
-        }
+    private fun getArtistTopTracks(): MutableLiveData<List<Track>> {
+        return firebaseRepo.getTracksOfArtist(playlistInfo.id,playlistInfo.name)
     }
 
-    fun checkIfUserFollowPlaylist(): Boolean  =
-        runBlocking {
-            _isUserFollowPlaylist.value = try {
-                ToneApi.retrofitService.checkUserIsFollowingPlaylist(
-                    "Bearer $token",
-                    playlistInfo.id,
-                    user.id
-                )[0]
-            } catch (e: Exception) {
-                false
-            }
-            _isUserFollowPlaylist.value!!
-        }
+    fun getStateItemsLiked(){
+        val trackIDs = _playlistItems.value!!.map { it.id }
+        _stateLikedOfTracks = firebaseRepo
+            .checkObjectIsFollowed(user.id,trackIDs,"track")
+    }
 
     fun showBottomSheet(objectID: String, buttonID: Int ){
         _selectedObjectID.value = Pair(objectID,buttonID)
@@ -208,15 +143,7 @@ class PlaylistDetailsViewModel
     }
 
     private fun deletePlaylist(){
-        uiScope.launch {
-            try {
-                ToneApi.retrofitService.unfollowPlaylist(
-                    "Bearer $token",
-                    _selectedObjectID.value!!.first)
-            }catch (e: Exception){
-                Log.i("deletePlaylist",e.message.toString())
-            }
-        }
+        firebaseRepo.unfollowObject(user.id,_selectedObjectID.value!!.first,"playlist")
     }
 
     private fun addToPlaylist(){
@@ -251,56 +178,40 @@ class PlaylistDetailsViewModel
     }
 
     private fun likeTrack(){
-        val isSaved = runBlocking {
-            _selectedObjectID.value?.let { checkUserSavedTrack(it.first) }
-        }?: false
+        val indexOfTrack = _playlistItems.value!!
+            .indexOfFirst { it.id == _selectedObjectID.value!!.first }
+        Log.i("likeTrack","${_stateLikedOfTracks.value!![indexOfTrack]}")
 
-        uiScope.launch {
-            try {
-                if (isSaved) {
-                    ToneApi.retrofitService
-                        .removeTracksForCurrentUser(
-                            "Bearer $token"
-                            ,_selectedObjectID.value!!.first)
-                } else {
-                    ToneApi.retrofitService
-                        .saveTracksForCurrentUser(
-                            "Bearer $token"
-                            ,_selectedObjectID.value!!.first)
-                    logAnalyticsEvent(_selectedObjectID.value!!.first)
-                }
-            } catch (e: Exception){
-                Log.i("likeTrack","Failure id ${_selectedObjectID.value?.first.toString()} bool $isSaved ${e.message.toString()}")
-            }
+        if (_stateLikedOfTracks.value!![indexOfTrack]) {
+            firebaseRepo
+                .unfollowObject(user.id,_selectedObjectID.value!!.first,"track")
+        } else {
+            firebaseRepo
+                .followObject(user.id,_selectedObjectID.value!!.first,"track")
         }
+        var newState = mutableListOf<Boolean>()
+        newState += _stateLikedOfTracks.value!!
+        newState[indexOfTrack] = !newState[indexOfTrack]
+        _stateLikedOfTracks.value = newState
     }
 
-    private fun logAnalyticsEvent(id: String){
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM){
-            param(FirebaseAnalytics.Param.ITEM_ID,id)
-        }
+    fun checkedTrackIsLiked(): Boolean{
+        val indexOfTrack = _playlistItems.value!!
+            .indexOfFirst { it.id == _selectedObjectID.value!!.first }
+        return _stateLikedOfTracks.value!![indexOfTrack]
     }
-
-    fun checkUserSavedTrack(id: String): Boolean =
-        runBlocking {
-            try {
-                ToneApi.retrofitService.checkUserSavedTrack("Bearer $token", id)[0]
-            } catch (e: Exception){
-                false
-            }
-        }
 
     private fun likePlaylist(){
         uiScope.launch {
             try {
-                if (_isUserFollowPlaylist.value == false) {
+                if (_isPlaylistFollowed.value == false) {
 
-                    ToneApi.retrofitService.followPlaylist("Bearer $token", playlistInfo.id)
+                    firebaseRepo.followObject(user.id,playlistInfo.id,"playlist")
                     changeStateFollowPlaylist()
                 }
                 else {
 
-                    ToneApi.retrofitService.unfollowPlaylist("Bearer $token", playlistInfo.id)
+                    firebaseRepo.unfollowObject(user.id,playlistInfo.id,"playlist")
                     changeStateFollowPlaylist()
                 }
             }catch (e: Exception){
@@ -310,7 +221,7 @@ class PlaylistDetailsViewModel
     }
 
     private fun changeStateFollowPlaylist(){
-        _isUserFollowPlaylist.value = !_isUserFollowPlaylist.value!!
+        _isPlaylistFollowed.value = !_isPlaylistFollowed.value!!
     }
 
     private fun addToQueue(){
@@ -322,7 +233,7 @@ class PlaylistDetailsViewModel
     }
 
     fun checkIsOwnedByUser(){
-        _isOwnedByUser.value = currentPlaylist.value!!.owner.id == user.id
+        _isOwnedByUser.value = currentPlaylist.value!!.owner?.id == user.id
     }
 
     override fun onCleared() {

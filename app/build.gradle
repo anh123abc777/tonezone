@@ -119,7 +119,9 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-analytics-ktx:17.6.0'
     implementation "com.google.firebase:firebase-ml-model-interpreter:22.0.4"
+    implementation platform('com.google.firebase:firebase-bom:29.3.0')
 
+    implementation 'com.google.firebase:firebase-firestore-ktx'
 
     implementation "androidx.recyclerview:recyclerview:1.3.0-alpha01"
 
