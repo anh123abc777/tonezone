@@ -2,9 +2,16 @@
 
 package com.example.tonezone
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -15,6 +22,10 @@ import com.example.tonezone.database.Token
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
+import com.example.tonezone.network.Track
+import com.example.tonezone.notifycation.CreateNotification
+import com.example.tonezone.notifycation.OnClearFromRecentService
+import com.example.tonezone.notifycation.Playable
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.spotify.sdk.android.auth.AuthorizationClient
@@ -30,6 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+    private lateinit var notificationManager: NotificationManager
 
     private val mainViewModel: MainViewModel by viewModels {
         MainViewModelFactory(this)
@@ -49,6 +61,74 @@ class MainActivity : AppCompatActivity() {
         setupNav()
         setupMiniPlayer()
 
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            createChannel()
+            registerReceiver(broadcastReceiver, IntentFilter("TRACKS_TRACKS"))
+            startService(Intent(baseContext, OnClearFromRecentService::class.java))
+        }
+        setupPlayerNotification()
+    }
+
+    private fun setupPlayerNotification(){
+        playerViewModel.playerState.observeForever{ state ->
+
+            playerViewModel.currentTrack.observeForever { track ->
+
+                if (track != Track()) {
+
+                    if (state == PlayerScreenViewModel.PlayerState.PLAY) {
+                        CreateNotification().createNotification(
+                            this,
+                            track,
+                            R.drawable.ic_custom_pause,
+                            playerViewModel.posSongSelectedInGroup(),
+                            playerViewModel.currentPlaylist.value?.size ?: 0,
+                        )
+                    } else {
+                        CreateNotification().createNotification(
+                            this,
+                            track,
+                            R.drawable.ic_custom_play,
+                            playerViewModel.posSongSelectedInGroup(),
+                            playerViewModel.currentPlaylist.value?.size ?: 0,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private val broadcastReceiver = object : BroadcastReceiver(){
+        override fun onReceive(context: Context, intent: Intent) {
+
+            when(intent.extras?.get("action_name")){
+                CreateNotification().ACTION_PREVIOUS -> {
+                    playerViewModel.onPrevious()
+                }
+
+                CreateNotification().ACTION_PLAY -> {
+                    playerViewModel.onChangeState()
+
+                }
+
+                CreateNotification().ACTION_NEXT -> {
+                    playerViewModel.onNext()
+                }
+
+                else -> Toast.makeText(context,"WTF is this",Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+    private fun createChannel(){
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            val channel = NotificationChannel(
+                CreateNotification().CHANNEL_ID,"ToneZone",NotificationManager.IMPORTANCE_LOW)
+
+            notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     private fun setupMiniPlayer(){
@@ -147,6 +227,11 @@ class MainActivity : AppCompatActivity() {
         runBlocking(Dispatchers.IO) {
             repository.clear()
         }
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            notificationManager.cancelAll()
+        }
+//        unregisterReceiver(broadcastReceiver)
 
     }
+
 }

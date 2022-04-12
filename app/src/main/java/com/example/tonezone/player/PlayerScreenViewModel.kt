@@ -49,10 +49,6 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
     val progress : LiveData<Long>
         get() = _progress
 
-    private var _uriTrackResponse = MutableLiveData<String>()
-    val uriTrackResponse : LiveData<String>
-        get() = _uriTrackResponse
-
     private var _currentPlaylist = MutableLiveData<List<Track>>()
     val currentPlaylist : LiveData<List<Track>>
         get() = _currentPlaylist
@@ -143,7 +139,7 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
         }
     }
 
-    private fun posSongSelectedInGroup() = _currentPlaylist.value!!.indexOfFirst {
+    fun posSongSelectedInGroup() = _currentPlaylist.value!!.indexOfFirst {
         it.id == currentTrack.value!!.id
     }
 

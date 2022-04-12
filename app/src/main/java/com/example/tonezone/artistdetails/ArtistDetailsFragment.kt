@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -55,6 +56,7 @@ class ArtistDetailsFragment : Fragment() {
 
         createArtistTopTracksAdapter()
         createArtistAlbumsAdapter()
+        createRelateArtistsAdapter()
         setupShowMoreTracks()
         setupShowMoreAlbums()
         handleOnPlay()
@@ -111,6 +113,22 @@ class ArtistDetailsFragment : Fragment() {
             })
         albumsAdapter.setLimitItem(6)
         binding.artistAlbums.adapter = albumsAdapter
+    }
+
+    private fun createRelateArtistsAdapter(){
+        val relateArtistsAdapter = LibraryAdapter(LibraryAdapter
+            .OnClickListener{ item, _ ->
+                val relateArtist = PlaylistInfo(
+                    item.id!!,
+                    item.name!!,
+                    item.description!!,
+                    item.image,
+                    item.typeName!!)
+
+                val bundle = bundleOf( "playlistInfo" to relateArtist)
+                findNavController().navigate(R.id.artistDetailsFragment,bundle)
+        })
+        binding.relateArtists.adapter = relateArtistsAdapter
     }
 
     private fun handleNavigateToPlaylistDetails() {
