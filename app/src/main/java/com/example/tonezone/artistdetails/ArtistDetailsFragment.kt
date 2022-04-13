@@ -12,10 +12,10 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.tonezone.MainViewModel
 import com.example.tonezone.R
+import com.example.tonezone.adapter.ArtistsAdapter
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentArtistDetailsBinding
 import com.example.tonezone.network.Artist
-import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.playlistdetails.PlaylistDetailsViewModel
@@ -83,7 +83,7 @@ class ArtistDetailsFragment : Fragment() {
 
     private fun handleOnPlay(){
         binding.playButton.setOnClickListener {
-//            playerViewModel.onInit(playlistInfo,0)
+            playerViewModel.onInit(0,viewModel.artistTopTracks.value)
         }
     }
 
@@ -116,14 +116,14 @@ class ArtistDetailsFragment : Fragment() {
     }
 
     private fun createRelateArtistsAdapter(){
-        val relateArtistsAdapter = LibraryAdapter(LibraryAdapter
-            .OnClickListener{ item, _ ->
+        val relateArtistsAdapter = ArtistsAdapter(ArtistsAdapter
+            .OnClickListener{ item ->
                 val relateArtist = PlaylistInfo(
                     item.id!!,
                     item.name!!,
-                    item.description!!,
-                    item.image,
-                    item.typeName!!)
+                    item.popularity.toString(),
+                    item.images?.get(0)?.url,
+                    item.type!!)
 
                 val bundle = bundleOf( "playlistInfo" to relateArtist)
                 findNavController().navigate(R.id.artistDetailsFragment,bundle)

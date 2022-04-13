@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="artist"
+            type="com.example.tonezone.network.Artist" />
+
+        <variable
+            name="clickListener"
+            type="com.example.tonezone.adapter.ArtistsAdapter.OnClickListener" />
+    </data>
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="4dp"
+        android:onClick="@{() -> clickListener.onClick(artist)}"
+        >
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/border_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            app:cardCornerRadius="64dp"
+            android:elevation="0dp"
+            >
+
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            listImageUrl="@{artist.images}"
+            android:layout_gravity="center_horizontal"
+            />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/display_name"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@{artist.name}"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            />
+
+    </LinearLayout>
+</layout>

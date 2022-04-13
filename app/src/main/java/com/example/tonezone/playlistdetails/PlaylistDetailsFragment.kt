@@ -15,9 +15,16 @@ import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentPlaylistDetailsBinding
 import com.example.tonezone.network.Artist
+import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.PlaylistInfo
+import com.example.tonezone.network.ToneApi
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.lang.Thread.sleep
 
 class PlaylistDetailsFragment : Fragment() {
 
@@ -64,12 +71,30 @@ class PlaylistDetailsFragment : Fragment() {
 
         handlePlayPlaylist()
 
+        val firebaseRepo = FirebaseRepository()
         viewModel.playlistItems.observe(viewLifecycleOwner){
             if (it!=null){
                 viewModel.getStateItemsLiked()
+
+//                runBlocking(Dispatchers.IO) {
+//                    it.forEach { track ->
+//                        launch(Dispatchers.IO) {
+//                            track.artists?.forEach { artist ->
+//                                val artistProfile = ToneApi.retrofitService
+//                                    .getArtist(
+//                                        "Bearer ${mainViewModel.token}",
+//                                        artist.id!!
+//                                    )
+//                                if (artistProfile!=null){
+//                                    firebaseRepo.insertArtist(artistProfile)
+//                                }
+//                                sleep(10)
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
-
 
         return binding.root
     }

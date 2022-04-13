@@ -157,15 +157,14 @@ class FirebaseRepository {
 
     fun insertArtists(artists: List<Artist>){
         artists.forEach { artist ->
-            insertArtist(artist)
+//            insertArtist(artist)
         }
     }
 
-    fun insertArtist(artist: Artist){
+    suspend fun insertArtist(artist: Artist){
         db.collection("Artist")
             .document(artist.id!!)
             .set(artist)
-
     }
 
     fun getArtist(id: String): MutableLiveData<Artist>{
@@ -839,15 +838,20 @@ class FirebaseRepository {
             .get()
             .addOnSuccessListener { artistDoc ->
                 if(artistDoc!=null){
-                    val genres = artistDoc.get("genres") as List<*>
-                    db.collection("Artist")
-                        .whereArrayContainsAny("genres",genres)
-                        .get()
-                        .addOnSuccessListener { relateArtistsDoc ->
-                            if (relateArtistsDoc!=null){
-                                relateArtists.value = relateArtistsDoc.toObjects(Artist::class.java)
+                    if(artistDoc.get("genres")!=null) {
+                        val genres = artistDoc.get("genres") as List<*>
+                        db.collection("Artist")
+                            .whereEqualTo("genres", genres)
+                            .get()
+                            .addOnSuccessListener { relateArtistsDoc ->
+                                if (relateArtistsDoc != null) {
+                                    val relateArtistData =
+                                        relateArtistsDoc.toObjects(Artist::class.java).toMutableList()
+                                    relateArtistData.remove(relateArtistData.find { it.id==id }!!)
+                                    relateArtists.value = relateArtistData
+                                }
                             }
-                        }
+                    }
                 }
             }
         return relateArtists

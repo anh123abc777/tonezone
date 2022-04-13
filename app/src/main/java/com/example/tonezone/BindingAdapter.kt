@@ -55,13 +55,21 @@ fun bindPlaylistRecyclerview(recyclerView: RecyclerView, list: List<Playlist>?){
     }
 }
 
-@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userTracksDatumSaveds","sortOption","keyWord"],requireAll = false)
+@BindingAdapter("relateArtists")
+fun bindArtistsRecyclerview(recyclerView: RecyclerView, list: List<Artist>?){
+    if(list!=null){
+        val adapter = recyclerView.adapter as ArtistsAdapter
+        adapter.submitList(list)
+    }
+}
+
+@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userTracksDataSaveds","sortOption","keyWord"],requireAll = false)
 fun bindDataYourLibrary(recyclerView: RecyclerView,
                         playlistData: List<Playlist>?,
                         artistData: List<Artist>?,
                         trackData: List<Track>?,
                         albumData: List<Album>?,
-                        userTracksDatumSaveds: List<SavedTrack>?,
+                        userTracksDataSaveds: List<SavedTrack>?,
                         sortOption: SortOption?,
                         keyWord: String?
                         ){
@@ -69,7 +77,7 @@ fun bindDataYourLibrary(recyclerView: RecyclerView,
     val adapter = recyclerView.adapter as LibraryAdapter
 
     val userSavedTracks =
-        if(!userTracksDatumSaveds.isNullOrEmpty())
+        if(!userTracksDataSaveds.isNullOrEmpty())
             listOf(Playlist("userSavedTrack","liked Songs",
              listOf(Image(null,url="https://picsum.photos/300/300",null)),"User's save songs",Owner(""),
             false,"playlist", listOf()))

@@ -93,10 +93,11 @@ class ArtistDetailsViewModel(
     private fun getArtistAlbumsData(){
         uiScope.launch {
             try {
-                _artistAlbums.value = ToneApi.retrofitService
+                val temp = ToneApi.retrofitService
                     .getArtistAlbums("Bearer $token",
                     playlistInfo.id).items
-                firebaseRepo.insertAlbums(_artistAlbums.value!!)
+                if (temp != _artistAlbums.value)
+                    firebaseRepo.insertAlbums(_artistAlbums.value!!)
             }catch (e: Exception){
             }
         }
