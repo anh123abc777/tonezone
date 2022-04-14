@@ -3,6 +3,8 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        maven { url "https://chaquo.com/maven" }
+
     }
     plugins {
         id 'com.android.application' version '7.1.0-alpha09'

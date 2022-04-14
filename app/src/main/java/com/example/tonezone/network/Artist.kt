@@ -10,7 +10,9 @@ data class ArtistsObject(
 
 @Parcelize
 data class Artists(
-	val items: List<Artist>?= listOf()
+	val items: List<Artist>?= listOf(),
+	val artists: List<Artist>?= listOf()
+
 ) : Parcelable
 
 @Parcelize

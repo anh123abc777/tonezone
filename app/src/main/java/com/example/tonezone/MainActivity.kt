@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -18,6 +19,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.chaquo.python.PyException
+import com.chaquo.python.PyObject
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.example.tonezone.database.Token
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
@@ -49,7 +54,12 @@ class MainActivity : AppCompatActivity() {
 
     private val playerViewModel: PlayerScreenViewModel by viewModels()
 
-    private lateinit var repository: TokenRepository
+    private val repository: TokenRepository by lazy{
+        TokenRepository(TonezoneDB.getInstance(application).tokenDao)
+    }
+
+    private val py : Python by lazy {  Python.getInstance()}
+    private val module : PyObject by lazy { py.getModule("script")}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +67,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.lifecycleOwner = this
 
-        repository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
+        if (! Python.isStarted()) {
+            Python.start(AndroidPlatform(this))
+        }
+        modulePy()
+
         setupNav()
         setupMiniPlayer()
 
@@ -67,6 +81,36 @@ class MainActivity : AppCompatActivity() {
             startService(Intent(baseContext, OnClearFromRecentService::class.java))
         }
         setupPlayerNotification()
+    }
+
+    private fun modulePy(){
+        try {
+            val test = module.callAttr("recommendation",
+                arrayOf(arrayOf(0,1,1,0,0),
+                    arrayOf(1,1,1,0,1),
+                    arrayOf(0,1,0,1,1),
+                    arrayOf(1,0,0,1,0),
+                    arrayOf(1,0,1,0,1),
+                    arrayOf(0,1,0,1,1),
+                    arrayOf(1,0,0,1,0),
+                    arrayOf(1,0,1,0,1),
+                    arrayOf(1,0,1,1,1),
+                    arrayOf(1,0,1,1,1),
+                    arrayOf(1,0,1,1,1),
+                    arrayOf(1,0,1,1,1),
+                    arrayOf(1,0,1,1,1),
+                    arrayOf(0,0,1,1,0),
+                    arrayOf(1,0,1,0,0),
+                    arrayOf(0,0,1,0,1)),
+                arrayOf(3,0,5,0,1,0,2,3,1,3,0,0,1,3,2,4)).asList()
+            val temp = test.map { it.toFloat().toInt() }
+
+            Log.i("modulePy","$temp")
+        }catch (e: PyException){
+            Log.i("modulePy","$e")
+
+
+        }
     }
 
     private fun setupPlayerNotification(){

@@ -236,6 +236,12 @@ interface ToneApiService {
         @Header("Authorization") auth: String,
         @Path("id") id: String
         ): Tracks
+
+    @GET("artists/{id}/related-artists")
+    suspend fun getRelatedArtists(
+        @Header("Authorization") auth: String,
+        @Path("id") id: String
+    ): Artists
 }
 
 object ToneApi{

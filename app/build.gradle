@@ -5,6 +5,8 @@ plugins {
     id 'org.jetbrains.kotlin.kapt'
     id 'androidx.navigation.safeargs'
     id 'com.google.gms.google-services'
+    id 'com.chaquo.python'
+
 }
 
 android {
@@ -18,6 +20,28 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
+        python {
+            buildPython "C:/Users/haohao/AppData/Local/Programs/Python/Python39/python.exe"
+            pip {
+                install "numpy"
+                install "sklearn"
+                install "pandas"
+                install "matplotlib"
+
+            }
+        }
+
+    }
+
+    sourceSets {
+        main {
+            python.srcDir "src/main/python"
+        }
     }
 
     buildTypes {
@@ -127,49 +151,5 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.5'
 
-
-    // Align versions of all Kotlin components
-//    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-
-    // Use the Kotlin JDK 8 standard library.
-//    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-
-    // This dependency is used by the application.
-//    implementation("com.google.guava:guava:29.0-jre")
-
-    // Smile
-
-//    implementation("com.github.haifengl:smile-core:2.6.0")
-//    implementation("com.github.haifengl:smile-kotlin:2.6.0")
-
-//    implementation 'org.bytedeco.javacpp-presets:openblas:0.2.19-1.5.4'
-//    implementation 'org.bytedeco.javacpp-presets:openblas:0.2.19-1.5.4:android-x86'
-//    implementation 'org.bytedeco.javacpp-presets:openblas:0.2.19-1.5.4:android-arm'
-
-//    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.3'
-
-
-//    implementation group: 'org.bytedeco', name: 'javacpp', version: '1.5.4', classifier: 'macosx-x86_64'
-//    implementation(group:"org.bytedeco", name: 'javacpp', version: '1.5.4', classifier:"windows-x86_64")
-//    implementation(group:"org.bytedeco", name: 'javacpp', version: '1.5.4', classifier:"linux-x86_64")
-//    implementation(group:"org.bytedeco", name: 'javacpp', version: '1.5.4', classifier:"linux-arm64")
-//    implementation(group:"org.bytedeco", name: 'javacpp', version: '1.5.4', classifier:"linux-ppc64le")
-//    implementation(group:"org.bytedeco", name: 'javacpp', version: '1.5.4', classifier:"android-arm64")
-//    implementation(group:"org.bytedeco", name: 'javacpp', version: '1.5.4', classifier:"ios-arm64")
-//
-//    implementation(group:"org.bytedeco", name:"openblas", version:"0.3.9-1.5.4", classifier:"macosx-x86_64")
-//    implementation(group:"org.bytedeco", name:"openblas", version:"0.3.9-1.5.4", classifier:"windows-x86_64")
-//    implementation(group:"org.bytedeco", name:"openblas", version:"0.3.9-1.5.4", classifier:"linux-x86_64")
-//    implementation(group:"org.bytedeco", name:"openblas", version:"0.3.9-1.5.4", classifier:"linux-arm64")
-//    implementation(group:"org.bytedeco", name:"openblas", version:"0.3.9-1.5.4", classifier:"linux-ppc64le")
-//    implementation(group:"org.bytedeco", name:"openblas", version:"0.3.9-1.5.4", classifier:"android-arm64")
-//    implementation(group:"org.bytedeco", name:"openblas", version:"0.3.9-1.5.4", classifier:"ios-arm64")
-//
-//
-//    implementation(group:'org.bytedeco', name:'arpack-ng', version:'3.7.0-1.5.4', classifier:'macosx-x86_64')
-//    implementation(group:'org.bytedeco', name:'arpack-ng', version:'3.7.0-1.5.4', classifier:'windows-x86_64')
-//    implementation(group:'org.bytedeco', name:'arpack-ng', version:'3.7.0-1.5.4', classifier:'linux-x86_64')
-//    implementation(group:'org.bytedeco', name:'arpack-ng', version:'3.7.0-1.5.4', classifier:'linux-arm64')
-//    implementation(group:'org.bytedeco', name:'arpack-ng', version:'3.7.0-1.5.4 ', classifier:'linux-ppc64le')
 }
 

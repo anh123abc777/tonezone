@@ -4,6 +4,7 @@ import TrackInPlaylist
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.tonezone.utils.convertDocToPlaylist
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -492,6 +493,7 @@ class FirebaseRepository {
                     }
                 }
             }
+
     }
 
     fun getUserProfile(userID: String): MutableLiveData<User>{
@@ -855,6 +857,15 @@ class FirebaseRepository {
                 }
             }
         return relateArtists
+    }
+
+    fun submitArtistScore(userID: String,id: String,score: Int){
+        db.collection("Score")
+            .document(userID)
+            .collection("artists")
+            .document(id)
+            .set(hashMapOf("score" to score))
+
     }
 
 }
