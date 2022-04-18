@@ -56,11 +56,12 @@ class ArtistDetailsViewModel(
         getArtistAlbumsData()
 //        checkIsFollowingArtist()
         getRelatedArtists()
+        getArtistTopTracks()
     }
 
     private fun getArtistTopTracks() {
         uiScope.launch {
-            _artistTopTracks.value = try {
+            try {
                 val artistTopTracksDeferred = ToneApi.retrofitService
                     .getArtistTopTracksAsync(
                         "Bearer $token",
@@ -68,9 +69,9 @@ class ArtistDetailsViewModel(
                         "VN"
                     )
                 artistTopTracksDeferred.tracks!!
+                firebaseRepo.insertTracks(artistTopTracksDeferred.tracks!!)
             } catch (e: Exception) {
                 Log.i("error", e.message!!)
-                listOf()
             }
         }
     }

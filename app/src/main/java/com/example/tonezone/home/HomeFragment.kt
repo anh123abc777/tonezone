@@ -12,6 +12,7 @@ import com.example.tonezone.MainViewModel
 import com.example.tonezone.adapter.GroupPlaylistAdapter
 import com.example.tonezone.adapter.PlaylistAdapter
 import com.example.tonezone.databinding.FragmentHomeBinding
+import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.PlaylistInfo
 
 
@@ -36,6 +37,10 @@ class HomeFragment : Fragment() {
         binding.viewModel = viewModel
         createAdapterGroupPlaylist()
         observeNavigateToPlaylistDetails()
+
+        binding.logout.setOnClickListener {
+            mainViewModel.logout()
+        }
 
         return binding.root
     }

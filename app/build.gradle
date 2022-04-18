@@ -5,7 +5,6 @@ plugins {
     id 'org.jetbrains.kotlin.kapt'
     id 'androidx.navigation.safeargs'
     id 'com.google.gms.google-services'
-    id 'com.chaquo.python'
 
 }
 
@@ -21,27 +20,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
-        }
 
-        python {
-            buildPython "C:/Users/haohao/AppData/Local/Programs/Python/Python39/python.exe"
-            pip {
-                install "numpy"
-                install "sklearn"
-                install "pandas"
-                install "matplotlib"
-
-            }
-        }
-
-    }
-
-    sourceSets {
-        main {
-            python.srcDir "src/main/python"
-        }
     }
 
     buildTypes {
@@ -73,7 +52,7 @@ android {
 dependencies {
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation files('C:\\Users\\haohao\\Documents\\Kotlin\\spotify-app-remote-release-0.7.2.aar')
+    implementation 'com.google.firebase:firebase-auth:19.2.0'
     def version_retrofit = "2.9.0"
     def version_navigation = "2.4.1"
     def version_moshi = '1.12.0'
@@ -84,6 +63,7 @@ dependencies {
     def kotlin_version = "1.6.10"
     def version_kotlin_coroutines = '1.6.0'
     def version_gson = '2.9.0'
+    def kotlin_client_version = '1.3.30'
 
 
     implementation 'androidx.core:core-ktx:1.7.0'
@@ -150,6 +130,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.3.0-alpha01"
 
     implementation 'com.google.code.gson:gson:2.8.5'
+
+//    implementation "com.algolia:algoliasearch-client-kotlin:$kotlin_client_version"
 
 }
 

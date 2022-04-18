@@ -71,32 +71,24 @@ class PlaylistDetailsFragment : Fragment() {
 
         handlePlayPlaylist()
 
+        handleBackPress()
+
         val firebaseRepo = FirebaseRepository()
         viewModel.playlistItems.observe(viewLifecycleOwner){
             if (it!=null){
                 viewModel.getStateItemsLiked()
+                firebaseRepo.insertTracks(it)
 
-//                runBlocking(Dispatchers.IO) {
-//                    it.forEach { track ->
-//                        launch(Dispatchers.IO) {
-//                            track.artists?.forEach { artist ->
-//                                val artistProfile = ToneApi.retrofitService
-//                                    .getArtist(
-//                                        "Bearer ${mainViewModel.token}",
-//                                        artist.id!!
-//                                    )
-//                                if (artistProfile!=null){
-//                                    firebaseRepo.insertArtist(artistProfile)
-//                                }
-//                                sleep(10)
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
 
         return binding.root
+    }
+
+    private fun handleBackPress(){
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressed()
+        }
     }
 
     private fun handlePlayPlaylist(){

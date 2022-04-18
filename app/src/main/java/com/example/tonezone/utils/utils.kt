@@ -10,6 +10,7 @@ import com.example.tonezone.network.Owner
 import com.example.tonezone.network.Playlist
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
+import kotlin.collections.HashMap
 
 fun convertDocToPlaylist(value: DocumentSnapshot): Playlist {
     val playlist = Playlist()
@@ -52,23 +53,32 @@ fun displayArtistNames(list: List<Artist>): String{
 
 suspend fun createBitmapFromUrl(context: Context, url: String): Bitmap {
 
-
-//
-//    var bitmap = BitmapFactory.decodeResource(context.resources,R.drawable.splash_image)
-//    Glide.with(context)
-//        .asBitmap()
-//        .load(url)
-//        .into(object : CustomTarget<Bitmap>(){
-//            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-//                bitmap = resource
-//            }
-//            override fun onLoadCleared(placeholder: Drawable?) {
-//            }
-//        })
-
     return Glide
         .with(context)
         .asBitmap()
         .load(url)
         .submit().get()
+}
+
+fun generateSearchKeywords(inputText: String): List<String>{
+    var inputString = inputText.lowercase()
+    var keyWords = mutableListOf<String>()
+
+    val words = inputString.split(" ")
+
+    for (word in words){
+        var appendString = ""
+
+        //For every character in the whole string
+        for(charPosition in inputString.indices){
+            appendString += inputString[charPosition].toString()
+            keyWords.add(appendString)
+        }
+
+        //remove first word from the string
+        inputString = inputString.replace("$word ","")
+
+    }
+
+    return keyWords
 }

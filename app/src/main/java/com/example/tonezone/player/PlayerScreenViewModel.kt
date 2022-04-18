@@ -14,9 +14,6 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.extractor.ts.DefaultTsPayloadReaderFactory
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.spotify.android.appremote.api.ConnectionParams
-import com.spotify.android.appremote.api.Connector
-import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.*
 import java.lang.IllegalArgumentException
 
@@ -24,12 +21,10 @@ import java.lang.IllegalArgumentException
 class PlayerScreenViewModel(val application: Application) : ViewModel() {
 
     private val CLIENT_ID = "0546209c8b9b4b66a8d49037c566caa6"
-    private val REDIRECT_URI = "com.tonezone://callback"
-    private var mSpotifyAppRemote: SpotifyAppRemote? = null
-    private var connectionParams = ConnectionParams.Builder(CLIENT_ID)
-        .setRedirectUri(REDIRECT_URI)
-        .showAuthView(true)
-        .build()!!
+//    private val REDIRECT_URI = "com.tonezone://callback"
+//        .setRedirectUri(REDIRECT_URI)
+//        .showAuthView(true)
+//        .build()!!
 
     private val tokenRepository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
     val token = runBlocking(Dispatchers.IO) { tokenRepository.token}
@@ -171,17 +166,14 @@ class PlayerScreenViewModel(val application: Application) : ViewModel() {
     }
 
     fun onShuffle(){
-        mSpotifyAppRemote!!.playerApi.setShuffle(!_isShuffling.value!!)
+//        mSpotifyAppRemote!!.playerApi.setShuffle(!_isShuffling.value!!)
     }
 
     fun onRepeat(){
-        mSpotifyAppRemote!!.playerApi.setRepeat(1)
+//        mSpotifyAppRemote!!.playerApi.setRepeat(1)
     }
 
-    fun disconnect(){
-        SpotifyAppRemote.disconnect(mSpotifyAppRemote)
-        _playerState.value = PlayerState.NONE
-    }
+
 
     override fun onCleared() {
         super.onCleared()

@@ -57,6 +57,17 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/exo_controls_play"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_gravity="end|top"
+            tools:ignore="ContentDescription"
+            app:elevation="10dp"
+            />
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
@@ -127,16 +138,6 @@
                             android:src="@drawable/ic_favorite"
                             app:tint="@color/colorSecondary" />
 
-                        <ImageView
-                            android:id="@+id/play"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_custom_play"
-                            android:background="@drawable/press_button"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            />
 
                     </RelativeLayout>
 

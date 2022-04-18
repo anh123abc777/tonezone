@@ -52,7 +52,6 @@ class PlayerScreenFragment : Fragment() {
 
 
     override fun onDestroy() {
-        viewModel.disconnect()
         super.onDestroy()
     }
     //    WTF should I do with this screen????
