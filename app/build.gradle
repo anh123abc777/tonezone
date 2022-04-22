@@ -82,7 +82,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-moshi:$version_retrofit"
 
     //exoPlayer
-    implementation 'com.google.android.exoplayer:exoplayer:2.15.0'
+    implementation 'com.google.android.exoplayer:exoplayer:2.17.1'
 
     //Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$version_navigation"
@@ -130,6 +130,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.3.0-alpha01"
 
     implementation 'com.google.code.gson:gson:2.8.5'
+
+    implementation 'androidx.palette:palette-ktx:1.0.0'
 
 //    implementation "com.algolia:algoliasearch-client-kotlin:$kotlin_client_version"
 

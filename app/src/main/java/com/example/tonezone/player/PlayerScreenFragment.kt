@@ -1,18 +1,31 @@
 package com.example.tonezone.player
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.palette.graphics.Palette
+import com.example.tonezone.MainViewModel
 import com.example.tonezone.databinding.FragmentPlayerScreenBinding
 import com.example.tonezone.network.Track
+import com.example.tonezone.network.User
+import com.example.tonezone.utils.createBitmapFromUrl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 class PlayerScreenFragment : Fragment() {
 
     private lateinit var binding: FragmentPlayerScreenBinding
-    private lateinit var viewModel: PlayerScreenViewModel
+    private val mainViewModel : MainViewModel by activityViewModels()
+    private val viewModel: PlayerScreenViewModel by activityViewModels{
+        PlayerScreenViewModelFactory(requireNotNull(activity).application,mainViewModel.firebaseAuth.value!!)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -20,24 +33,34 @@ class PlayerScreenFragment : Fragment() {
     ): View {
 
         binding = FragmentPlayerScreenBinding.inflate(inflater)
-        val application = requireNotNull(activity).application
-        val factory = PlayerScreenViewModelFactory(application)
-        viewModel = ViewModelProvider(requireActivity(),factory).get(PlayerScreenViewModel::class.java)
         binding.viewModel = viewModel
         binding.lifecycleOwner = activity
 
         handlePlayingTrack()
+        handleShowCurrentPlaylist()
+        viewModel.setupPropertiesView()
 
         return binding.root
     }
 
     private fun handlePlayingTrack(){
-        var currentTrack = Track()
-        viewModel.currentTrack.observe(viewLifecycleOwner){
-            if(it!= Track() && currentTrack!=it){
-                viewModel.initSeekBar()
-                currentTrack = it
-                viewModel.onPlay()
+        if (viewModel.playerState.value==PlayerScreenViewModel.PlayerState.NONE) {
+            viewModel.currentTrack.observe(requireActivity()) {
+                if (it != Track()) {
+                    viewModel.initSeekBar()
+                    viewModel.onPlay()
+                    viewModel.initPrimaryColor()
+                    viewModel.checkIsLikeTrack()
+                }
+            }
+        }
+    }
+
+    private fun handleShowCurrentPlaylist(){
+        viewModel.isShowingCurrentPlaylist.observe(requireActivity()){
+            if (it==true){
+                findNavController().navigate(PlayerScreenFragmentDirections.actionPlayerScreenFragmentToCurrentPlaylistFragment())
+                viewModel.showCurrentPlaylistComplete()
             }
         }
     }

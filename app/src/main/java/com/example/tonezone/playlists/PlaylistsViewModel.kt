@@ -28,8 +28,8 @@ class PlaylistsViewModel(val token: String, val playlistInfo: PlaylistInfo) : Vi
                     .getCategoryPlaylistsAsync("Bearer $token", playlistInfo.id).playlists.items!!
                 val playlistIDs = temp.map { it.id!! }
 
-                firebaseRepo.insertItemsToCategory(playlistInfo.id,playlistIDs)
-                firebaseRepo.insertPlaylist(temp)
+//                firebaseRepo.insertItemsToCategory(playlistInfo.id,playlistIDs)
+//                firebaseRepo.insertPlaylist(temp)
 //
             } catch (e: Exception) {
                 Log.i("result", e.message!!)

@@ -14,4 +14,5 @@
     <color name="white_opaque">#19000000</color>
     <color name="color_title">#5D8294</color>
     <color name="pink">#F2BBBB</color>
+    <color name="player_color">#707070</color>
 </resources>

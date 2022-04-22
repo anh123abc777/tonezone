@@ -1,7 +1,10 @@
 package com.example.tonezone
 
+import android.content.res.ColorStateList
 import android.text.format.DateUtils
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
@@ -15,29 +18,8 @@ import com.example.tonezone.utils.Signal
 import com.example.tonezone.utils.convertSignalToIcon
 import com.example.tonezone.utils.convertSignalToText
 import com.example.tonezone.yourlibrary.SortOption
+import com.google.android.exoplayer2.Player
 import com.google.android.material.chip.Chip
-
-
-//@BindingAdapter("imageUrl")
-//fun bindImage(imgView : ImageView, imgUrl : String?){
-//    imgUrl?.let {
-//        val imgUri : Uri = ewImgUrl.toUri().buildUpon().scheme("https").build()
-//
-//        Glide.with(imgView.context)
-//            .load(imgUri)
-//            .apply(
-//                RequestOptions())
-//            .into(imgView)
-//    }
-//}
-
-//@BindingAdapter("valueGenres")
-//fun bindDataGenres(recyclerView: RecyclerView, data: Topic?){
-//    val adapter = recyclerView.adapter as GenreAdapter
-//    if (data!=null) {
-//        adapter.submitList(data.genres)
-//    }
-//}
 
 @BindingAdapter("groupPlaylists")
 fun bindGroupPlaylistsRecyclerview(recyclerView: RecyclerView, list: List<GroupPlaylist>?){
@@ -63,13 +45,13 @@ fun bindArtistsRecyclerview(recyclerView: RecyclerView, list: List<Artist>?){
     }
 }
 
-@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userTracksDataSaveds","sortOption","keyWord"],requireAll = false)
+@BindingAdapter(value = ["playlistData","artistData","trackData","albumData","userSavedTracksData","sortOption","keyWord"],requireAll = false)
 fun bindDataYourLibrary(recyclerView: RecyclerView,
                         playlistData: List<Playlist>?,
                         artistData: List<Artist>?,
                         trackData: List<Track>?,
                         albumData: List<Album>?,
-                        userTracksDataSaveds: List<SavedTrack>?,
+                        userSavedTracksData: List<SavedTrack>?,
                         sortOption: SortOption?,
                         keyWord: String?
                         ){
@@ -77,8 +59,8 @@ fun bindDataYourLibrary(recyclerView: RecyclerView,
     val adapter = recyclerView.adapter as LibraryAdapter
 
     val userSavedTracks =
-        if(!userTracksDataSaveds.isNullOrEmpty())
-            listOf(Playlist("userSavedTrack","liked Songs",
+        if(!userSavedTracksData.isNullOrEmpty())
+            listOf(Playlist("UserSavedTrack","liked Songs",
              listOf(Image(null,url="https://picsum.photos/300/300",null)),"User's save songs",Owner(""),
             false,"playlist", listOf()))
         else
@@ -143,8 +125,41 @@ fun bindImage(imageView: ImageView,imageUrl: String?,listImageUrl: List<Image>?)
 
 @BindingAdapter("layoutVisibility")
 fun bindLayoutVisibility(relativeLayout: RelativeLayout, track: Track?){
-
     relativeLayout.visibility = if(track!=Track() && track!=null) View.VISIBLE else View.GONE
+}
+
+
+@BindingAdapter("isNavigatingCurrentPlaylist")
+fun bindLayoutVisibility(relativeLayout: RelativeLayout, isShowing: Boolean?){
+        when(isShowing){
+            null -> relativeLayout.visibility = View.VISIBLE
+            false -> hiddenView(relativeLayout)
+        }
+}
+
+@BindingAdapter("isNavigatingCurrentPlaylist")
+fun bindLayoutVisibility(linearLayout: LinearLayout, isShowing: Boolean?){
+    when(isShowing){
+        false -> hiddenView(linearLayout)
+    }
+}
+
+private fun hiddenView(view: View){
+    val animationDown = AnimationUtils.loadAnimation(view.context,R.anim.bottom_down)
+    animationDown.setAnimationListener(object: Animation.AnimationListener{
+        override fun onAnimationStart(p0: Animation?) {
+            view.visibility = View.VISIBLE
+        }
+
+        override fun onAnimationEnd(p0: Animation?) {
+            view.visibility = View.GONE
+
+        }
+
+        override fun onAnimationRepeat(p0: Animation?) {
+        }
+    })
+        view.startAnimation(animationDown)
 }
 
 @BindingAdapter("formatTime")
@@ -171,15 +186,6 @@ fun bindStatePlayButton(button: ImageButton, state: PlayerScreenViewModel.Player
         else -> button.setImageResource(R.drawable.ic_custom_play)
     }
 }
-
-@BindingAdapter("isChoose")
-fun bindColorShuffleButton(imageView: ImageView, isChoose: Boolean){
-    if(isChoose)
-        imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.colorSecondary))
-    else
-        imageView.setColorFilter(ContextCompat.getColor(imageView.context,R.color.gray))
-}
-
 
 @BindingAdapter("sizeList")
 fun bindChip(chip: Chip, sizeList: Int?){
@@ -243,4 +249,50 @@ fun bindImageProfile(imageView: ImageView,playlistInfo: PlaylistInfo){
         imageView.visibility = View.VISIBLE
     else
         imageView.visibility = View.GONE
+}
+
+@BindingAdapter(value = ["repeatMode","lightColor","darkColor"])
+fun bindIconRepeatButton(imageButton: ImageButton,repeatMode: Int,lightColor: Int, darkColor: Int){
+    var imageResource = when(repeatMode){
+        Player.REPEAT_MODE_ALL -> R.drawable.ic_repeat
+        Player.REPEAT_MODE_ONE -> R.drawable.ic_repeat_one
+        Player.REPEAT_MODE_OFF -> {
+            R.drawable.ic_repeat
+        }
+        else -> R.drawable.ic_repeat
+    }
+
+    imageButton.setImageResource(imageResource)
+    if (repeatMode==0){
+        imageButton.imageTintList = ColorStateList.valueOf(darkColor)
+    }else
+        imageButton.imageTintList = ColorStateList.valueOf(lightColor)
+}
+
+@BindingAdapter(value = ["isChoosing","lightButtonTint","darkButtonTint"])
+fun bindColorShuffleButton(imageButton: ImageButton, isChoosing: Boolean, lightButtonTint: Int, darkButtonTint: Int){
+
+        if(isChoosing)
+            imageButton.imageTintList = ColorStateList.valueOf(lightButtonTint)
+        else
+            imageButton.imageTintList = ColorStateList.valueOf(darkButtonTint)
+
+}
+
+@BindingAdapter( "stateButton")
+fun bindStateButton(imageButton: ImageButton, isPositive: Boolean){
+        if (isPositive)
+            imageButton.setColorFilter(
+                ContextCompat.getColor(
+                    imageButton.context,
+                    R.color.colorSecondary
+                )
+            )
+        else
+            imageButton.setColorFilter(ContextCompat.getColor(imageButton.context, R.color.gray))
+}
+
+@BindingAdapter("backgroundColor")
+fun bindBackGroundColor(relativeLayout: RelativeLayout,color: Int){
+    relativeLayout.setBackgroundColor(color)
 }

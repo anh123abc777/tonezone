@@ -83,7 +83,7 @@ class ArtistDetailsFragment : Fragment() {
 
     private fun handleOnPlay(){
         binding.playButton.setOnClickListener {
-            playerViewModel.onInit(0,viewModel.artistTopTracks.value)
+            playerViewModel.onInit(0,viewModel.tracks.value)
         }
     }
 

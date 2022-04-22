@@ -4,16 +4,19 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.178" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/below_shadow.xml" value="0.1" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/border_artist.xml" value="0.1625" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/border_avt_playlist.xml" value="0.178" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/border_chip.xml" value="0.178" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/button_state_pressed.xml" value="0.1095" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/checkbox.xml" value="0.1855" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_add.xml" value="0.103" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_add_playlist.xml" value="0.211" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_baseline_home_24.xml" value="0.178" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_baseline_push_pin_24.xml" value="0.13" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_close.xml" value="0.13" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_connection_error.xml" value="0.211" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_crop.xml" value="0.1" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_custom_pause.xml" value="0.1" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_custom_play.xml" value="0.103" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_drag.xml" value="0.1095" />
@@ -22,6 +25,7 @@
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_hide.xml" value="0.1095" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_launcher_background.xml" value="0.178" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_library_music_black_24dp.xml" value="0.1625" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_outline_play_circle_24.xml" value="0.1855" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_outline_queue_music_24.xml" value="0.178" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_remove.xml" value="0.1095" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/ic_shuffle_black_24dp.xml" value="0.1625" />
@@ -33,16 +37,19 @@
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/press_button.xml" value="0.1705" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/press_item.xml" value="0.1715" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/press_item_list.xml" value="0.1" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/shadow_layout.xml" value="0.1" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/state_pressed_button.xml" value="0.1" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/drawable/state_pressed_item.xml" value="0.1" />
-        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/activity_main.xml" value="0.176" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/activity_main.xml" value="0.3059895833333333" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/checkbox.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/chipgroup_yourlibrary.xml" value="0.259375" />
-        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_artist_details.xml" value="0.176" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_artist_details.xml" value="0.2" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_current_playlist.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_detail_playlist.xml" value="0.2" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_home.xml" value="0.22826086956521738" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_login.xml" value="0.264" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_play_view.xml" value="0.136" />
-        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_player_screen.xml" value="0.324577861163227" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_player_screen.xml" value="0.264" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_playlist_details.xml" value="0.264" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_playlists.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_register.xml" value="0.264" />
@@ -53,6 +60,7 @@
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_slagsh_screen.xml" value="0.2453125" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_your_library.xml" value="0.1" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/fragment_your_playlist.xml" value="0.259375" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/header.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/item_artist.xml" value="0.2" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/item_artist_horizontal.xml" value="0.2" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/item_artists_horizontal.xml" value="0.10925925925925926" />
@@ -65,12 +73,14 @@
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/item_playlist_in_grid.xml" value="0.14722222222222223" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/item_playlist_in_list.xml" value="0.1" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/item_track.xml" value="0.176" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/item_track_manager.xml" value="0.2" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/mini_player.xml" value="0.22826086956521738" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/modal_bottom_sheet_content.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/layout/option_display_list.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/menu/add_to_playlist_menu.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/menu/appbar_yourlibrary_menu.xml" value="0.259375" />
         <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.259375" />
+        <entry key="..\:/Users/haohao/Documents/Kotlin/TRAINING/ToneZone/app/src/main/res/menu/current_playlist_option_toolbar_menu.xml" value="0.6" />
       </map>
     </option>
   </component>

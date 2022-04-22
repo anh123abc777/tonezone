@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.tonezone.player.PlayerScreenViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".player.currentplaylist.CurrentPlaylistFragment"
+        android:orientation="vertical"
+        android:background="@{viewModel.darkBackgroundDrawable}"
+        >
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/selected_option_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="Songs"
+            app:navigationIcon="@drawable/ic_unchecked"
+            app:titleTextColor="@{viewModel.darkColorOnPrimary}"
+            app:navigationIconTint="@{viewModel.darkColorOnPrimary}"
+            >
+            <Button
+                android:id="@+id/clear_select_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/press_button"
+                android:text="Clear"
+                android:textColor="@{viewModel.darkColorOnPrimary}"
+                android:layout_gravity="center_vertical|end"
+                android:onClick="@{() -> viewModel.clearSelectedTracks()}"
+                />
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
+            app:elevation="8dp"
+            android:background="@{viewModel.darkBackgroundDrawable}"
+            android:visibility="@{viewModel.isLongPress}"
+            >
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIconTint="@{viewModel.darkColorOnPrimary}"
+                />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_current_playlist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:orientation="vertical"
+            android:layout_gravity="top"
+            android:clipToPadding="false"
+            android:background="@{viewModel.darkBackGround}"
+            android:paddingBottom="64dp"
+            />
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/selected_option_layout"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_gravity="bottom"
+            android:background="@{viewModel.darkBackgroundDrawable}"
+            >
+
+            <Button
+                android:id="@+id/hide_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/hide"
+                android:background="@drawable/press_button"
+                android:layout_gravity="center_vertical|start"
+                android:onClick="@{() -> viewModel.hideTracksFromPlaylist()}"
+                android:textColor="@{viewModel.darkColorOnPrimary}"
+                />
+
+            <Button
+                android:id="@+id/add_to_playlist_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/add_to_playlist"
+                android:background="@drawable/press_button"
+                android:layout_gravity="center_vertical|end"
+                android:textColor="@{viewModel.darkColorOnPrimary}"
+                />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

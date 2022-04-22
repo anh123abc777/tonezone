@@ -2,16 +2,20 @@
 
 package com.example.tonezone
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +23,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import androidx.palette.graphics.Palette
 import com.example.tonezone.database.Token
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
@@ -26,14 +31,15 @@ import com.example.tonezone.databinding.ActivityMainBinding
 import com.example.tonezone.network.Track
 import com.example.tonezone.notifycation.CreateNotification
 import com.example.tonezone.notifycation.OnClearFromRecentService
-import com.example.tonezone.notifycation.Playable
 import com.example.tonezone.player.PlayerScreenViewModel
+import com.example.tonezone.utils.createBitmapFromUrl
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.spotify.sdk.android.auth.LoginActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+
 
 const val REDIRECT_URI = "com.tonezone://callback"
 
@@ -58,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
+        binding.viewModel = playerViewModel
         binding.lifecycleOwner = this
 
 
@@ -70,9 +77,60 @@ class MainActivity : AppCompatActivity() {
             startService(Intent(baseContext, OnClearFromRecentService::class.java))
         }
         setupPlayerNotification()
-
         handleLogin()
+        setupSeekbar()
+        observeSomething()
     }
+
+    private fun observeSomething(){
+        playerViewModel.isShuffling.observe(this){
+            Toast.makeText(this,"$it",Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun setupSeekbar(){
+        binding.simpleSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if(fromUser) {
+                    playerViewModel.seekTo(progress)
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+
+        })
+        setupProgressBackgroundTintSeekbar()
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    fun setupProgressBackgroundTintSeekbar(){
+
+        playerViewModel.currentTrack.observe(this) {
+            if (it!=Track()){
+                val bitmap = runBlocking(Dispatchers.IO) {
+                    createBitmapFromUrl(
+                        applicationContext,
+                        playerViewModel.currentTrack.value?.album?.images?.get(0)?.url ?: ""
+                    )
+                }
+
+    //             Asynchronous
+                Palette.from(bitmap).generate { palette ->
+                    val txtBackgroundColor = palette?.mutedSwatch?.bodyTextColor
+                    binding.simpleSeekBar.progressBackgroundTintList =
+                        txtBackgroundColor?.let { color ->
+                            ColorStateList.valueOf(
+                                color
+                            )
+                        }
+                }
+            }
+        }
+    }
+
 
     private fun handleLogin(){
 
@@ -182,15 +240,23 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val currentDestination= navController.currentDestination
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_player) as NavHostFragment
+        val playerNavController =  navHostFragment.navController
+        playerNavController.enableOnBackPressed(true)
 
         if (currentDestination != null) {
             when(currentDestination.id) {
-                R.id.loginFragment -> {
+                R.id.loginFragment,R.id.splashScreenFragment -> {
                     finish()
+                }
+
+                else -> {
+                        super.onBackPressed()
                 }
             }
         }
-        super.onBackPressed()
+
     }
 
 

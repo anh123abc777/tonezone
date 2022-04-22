@@ -10,9 +10,6 @@ import kotlinx.coroutines.*
 
 class HomeViewModel(val token: String, val user: User) : ViewModel() {
 
-    private val viewModelJob = Job()
-    private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
-
     private var _groupPlaylists = MutableLiveData<List<GroupPlaylist>>()
     val groupPlaylists : LiveData<List<GroupPlaylist>>
         get() = _groupPlaylists
@@ -99,7 +96,6 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
     }
 
     override fun onCleared() {
-        uiScope.cancel()
         super.onCleared()
     }
 }

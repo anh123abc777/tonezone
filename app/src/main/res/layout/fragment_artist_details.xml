@@ -124,7 +124,7 @@
                     tools:listitem="@layout/item_track"
                     tools:itemCount="6"
                     android:layout_marginTop="8dp"
-                    trackData="@{ viewModel.artistTopTracks}"
+                    trackData="@{viewModel.tracks}"
                     android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
                     />

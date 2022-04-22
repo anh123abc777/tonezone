@@ -124,9 +124,10 @@
                             android:src="@drawable/ic_ver_more"
                             app:tint="@color/colorSecondary" />
 
+<!--                        isChoosing="@{viewModel.isUserPlaylistFollowed()}"-->
+
                         <ImageButton
                             android:id="@+id/like"
-                            isChoose="@{viewModel.isUserPlaylistFollowed()}"
                             isVisibility="@{viewModel.isOwnedByUser}"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

@@ -9,44 +9,94 @@
             type="com.example.tonezone.player.PlayerScreenViewModel" />
     </data>
 
-    <RelativeLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".player.PlayerScreenFragment"
-        android:padding="16dp"
+        android:paddingTop="16dp"
+        android:orientation="vertical"
+        android:background="@{viewModel.darkBackgroundDrawable}"
         >
 
-        <ImageView
-            android:id="@+id/dragDown"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:src="@drawable/ic_drag"
-            app:tint="@color/black"
-            android:elevation="10dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            />
+        <LinearLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_gravity="top"
+            android:background="@{viewModel.darkBackgroundDrawable}"
+            >
+
+            <LinearLayout
+                android:id="@+id/screen_controller"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp"
+                >
+
+                <ImageView
+                    android:id="@+id/dragDown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:src="@drawable/ic_crop"
+                    android:tint="@{viewModel.darkTint}"
+                    android:elevation="10dp"
+                    android:layout_gravity="center_vertical"
+                    tools:ignore="UseAppTint" />
+
+                <LinearLayout
+                    android:id="@+id/track_information"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    >
+
+                    <TextView
+                        android:layout_width="268dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/songName"
+                        android:textSize="16sp"
+                        android:singleLine="true"
+                        android:textColor="@{viewModel.colorOnPrimary}"
+                        android:text="@{viewModel.currentTrack.name}"
+                        />
+
+                    <TextView
+                        android:id="@+id/artists"
+                        android:layout_width="268dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:singleLine="true"
+                        android:textColor="@{viewModel.colorOnPrimary}"
+                        artists="@{viewModel.currentTrack.artists}"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/frameThumbnail"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="32dp"
             android:layout_marginBottom="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/dragDown"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="2dp"
             android:elevation="8dp"
-            app:cardElevation="8dp"
+            app:cardCornerRadius="640dp"
+            android:layout_gravity="center"
             >
 
             <ImageView
                 android:id="@+id/thumbnail"
-                android:layout_width="match_parent"
-                android:layout_height="360dp"
+                android:layout_width="264dp"
+                android:layout_height="264dp"
                 android:layout_gravity="center_horizontal"
                 listImageUrl="@{viewModel.currentTrack.album.images}"
                 android:scaleType="fitXY"
@@ -54,165 +104,8 @@
 
         </androidx.cardview.widget.CardView>
 
-        <LinearLayout
-            android:id="@+id/track_information"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_below="@id/frameThumbnail"
-            >
-            <TextView
-                android:layout_width="268dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/songName"
-                android:textSize="20sp"
-                android:singleLine="true"
-                android:text="@{viewModel.currentTrack.name}"
-                />
-
-            <TextView
-                android:id="@+id/artists"
-                android:layout_width="268dp"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:singleLine="true"
-                artists="@{viewModel.currentTrack.artists}"
-                />
-
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/fullSeekBar"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/track_information"
-
-            >
-
-            <SeekBar
-                android:id="@+id/simpleSeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_centerInParent="true"
-                android:max="@{viewModel.currentTrack.duration_ms.intValue()/1000}"
-                android:progress="@{viewModel.progress.intValue()/1000}"
-                />
-
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="16dp"
-                >
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:text="0:00"
-                    android:layout_marginBottom="8dp"
-                    formatTime="@{viewModel.progress}"
-                    />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="4:00"
-                    android:layout_alignParentRight="true"
-                    formatTime="@{viewModel.currentTrack.duration_ms}"
-                    />
-
-            </RelativeLayout>
-
-        </LinearLayout>
-
-
-        <RelativeLayout
-            android:id="@+id/controller"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="8dp"
-            >
-
-            <ImageButton
-                android:id="@+id/shuffle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/skip_previous"
-                android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_shuffle_black_24dp"
-                android:onClick="@{() -> viewModel.onShuffle()}"
-                isChoose="@{viewModel.isShuffling}"
-                android:padding="8dp"
-                android:background="@drawable/press_button"
-                />
-
-            <ImageButton
-                android:id="@+id/skip_previous"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_previous"
-                android:padding="8dp"
-                android:background="@drawable/press_button"
-                android:layout_toLeftOf="@id/play"
-                android:layout_marginEnd="16dp"
-                android:layout_centerVertical="true"
-                android:onClick="@{() -> viewModel.onPrevious()}"
-                />
-
-
-            <ImageButton
-                android:id="@+id/play"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:padding="8dp"
-                android:background="@drawable/press_button"
-                android:backgroundTintMode="src_over"
-                playerState="@{viewModel.playerState}"
-                android:onClick="@{() -> viewModel.onChangeState()}"
-                />
-
-
-            <ImageButton
-                android:id="@+id/skip_next"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_next"
-                android:padding="8dp"
-                android:background="@drawable/press_button"
-                android:layout_toEndOf="@id/play"
-                android:layout_marginStart="16dp"
-                android:layout_centerVertical="true"
-                android:onClick="@{() -> viewModel.onNext()}"
-                />
-
-            <ImageButton
-                android:id="@+id/queue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_library_music_black_24dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/skip_next"
-                android:layout_marginStart="16dp"
-                android:padding="8dp"
-                android:background="@drawable/press_button"
-                />
-
-        </RelativeLayout>
-
-    </RelativeLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

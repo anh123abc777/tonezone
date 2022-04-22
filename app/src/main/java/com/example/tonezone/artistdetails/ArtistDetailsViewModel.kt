@@ -17,7 +17,7 @@ class ArtistDetailsViewModel(
     private val firebaseRepo = FirebaseRepository()
 
     private val _artistTopTracks = firebaseRepo.getTracksOfArtist(playlistInfo.id,playlistInfo.name)
-    val artistTopTracks : LiveData<List<Track>>
+    val tracks : LiveData<List<Track>>
         get() = _artistTopTracks
 
     private val _artist = MutableLiveData<Artist>()
@@ -69,7 +69,7 @@ class ArtistDetailsViewModel(
                         "VN"
                     )
                 artistTopTracksDeferred.tracks!!
-                firebaseRepo.insertTracks(artistTopTracksDeferred.tracks!!)
+//                firebaseRepo.insertTracks(artistTopTracksDeferred.tracks!!)
             } catch (e: Exception) {
                 Log.i("error", e.message!!)
             }
@@ -85,7 +85,7 @@ class ArtistDetailsViewModel(
                         playlistInfo.id
                     ).artists
                 Log.i("relatedArtists","$relatedArtist")
-                relatedArtist?.let { firebaseRepo.insertArtists(it) }
+//                relatedArtist?.let { firebaseRepo.insertArtists(it) }
             } catch (e: Exception) {
                 Log.i("error", "$e")
             }
@@ -99,7 +99,7 @@ class ArtistDetailsViewModel(
                        .getArtist(
                            "Bearer $token",
                            playlistInfo.id)
-                   firebaseRepo.insertArtist(_artist.value!!)
+//                   firebaseRepo.insertArtist(_artist.value!!)
                    Log.i("getArtist","Failure ${_artist.value}")
                }catch (e: Exception){
                    Log.i("getArtist","Failure $e")
@@ -114,7 +114,7 @@ class ArtistDetailsViewModel(
                 _artistAlbums.value = ToneApi.retrofitService
                     .getArtistAlbums("Bearer $token",
                     playlistInfo.id).items
-                    firebaseRepo.insertAlbums(_artistAlbums.value!!)
+//                    firebaseRepo.insertAlbums(_artistAlbums.value!!)
                 Log.i("artistAlbums","${_artistAlbums.value}")
 
             }catch (e: Exception){
@@ -149,12 +149,12 @@ class ArtistDetailsViewModel(
 
     private fun unfollowArtist(){
         firebaseRepo.unfollowObject(user.id,playlistInfo.id,"artist")
-        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,0)
+//        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,0)
     }
 
     private fun followArtist(){
         firebaseRepo.followObject(user.id,playlistInfo.id,"artist")
-        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,1)
+//        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,1)
     }
 
     fun navigateToMoreTracks(){

@@ -1,10 +1,14 @@
 package com.example.tonezone.network
 
 import TrackInPlaylist
+import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.utils.convertDocToPlaylist
-import com.google.firebase.firestore.FieldPath
+import com.example.tonezone.utils.generateSearchKeywords
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -12,7 +16,10 @@ import com.google.firebase.ktx.Firebase
 
 class FirebaseRepository {
 
-    private val db = Firebase.firestore
+    val db = Firebase.firestore
+    init {
+        db.firestoreSettings = FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
+    }
 
     /** track **/
     fun getAllTracks(){
@@ -21,7 +28,14 @@ class FirebaseRepository {
             .addOnSuccessListener { documents ->
                 for (document in documents){
                     val track = document.toObject<Track>()
-                    tracks.add(track)
+//                    val map = hashMapOf(
+//                        "id" to track.id,
+//                        "type" to track.type,
+//                        "search_keywords" to generateSearchKeywords(track.name!!)
+//                    )
+//                    db.collection("Search")
+//                        .document(track.id!!)
+//                        .set(map)
                 }
             }
             .addOnFailureListener {
@@ -29,13 +43,13 @@ class FirebaseRepository {
             }
     }
 
-    fun insertTracks(tracks: List<Track>){
-        tracks.forEach { track ->
-            insertTrack(track)
-//            insertArtists(track.artists?: listOf())
-            track.album?.let { insertAlbum(it) }
-        }
-    }
+//    fun insertTracks(tracks: List<Track>){
+//        tracks.forEach { track ->
+//            insertTrack(track)
+////            insertArtists(track.artists?: listOf())
+//            track.album?.let { insertAlbum(it) }
+//        }
+//    }
 
      private fun insertTrack(track: Track){
          if (track.preview_url!=null) {
@@ -104,6 +118,17 @@ class FirebaseRepository {
 
                 if (value!=null){
                     tracks.value = value.toObjects(Track::class.java)
+
+//                    tracks.value!!.forEach {
+//                        val map = hashMapOf(
+//                            "id" to it.id,
+//                            "type" to it.type,
+//                            "search_keywords" to generateSearchKeywords(it.name)
+//                        )
+//                        db.collection("Search")
+//                            .document(it.id)
+//                            .set(map)
+//                    }
                 }
             }
 
@@ -132,6 +157,18 @@ class FirebaseRepository {
                                        if (value != null) {
                                            listData+=value.toObjects(Track::class.java)
                                            val temp = listData
+
+//                                           temp.forEach {
+//                                               val map = hashMapOf(
+//                                                   "id" to it.id,
+//                                                   "type" to it.type,
+//                                                   "search_keywords" to generateSearchKeywords(it.name)
+//                                               )
+//                                               db.collection("Search")
+//                                                   .document(it.id)
+//                                                   .set(map)
+//                                           }
+
                                            tracks.value = temp
                                        }
                                    }
@@ -156,17 +193,17 @@ class FirebaseRepository {
 
     /** artist **/
 
-    fun insertArtists(artists: List<Artist>){
-        artists.forEach { artist ->
-//            insertArtist(artist)
-        }
-    }
+//    fun insertArtists(artists: List<Artist>){
+//        artists.forEach { artist ->
+////            insertArtist(artist)
+//        }
+//    }
 
-    suspend fun insertArtist(artist: Artist){
-        db.collection("Artist")
-            .document(artist.id!!)
-            .set(artist)
-    }
+//    suspend fun insertArtist(artist: Artist){
+//        db.collection("Artist")
+//            .document(artist.id!!)
+//            .set(artist)
+//    }
 
     fun getArtist(id: String): MutableLiveData<Artist>{
         val artist = MutableLiveData<Artist>()
@@ -198,14 +235,14 @@ class FirebaseRepository {
 
     /** playlist **/
 
-    fun insertPlaylist(playlists: List<Playlist>){
-        playlists.forEach { playlist ->
-
-            db.collection("Playlist")
-                .document(playlist.id!!)
-                .set(playlist, SetOptions.merge())
-        }
-    }
+//    fun insertPlaylist(playlists: List<Playlist>){
+//        playlists.forEach { playlist ->
+//
+//            db.collection("Playlist")
+//                .document(playlist.id!!)
+//                .set(playlist, SetOptions.merge())
+//        }
+//    }
 
     fun addItemToSystemPlaylist(playlistID: String,tracks: List<TrackInPlaylist>){
         val dataInserting = tracks.map {
@@ -260,6 +297,24 @@ class FirebaseRepository {
         return playlist
     }
 
+    fun getAllPlaylists(){
+        db.collection("Playlist")
+            .get()
+            .addOnSuccessListener {docs ->
+                for(doc in docs){
+                    val playlist = convertDocToPlaylist(doc)
+//                    val map = hashMapOf(
+//                        "id" to playlist.id,
+//                        "type" to playlist.type,
+//                        "search_keywords" to generateSearchKeywords(playlist.name!!)
+//                    )
+//                    db.collection("Search")
+//                        .document(playlist.id!!)
+//                        .set(map)
+                }
+            }
+    }
+
     fun getPlaylist(id: String): MutableLiveData<Playlist>{
         val playlist = MutableLiveData<Playlist>()
         db.collection("Playlist")
@@ -283,9 +338,12 @@ class FirebaseRepository {
 
     fun addItemToYourPlaylist(playlistID: String, newTrackIDs: List<String>){
 
-        db.collection("Playlist")
-            .document(playlistID)
-            .set(hashMapOf("tracks" to newTrackIDs), SetOptions.mergeFields("tracks"))
+        newTrackIDs.forEach {
+            db.collection("Playlist")
+                .document(playlistID)
+//            .set(hashMapOf("tracks" to newTrackIDs), SetOptions.mergeFields("tracks"))
+                .update("tracks", FieldValue.arrayUnion(it))
+        }
     }
 
     fun getSeveralPlaylist(ids: List<String>): MutableLiveData<List<Playlist>>{
@@ -334,6 +392,16 @@ class FirebaseRepository {
                                 }
 
                                 playlists.value = listData
+//                                playlists.value!!.forEach {
+//                                    val map = hashMapOf(
+//                                        "id" to it.id,
+//                                        "type" to it.type,
+//                                        "se   arch_keywords" to generateSearchKeywords(it.name!!)
+//                                    )
+//                                    db.collection("Search")
+//                                        .document(it.id!!)
+//                                        .set(map)
+//                                }
                             }
                         }
                 }
@@ -342,14 +410,14 @@ class FirebaseRepository {
         return playlists
     }
 
-    fun insertSystem(ids: List<String>,systemTopic: String){
-            db.collection("System")
-                .document("SystemTopic")
-                .set(hashMapOf(systemTopic to ids), SetOptions.mergeFields(systemTopic))
-                .addOnFailureListener {
-                    Log.i("insertSystem","$it")
-                }
-    }
+//    fun insertSystem(ids: List<String>,systemTopic: String){
+//            db.collection("System")
+//                .document("SystemTopic")
+//                .set(hashMapOf(systemTopic to ids), SetOptions.mergeFields(systemTopic))
+//                .addOnFailureListener {
+//                    Log.i("insertSystem","$it")
+//                }
+//    }
 
     enum class SystemTopic{
         featured_playlists, new_releases, charts
@@ -357,20 +425,20 @@ class FirebaseRepository {
 
     /** album **/
 
-    fun insertAlbums(albums: List<Album>){
-        albums.forEach { album ->
-            insertAlbum(album)
-//            insertArtists(album.artists?: listOf())
-        }
-    }
+//    fun insertAlbums(albums: List<Album>){
+//        albums.forEach { album ->
+//            insertAlbum(album)
+////            insertArtists(album.artists?: listOf())
+//        }
+//    }
 
-    fun insertAlbum(album: Album){
-            album.id?.let {
-                db.collection("Album")
-                    .document(it)
-                    .set(album)
-            }
-    }
+//    fun insertAlbum(album: Album){
+//            album.id?.let {
+//                db.collection("Album")
+//                    .document(it)
+//                    .set(album)
+//            }
+//    }
 
     fun getTracksOfAlbum(album: Album): MutableLiveData<List<Track>>{
         val tracks = MutableLiveData<List<Track>>()
@@ -442,6 +510,16 @@ class FirebaseRepository {
                     .addOnSuccessListener { results ->
                         if (results != null) {
                             tracks.value = results.toObjects(Track::class.java)
+//                            tracks.value!!.forEach {
+//                                val map = hashMapOf(
+//                                    "id" to it.id,
+//                                    "type" to it.type,
+//                                    "search_keywords" to generateSearchKeywords(it.name)
+//                                )
+//                                db.collection("Search")
+//                                    .document(it.id)
+//                                    .set(map)
+//                            }
                         }
                     }
             }
@@ -464,6 +542,16 @@ class FirebaseRepository {
                         .get()
                         .addOnSuccessListener { documents ->
                                 albums.value = documents.toObjects(Album::class.java)
+//                            albums.value!!.forEach {
+//                                val map = hashMapOf(
+//                                    "id" to it.id,
+//                                    "type" to it.type,
+//                                    "search_keywords" to generateSearchKeywords(it.name!!)
+//                                )
+//                                db.collection("Search")
+//                                    .document(it.id!!)
+//                                    .set(map)
+//                            }
                             }
 
                 }
@@ -521,31 +609,38 @@ class FirebaseRepository {
         if (field!= "error") {
             db.collection("Followed")
                 .document(userID)
-                .addSnapshotListener { value, _ ->
+                .update(field,FieldValue.arrayUnion(id))
+                .addOnFailureListener {
 
-                    val followedIDs = mutableListOf(id)
-                    if (value != null && value.exists()) {
-
-                        if (value[field] != null) {
-
-                            val availableList = (value[field] as List<String>)
-
-                            if (!availableList.contains(id))
-                                followedIDs += availableList
-                            else {
-                                followedIDs.clear()
-                                followedIDs +=availableList
-                            }
-
-                        }
-                    }
-
-                    Log.i("Follow","$followedIDs")
                     db.collection("Followed")
                         .document(userID)
-                        .set(hashMapOf(field to followedIDs), SetOptions.merge())
+                        .set(hashMapOf(field to listOf(id)))
 
                 }
+//                .addSnapshotListener { value, _ ->
+
+//                    val followedIDs = mutableListOf(id)
+//                    if (value != null && value.exists()) {
+//
+//                        if (value[field] != null) {
+//
+//                            val availableList = (value[field] as List<String>)
+//
+//                            if (!availableList.contains(id))
+//                                followedIDs += availableList
+//                            else {
+//                                followedIDs.clear()
+//                                followedIDs +=availableList
+//                            }
+//
+//                        }
+//                    }
+
+//                    db.collection("Followed")
+//                        .document(userID)
+//                        .set(hashMapOf(field to followedIDs), SetOptions.merge())
+
+//                }
         }
     }
 
@@ -556,29 +651,30 @@ class FirebaseRepository {
         if (field!= "error") {
             db.collection("Followed")
                 .document(userID)
-                .get()
-                .addOnSuccessListener{ value ->
+                .update(field,FieldValue.arrayRemove(id))
+//                .get()
+//                .addOnSuccessListener{ value ->
+//
+//                    if (value != null) {
+//
+//                        if (value[field] != null) {
+//
+//                            val availableList = (value[field] as MutableList<String>)
+//
+//                            if (availableList.contains(id)) {
+//                                availableList.remove(id)
+//
+//                                db.collection("Followed")
+//                                    .document(userID)
+//                                    .set(
+//                                        hashMapOf(field to availableList),
+//                                        SetOptions.merge()
+//                                    )
+//                            }
+//                        }
+//                    }
 
-                    if (value != null) {
-
-                        if (value[field] != null) {
-
-                            val availableList = (value[field] as MutableList<String>)
-
-                            if (availableList.contains(id)) {
-                                availableList.remove(id)
-
-                                db.collection("Followed")
-                                    .document(userID)
-                                    .set(
-                                        hashMapOf(field to availableList),
-                                        SetOptions.merge()
-                                    )
-                            }
-                        }
-                    }
-
-                }
+//                }
 
         }
     }
@@ -747,7 +843,6 @@ class FirebaseRepository {
     }
 
     /**Category**/
-
     fun getCategories(): MutableLiveData<List<Category>>{
         val categories = MutableLiveData<List<Category>>()
         db.collection("Category")
@@ -784,6 +879,18 @@ class FirebaseRepository {
                                         }
                                     }
                                     val currentData = listData
+
+//                                    currentData.forEach {
+//                                        val map = hashMapOf(
+//                                            "id" to it.id,
+//                                            "type" to it.type,
+//                                            "search_keywords" to generateSearchKeywords(it.name!!)
+//                                        )
+//                                        db.collection("Search")
+//                                            .document(it.id!!)
+//                                            .set(map)
+//                                    }
+
 //                                    if (index==playlistIDsSub.size-1) {
                                         playlists.value = currentData
 //                                    }
@@ -807,30 +914,29 @@ class FirebaseRepository {
         }
         return sublist
     }
-
-    fun insertCategories(categories: List<Category>){
-        categories.forEach { category ->
-            db.collection("Category")
-                .document(category.id!!)
-                .set(category, SetOptions.merge())
-        }
-    }
-
-    fun insertItemsToCategory(categoryID: String,playlistIDs: List<String>){
-        db.collection("Category")
-            .document(categoryID)
-            .set(hashMapOf("playlists" to playlistIDs), SetOptions.merge())
-    }
+//
+//    fun insertCategories(categories: List<Category>){
+//        categories.forEach { category ->
+//            db.collection("Category")
+//                .document(category.id!!)
+//                .set(category, SetOptions.merge())
+//        }
+//    }
+//
+//    fun insertItemsToCategory(categoryID: String,playlistIDs: List<String>){
+//        db.collection("Category")
+//            .document(categoryID)
+//            .set(hashMapOf("playlists" to playlistIDs), SetOptions.merge())
+//    }
 
     /** Genre **/
-    fun insertGenre(genres : List<String>){
-        db.collection("Genre")
-            .document()
-            .set(hashMapOf("genres" to genres), SetOptions.merge())
-    }
+//    fun insertGenre(genres : List<String>){
+//        db.collection("Genre")
+//            .document()
+//            .set(hashMapOf("genres" to genres), SetOptions.merge())
+//    }
 
     /** Recommendation **/
-
     fun getRelateArtist(id: String): MutableLiveData<List<Artist>>{
 
         val relateArtists = MutableLiveData<List<Artist>>()
@@ -850,6 +956,16 @@ class FirebaseRepository {
                                     val relateArtistData =
                                         relateArtistsDoc.toObjects(Artist::class.java).toMutableList()
                                     relateArtistData.remove(relateArtistData.find { it.id==id }!!)
+//                                    relateArtistData.forEach {
+//                                        val map = hashMapOf(
+//                                            "id" to it.id,
+//                                            "type" to it.type,
+//                                            "search_keywords" to generateSearchKeywords(it.name!!)
+//                                        )
+//                                        db.collection("Search")
+//                                            .document(it.id!!)
+//                                            .set(map)
+//                                    }
                                     relateArtists.value = relateArtistData
                                 }
                             }
@@ -859,13 +975,94 @@ class FirebaseRepository {
         return relateArtists
     }
 
-    fun submitArtistScore(userID: String,id: String,score: Int){
-        db.collection("Score")
-            .document(userID)
-            .collection("artists")
-            .document(id)
-            .set(hashMapOf("score" to score))
+//    fun submitArtistScore(userID: String,id: String,score: Int){
+//        db.collection("Score")
+//            .document(userID)
+//            .collection("artists")
+//            .document(id)
+//            .set(hashMapOf("score" to score))
+//
+//    }
 
+    /** search **/
+    fun searchInFirebase(searchText: String): MutableLiveData<List<LibraryAdapter.DataItem>>{
+        val searchList = MutableLiveData<List<LibraryAdapter.DataItem>>()
+        db.collection("Search")
+            .whereArrayContains("search_keywords",searchText)
+            .get()
+            .addOnCompleteListener {
+                if (it.isSuccessful){
+                    val result = it.result.toObjects(SearchModel::class.java)
+
+                    var list = listOf<LibraryAdapter.DataItem>()
+                    result.forEach { item ->
+                        when(item.type){
+
+                            "track" -> {
+                                db.collection("Track")
+                                    .whereEqualTo("id",item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful){
+                                            val track = doc.result.toObjects(Track::class.java)
+                                            list += listOf(LibraryAdapter.DataItem.TrackItem(track[0]))
+                                            searchList.value = list
+                                        }
+                                    }
+                            }
+
+                            "album" -> {
+                                db.collection("Album")
+                                    .whereEqualTo("id",item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful){
+                                            val album = doc.result.toObjects(Album::class.java)
+                                            list += listOf(LibraryAdapter.DataItem.AlbumItem(album[0]))
+                                            searchList.value = list
+                                        }
+                                    }
+                            }
+
+                            "artist" -> {
+                                db.collection("Artist")
+                                    .whereEqualTo("id",item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful){
+                                            val artist = doc.result.toObjects(Artist::class.java)
+                                            list += listOf(LibraryAdapter.DataItem.ArtistItem(artist[0]))
+                                            searchList.value = list
+                                        }
+                                    }
+                            }
+
+                            "playlist" -> {
+                                db.collection("Playlist")
+                                    .whereEqualTo("id",item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful){
+                                            val playlist = convertDocToPlaylist(doc.result.documents[0])
+                                            list += listOf(LibraryAdapter.DataItem.PlaylistItem(playlist))
+                                            searchList.value = list
+                                        }
+                                    }
+                            }
+                        }
+                    }
+
+
+                }else{
+                    Log.d(TAG,"Failure: ${it.exception!!.message}")
+                }
+            }
+        return searchList
     }
+
+    private data class SearchModel(
+        val id: String= "" ,
+        val type: String =""
+    )
 
 }

@@ -77,7 +77,7 @@ class PlaylistDetailsFragment : Fragment() {
         viewModel.playlistItems.observe(viewLifecycleOwner){
             if (it!=null){
                 viewModel.getStateItemsLiked()
-                firebaseRepo.insertTracks(it)
+//                firebaseRepo.insertTracks(it)
 
             }
         }
