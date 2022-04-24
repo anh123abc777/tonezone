@@ -24,7 +24,7 @@ class HomeFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val viewModel: HomeViewModel by viewModels {
-        HomeViewModelFactory(mainViewModel.token,mainViewModel.user.value!!)
+        HomeViewModelFactory(mainViewModel.token,mainViewModel.user.value!!,mainViewModel.firebaseAuth.value!!)
     }
 
     override fun onCreateView(
@@ -41,6 +41,7 @@ class HomeFragment : Fragment() {
         binding.logout.setOnClickListener {
             mainViewModel.logout()
         }
+
 
         return binding.root
     }
@@ -69,5 +70,4 @@ class HomeFragment : Fragment() {
             }
         }
     }
-
 }

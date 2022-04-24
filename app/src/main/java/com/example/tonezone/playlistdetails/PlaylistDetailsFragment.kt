@@ -94,7 +94,7 @@ class PlaylistDetailsFragment : Fragment() {
     private fun handlePlayPlaylist(){
         binding.play.setOnClickListener {
             playerViewModel.onInit(0,viewModel.playlistItems.value)
-
+            viewModel.saveHistory()
         }
     }
 
@@ -171,6 +171,7 @@ class PlaylistDetailsFragment : Fragment() {
                 null -> {
                     val pos = viewModel.playlistItems.value!!.indexOf(trackItem.track)
                     playerViewModel.onInit(pos,viewModel.playlistItems.value)
+                    viewModel.saveHistory()
                 }
 
                 else -> {

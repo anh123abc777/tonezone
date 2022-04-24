@@ -15,6 +15,7 @@ import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.Track
+import com.example.tonezone.utils.Type
 import com.example.tonezone.utils.createBitmapFromUrl
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -198,8 +199,6 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser)
     fun onNext() {
         jobs.cancel()
         if(posSongSelectedInGroup()<_currentPlaylist.value!!.size-1){
-//            exoPlayer.seekTo(posSongSelectedInGroup()+1,0L)
-//            exoPlayer.seekTo(exoPlayer.currentMediaItemIndex + 1, 0L)
             _currentTrack.value = _currentPlaylist.value?.get(posSongSelectedInGroup()+1)
             _playerState.value = PlayerState.PLAY
         }
@@ -225,31 +224,37 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser)
      var jobs = uiSeekBarScope.coroutineContext.job
 
     fun initSeekBar(){
-         jobs = uiSeekBarScope.launch {
+        val start = System.nanoTime()
+        var previousTrack = _currentTrack.value
 
-             var currentPosition = 0L
-             var previousTrack = _currentTrack.value
-             while (this.isActive) {
-                 if (_playerState.value == PlayerState.PLAY) {
-                     if (previousTrack==_currentTrack.value) {
-                         currentPosition = exoPlayer.currentPosition
-                         _progress.value = currentPosition
-                         Log.i("initSeekBar", "$this ${this.isActive}")
-                         delay(200L)
+        jobs = uiSeekBarScope.launch {
 
-                         if (_currentTrack.value!!.id != exoPlayer.currentMediaItem!!.mediaId)
-                             _currentTrack.value =
-                                 _currentPlaylist.value?.find { it.id == exoPlayer.currentMediaItem!!.mediaId }
-                     }else {
-                         this.cancel()
-                         Log.i("initSeekBar", "$this ${this.isActive}")
-                     }
-                 }else{
-                     this.cancel()
-                 }
-             }
-         }
+            var currentPosition = 0L
+            while (this.isActive) {
+                if (_playerState.value == PlayerState.PLAY) {
+                    if (previousTrack==_currentTrack.value) {
+                        currentPosition = exoPlayer.currentPosition
+                        _progress.value = currentPosition
+                        Log.i("initSeekBar", "$this ${this.isActive}")
+                        delay(200L)
+                        if (_currentTrack.value!!.id != exoPlayer.currentMediaItem!!.mediaId) {
+                            _currentTrack.value =
+                                _currentPlaylist.value?.find { it.id == exoPlayer.currentMediaItem!!.mediaId }
+                        }
+                    }else {
+                        this.cancel()
+                    }
+                }else{
+                    this.cancel()
+                }
+            }
         }
+        jobs.invokeOnCompletion {
+            val time = (System.nanoTime() - start).toDouble()/1e6
+            firebaseRepo.saveHistory(user.uid,previousTrack!!.id,time/previousTrack.duration_ms!!,Type.TRACK)
+
+        }
+    }
 
     fun seekTo(progress : Int){
         _progress.value = progress.toLong()*1000
@@ -482,9 +487,9 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser)
 
     fun likeTrack(){
         if (_isFavorite.value != true)
-            firebaseRepo.followObject(user.uid, _currentTrack.value!!.id,"track")
+            firebaseRepo.followObject(user.uid, _currentTrack.value!!.id,Type.TRACK)
         else
-            firebaseRepo.unfollowObject(user.uid, _currentTrack.value!!.id,"track")
+            firebaseRepo.unfollowObject(user.uid, _currentTrack.value!!.id,Type.TRACK)
 
         _isFavorite.value = !_isFavorite.value!!
     }

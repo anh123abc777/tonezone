@@ -13,8 +13,6 @@ import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -28,6 +26,7 @@ import com.example.tonezone.database.Token
 import com.example.tonezone.database.TokenRepository
 import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
+import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.Track
 import com.example.tonezone.notifycation.CreateNotification
 import com.example.tonezone.notifycation.OnClearFromRecentService
@@ -303,8 +302,15 @@ class MainActivity : AppCompatActivity() {
 //        return navController.navigateUp()
 //    }
 
+
+
     override fun onDestroy() {
         super.onDestroy()
+
+        val firebaseRepo = FirebaseRepository()
+        firebaseRepo.updateRecommendedTracks(mainViewModel.firebaseAuth.value!!.uid,this)
+
+
         runBlocking(Dispatchers.IO) {
             repository.clear()
         }

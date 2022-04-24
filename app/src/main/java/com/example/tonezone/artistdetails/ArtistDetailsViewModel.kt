@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
+import com.example.tonezone.utils.Type
 import kotlinx.coroutines.*
 
 class ArtistDetailsViewModel(
@@ -28,7 +29,7 @@ class ArtistDetailsViewModel(
     val artistAlbums : LiveData<List<Album>>
         get() = _artistAlbums
 
-    private val _isFollowingArtist = firebaseRepo.checkObjectIsFollowed(user.id,playlistInfo.id,"artist")
+    private val _isFollowingArtist = firebaseRepo.checkObjectIsFollowed(user.id,playlistInfo.id,Type.ARTIST)
     val isFollowingArtist : LiveData<Boolean>
         get() = _isFollowingArtist
 
@@ -148,12 +149,12 @@ class ArtistDetailsViewModel(
     }
 
     private fun unfollowArtist(){
-        firebaseRepo.unfollowObject(user.id,playlistInfo.id,"artist")
+        firebaseRepo.unfollowObject(user.id,playlistInfo.id,Type.ARTIST)
 //        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,0)
     }
 
     private fun followArtist(){
-        firebaseRepo.followObject(user.id,playlistInfo.id,"artist")
+        firebaseRepo.followObject(user.id,playlistInfo.id,Type.ARTIST)
 //        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,1)
     }
 

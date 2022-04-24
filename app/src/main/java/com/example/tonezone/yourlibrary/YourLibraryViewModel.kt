@@ -10,6 +10,7 @@ import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.ObjectRequest
 import com.example.tonezone.utils.Signal
+import com.example.tonezone.utils.Type
 import kotlinx.coroutines.*
 
 
@@ -164,12 +165,12 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
 
     private fun unfollowArtist(){
         firebaseRepo
-            .unfollowObject(user.id,_objectShowBottomSheet.value!!.second,"artist")
+            .unfollowObject(user.id,_objectShowBottomSheet.value!!.second,Type.ARTIST)
         getDataFollowedArtists()
     }
 
     private fun unlikePlaylist(){
-        firebaseRepo.unfollowObject(user.id,_objectShowBottomSheet.value!!.second,"playlist")
+        firebaseRepo.unfollowObject(user.id,_objectShowBottomSheet.value!!.second,Type.PLAYLIST)
     }
 
     private fun deletePlaylist(){

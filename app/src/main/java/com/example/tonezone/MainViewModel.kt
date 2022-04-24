@@ -93,4 +93,5 @@ class MainViewModel(private val activity: Activity): ViewModel() {
         _firebaseAuth.value = auth.currentUser
     }
 
+
 }

@@ -3,14 +3,17 @@ package com.example.tonezone.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
-import com.example.tonezone.network.Artist
-import com.example.tonezone.network.Image
-import com.example.tonezone.network.Owner
-import com.example.tonezone.network.Playlist
+import com.example.tonezone.network.*
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
+import java.util.*
 import kotlin.collections.HashMap
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 fun convertDocToPlaylist(value: DocumentSnapshot): Playlist {
     val playlist = Playlist()
@@ -25,6 +28,32 @@ fun convertDocToPlaylist(value: DocumentSnapshot): Playlist {
     Log.i("images","${(value.get("images") as List<Image>)}")
     return playlist
 }
+
+fun convertAlbumsToPlaylists(albums: List<Album>): List<Playlist> =
+    albums.map {
+        Playlist(
+            id = it.id!!,
+            description = it.album_group!!,
+            images = it.images!!,
+            name = it.name!!,
+            owner = Owner(),
+            public = false,
+            type = it.type!!,
+        )
+}
+
+fun convertArtistsToPlaylists(artists: List<Artist>): List<Playlist> =
+    artists.map {
+        Playlist(
+            id = it.id!!,
+            description = it.followers?.total.toString(),
+            images = it.images!!,
+            name = it.name!!,
+            owner = Owner(),
+            public = false,
+            type = it.type!!,
+        )
+    }
 
 fun convertHashMapToImage(imagesHashMap: List<*>): List<Image>{
     val list = mutableListOf<Image>()
@@ -82,3 +111,77 @@ fun generateSearchKeywords(inputText: String): List<String>{
 
     return keyWords
 }
+
+fun convertTypeToField(type: Type): String=
+    when(type){
+        Type.ARTIST -> "artists"
+        Type.PLAYLIST -> "playlists"
+        Type.TRACK -> "tracks"
+        Type.ALBUM -> "albums"
+        else -> "error"
+    }
+
+fun subList(list: List<*>):List<List<*>>{
+    val sublist = mutableListOf<List<*>>()
+    var index = 0
+    while ((list.size.toFloat()/10.toFloat())>index.toFloat()){
+        if (list.size>(index+1)*10)
+            sublist.add(list.subList(index*10,(index+1)*10))
+        else
+            sublist.add(list.subList(index*10,list.size))
+        index++
+    }
+    return sublist
+}
+
+fun cosineSimilarity(vectorA: DoubleArray, vectorB: DoubleArray): Double {
+    var dotProduct = 0.0
+    var normA = 0.0
+    var normB = 0.0
+    vectorA.forEachIndexed { i, _ ->
+        dotProduct += vectorA[i] * vectorB[i]
+        normA += vectorA[i].pow(2.0)
+        normB += vectorB[i].pow(2.0)
+    }
+    return dotProduct / (sqrt(normA) * sqrt(normB))
+}
+
+
+
+fun sortByValue(unsortMap: Map<String, Double>): Map<String, Double> {
+
+    val list: List<Map.Entry<String, Double>> = LinkedList(unsortMap.entries)
+
+    Collections.sort(list) { (_, value), (_, value1) -> value1.compareTo(value) }
+
+    val sortedMap: MutableMap<String, Double> = LinkedHashMap()
+    for ((key, value) in list) {
+        sortedMap[key] = value
+    }
+
+    return sortedMap
+}
+
+fun sortArtistsByValue(unsortMap: Map<Artist, Double>): Map<Artist, Double> {
+
+    val list: List<Map.Entry<Artist, Double>> = LinkedList(unsortMap.entries)
+
+    Collections.sort(list) { (_, value), (_, value1) -> value1.compareTo(value) }
+
+    val sortedMap: MutableMap<Artist, Double> = LinkedHashMap()
+    for ((key, value) in list) {
+        sortedMap[key] = value
+    }
+
+    return sortedMap
+}
+
+fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+    observe(lifecycleOwner, object : Observer<T> {
+        override fun onChanged(t: T?) {
+            observer.onChanged(t)
+            removeObserver(this)
+        }
+    })
+}
+
