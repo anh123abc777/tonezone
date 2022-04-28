@@ -17,6 +17,9 @@
         <action
             android:id="@+id/action_homeFragment_to_artistDetailsFragment"
             app:destination="@id/artistDetailsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_userProfileFragment"
+            app:destination="@id/userProfileFragment" />
     </fragment>
     <fragment
         android:id="@+id/playlistDetailsFragment"
@@ -31,7 +34,7 @@
             android:id="@+id/action_playlistDetailsFragment_to_yourPlaylistFragment"
             app:destination="@id/yourPlaylistFragment" />
         <action
-            android:id="@+id/action_playlistDetailsFragment_to_artistDetailsFragment3"
+            android:id="@+id/action_playlistDetailsFragment_to_artistDetailsFragment"
             app:destination="@id/artistDetailsFragment" />
     </fragment>
     <fragment
@@ -53,10 +56,31 @@
             android:name="playlistInfo"
             app:argType="com.example.tonezone.network.PlaylistInfo" />
         <action
-            android:id="@+id/action_artistDetailsFragment_to_playlistDetailsFragment3"
+            android:id="@+id/action_artistDetailsFragment_to_playlistDetailsFragment"
             app:destination="@id/playlistDetailsFragment" />
         <action
-            android:id="@+id/action_artistDetailsFragment_to_yourPlaylistFragment3"
+            android:id="@+id/action_artistDetailsFragment_to_yourPlaylistFragment"
             app:destination="@id/yourPlaylistFragment" />
+        <action
+            android:id="@+id/action_artistDetailsFragment_to_playlistsFragment"
+            app:destination="@id/playlistsFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/playlistsFragment"
+        android:name="com.example.tonezone.playlists.PlaylistsFragment"
+        android:label="PlaylistsFragment"
+        tools:layout="@layout/fragment_playlists"
+        >
+    <action
+        android:id="@+id/action_playlistsFragment_to_playlistDetailsFragment"
+        app:destination="@id/playlistDetailsFragment" />
+    <argument
+        android:name="playlistInfo"
+        app:argType="com.example.tonezone.network.PlaylistInfo" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="com.example.tonezone.userprofile.UserProfileFragment"
+        android:label="UserProfileFragment" />
 </navigation>

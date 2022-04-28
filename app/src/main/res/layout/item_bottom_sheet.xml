@@ -17,20 +17,17 @@
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:layout_margin="4dp"
-        app:background="@color/white"
-        android:backgroundTint="@color/white"
         android:onClick="@{() -> clickListener.onClick(signal)}"
         signal="@{signal}"
         signalIcon="@{signal}"
         android:gravity="center_vertical"
         android:elevation="0dp"
-        android:foregroundTint="@color/black"
-        android:textColor="@color/black"
         android:drawablePadding="50dp"
         android:textSize="14sp"
         android:padding="8dp"
         android:textStyle="normal"
         android:textAllCaps="false"
+        android:textColor="?attr/colorOnSecondary"
         />
 
 </layout>

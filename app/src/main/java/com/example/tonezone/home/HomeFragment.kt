@@ -24,7 +24,7 @@ class HomeFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val viewModel: HomeViewModel by viewModels {
-        HomeViewModelFactory(mainViewModel.token,mainViewModel.user.value!!,mainViewModel.firebaseAuth.value!!)
+        HomeViewModelFactory(mainViewModel.token, mainViewModel.userFirebase.value!!)
     }
 
     override fun onCreateView(
@@ -39,7 +39,8 @@ class HomeFragment : Fragment() {
         observeNavigateToPlaylistDetails()
 
         binding.logout.setOnClickListener {
-            mainViewModel.logout()
+//            mainViewModel.logout()
+            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToUserProfileFragment())
         }
 
 
@@ -48,14 +49,20 @@ class HomeFragment : Fragment() {
 
     private fun createAdapterGroupPlaylist(){
         val adapter = GroupPlaylistAdapter(PlaylistAdapter.OnClickListener {
-           viewModel.displayPlaylistDetails(PlaylistInfo(
-               it.id!!,
-               it.name!!,
-               it.description!!,
-                    it.images?.get(0)?.url,
-               it.type!!
-                ))
-        })
+            val playlistInfo = PlaylistInfo(
+                it.id!!,
+                it.name!!,
+                it.description!!,
+                it.images?.get(0)?.url,
+                it.type!!
+            )
+            when(it.type){
+                "playlist","album" -> viewModel.displayPlaylistDetails(playlistInfo)
+
+                "artist" -> findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToArtistDetailsFragment(playlistInfo))
+            }
+
+        } )
         binding.groupPlaylist.adapter = adapter
     }
 

@@ -28,8 +28,8 @@
 
         <ImageView
             android:id="@+id/avt_playlist"
-            android:layout_width="160sp"
-            android:layout_height="168sp"
+            android:layout_width="144dp"
+            android:layout_height="156dp"
             android:scaleType="centerCrop"
             android:src="@color/black"
             listImageUrl="@{playlist.images}"
@@ -37,7 +37,7 @@
 
         <TextView
             android:id="@+id/title_playlist"
-            android:layout_width="152dp"
+            android:layout_width="144dp"
             android:layout_height="wrap_content"
             android:text="@{playlist.name}"
             android:textSize="16sp"
@@ -48,7 +48,7 @@
 
         <TextView
             android:id="@+id/description_playlist"
-            android:layout_width="152dp"
+            android:layout_width="144dp"
             android:layout_height="wrap_content"
             android:text="@{playlist.description}"
             android:textSize="14sp"

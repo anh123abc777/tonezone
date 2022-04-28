@@ -9,10 +9,11 @@ import com.example.tonezone.R
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.Signal
 import com.example.tonezone.utils.Type
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.*
 
 class PlaylistDetailsViewModel
-    (val token: String, var playlistInfo: PlaylistInfo, private val user: User) : ViewModel() {
+    (val token: String, var playlistInfo: PlaylistInfo, val firebaseUser: FirebaseUser) : ViewModel() {
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
     private val firebaseRepo = FirebaseRepository()
@@ -21,7 +22,7 @@ class PlaylistDetailsViewModel
     val playlistItems : LiveData<List<Track>>
         get() = _playlistItems
 
-    private var _isPlaylistFollowed = firebaseRepo.checkObjectIsFollowed(user.id,playlistInfo.id,Type.PLAYLIST)
+    private var _isPlaylistFollowed = firebaseRepo.checkObjectIsFollowed(firebaseUser.uid,playlistInfo.id,Type.PLAYLIST)
     val isUserPlaylistFollowed : LiveData<Boolean>
         get() = _isPlaylistFollowed
 
@@ -53,6 +54,10 @@ class PlaylistDetailsViewModel
     val isSavedHistory : LiveData<Playlist>
         get() = _isSaveHistory
 
+    private var _queueTrack = MutableLiveData<Track?>()
+    val queueTrack : LiveData<Track?>
+        get() = _queueTrack
+
     private fun getDataPlaylistItems(): MutableLiveData<List<Track>> {
 
         return when (playlistInfo.type) {
@@ -65,7 +70,7 @@ class PlaylistDetailsViewModel
                 }
 
                 else -> {
-                    if(playlistInfo.id=="userSavedTrack")
+                    if(playlistInfo.id=="liked_track")
                         getUserSavedTracks()
                     else
                         getPlaylistTracks()
@@ -82,7 +87,8 @@ class PlaylistDetailsViewModel
     }
 
     private fun getUserSavedTracks(): MutableLiveData<List<Track>>{
-        return firebaseRepo.getLikedTracks(user.id)
+        Log.i("trackABCs","Something")
+        return firebaseRepo.getLikedTracks(firebaseUser.uid)
 
     }
 
@@ -90,10 +96,10 @@ class PlaylistDetailsViewModel
         return firebaseRepo.getTracksOfArtist(playlistInfo.id,playlistInfo.name)
     }
 
-    fun getStateItemsLiked(){
+    fun initStateLikedItems(){
         val trackIDs = _playlistItems.value!!.map { it.id }
         _stateLikedOfTracks = firebaseRepo
-            .checkObjectIsFollowed(user.id,trackIDs,Type.TRACK)
+            .checkObjectIsFollowed(firebaseUser.uid,trackIDs,Type.TRACK)
     }
 
     fun showBottomSheet(objectID: String, buttonID: Int ){
@@ -147,12 +153,12 @@ class PlaylistDetailsViewModel
     }
 
     private fun deletePlaylist(){
-        firebaseRepo.unfollowObject(user.id,_selectedObjectID.value!!.first,Type.PLAYLIST)
+        firebaseRepo.unfollowObject(firebaseUser.uid,_selectedObjectID.value!!.first)
     }
 
     private fun addToPlaylist(){
         _navigateYourPlaylists.value =
-            _playlistItems.value?.find { it.id == selectedObjectID.value!!.first}!!.uri
+            _playlistItems.value?.find { it.id == selectedObjectID.value!!.first}!!.id
     }
 
     @SuppressLint("NullSafeMutableLiveData")
@@ -181,17 +187,17 @@ class PlaylistDetailsViewModel
         _isShowingTrackDetails.value = null
     }
 
-    private fun likeTrack(){
+    fun likeTrack(){
         val indexOfTrack = _playlistItems.value!!
             .indexOfFirst { it.id == _selectedObjectID.value!!.first }
         Log.i("likeTrack","${_stateLikedOfTracks.value!![indexOfTrack]}")
 
         if (_stateLikedOfTracks.value!![indexOfTrack]) {
             firebaseRepo
-                .unfollowObject(user.id,_selectedObjectID.value!!.first,Type.TRACK)
+                .unfollowObject(firebaseUser.uid,_selectedObjectID.value!!.first)
         } else {
             firebaseRepo
-                .followObject(user.id,_selectedObjectID.value!!.first,Type.TRACK)
+                .followObject(firebaseUser.uid,_selectedObjectID.value!!.first,Type.TRACK)
         }
         var newState = mutableListOf<Boolean>()
         newState += _stateLikedOfTracks.value!!
@@ -205,17 +211,17 @@ class PlaylistDetailsViewModel
         return _stateLikedOfTracks.value?.get(indexOfTrack) ?: false
     }
 
-    private fun likePlaylist(){
+    fun likePlaylist(){
         uiScope.launch {
             try {
                 if (_isPlaylistFollowed.value == false) {
 
-                    firebaseRepo.followObject(user.id,playlistInfo.id,Type.PLAYLIST)
+                    firebaseRepo.followObject(firebaseUser.uid,playlistInfo.id,Type.PLAYLIST)
                     changeStateFollowPlaylist()
                 }
                 else {
 
-                    firebaseRepo.unfollowObject(user.id,playlistInfo.id,Type.PLAYLIST)
+                    firebaseRepo.unfollowObject(firebaseUser.uid,playlistInfo.id)
                     changeStateFollowPlaylist()
                 }
             }catch (e: Exception){
@@ -229,7 +235,11 @@ class PlaylistDetailsViewModel
     }
 
     private fun addToQueue(){
-        TODO()
+        _queueTrack.value = _playlistItems.value?.find { it.id== _selectedObjectID.value!!.first}
+    }
+
+    fun addToQueueComplete(){
+        _queueTrack.value = null
     }
 
     fun receiveSignal(signal: Signal){
@@ -237,12 +247,13 @@ class PlaylistDetailsViewModel
     }
 
     fun checkIsOwnedByUser(){
-        _isOwnedByUser.value = currentPlaylist.value!!.owner?.id == user.id
+        _isOwnedByUser.value = currentPlaylist.value!!.owner!!.id == firebaseUser.uid
+        Log.i("ownedBy","${currentPlaylist.value!!.owner!!.id } ${firebaseUser.uid} ${_isOwnedByUser.value}")
     }
 
     fun saveHistory(){
         if (_isSaveHistory.value != _currentPlaylist.value){
-            firebaseRepo.saveHistory(user.id,playlistInfo.id,0.0,Type.PLAYLIST)
+            firebaseRepo.saveHistory(firebaseUser.uid,playlistInfo.id,0.0,Type.PLAYLIST)
         }
         _isSaveHistory.value = _currentPlaylist.value
     }

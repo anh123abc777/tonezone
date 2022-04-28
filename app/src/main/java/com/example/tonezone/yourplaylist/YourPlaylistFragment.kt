@@ -21,6 +21,7 @@ import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourPlaylistBinding
 import com.example.tonezone.network.FirebaseRepository
+import com.example.tonezone.network.Owner
 import com.example.tonezone.yourlibrary.YourLibraryViewModel
 import com.example.tonezone.yourlibrary.YourLibraryViewModelFactory
 
@@ -31,7 +32,7 @@ class YourPlaylistFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val yourLibraryViewModel: YourLibraryViewModel by viewModels {
-        YourLibraryViewModelFactory(mainViewModel.token,mainViewModel.user.value!!)
+        YourLibraryViewModelFactory(mainViewModel.firebaseAuth.value!!)
     }
 
     private val trackUris : String by lazy {
@@ -67,40 +68,22 @@ class YourPlaylistFragment : Fragment() {
     private fun addItemToPlaylist(playlistID: String, trackIDs: String){
         val firebaseRepo = FirebaseRepository()
         firebaseRepo.addItemToYourPlaylist(playlistID, listOf(trackIDs))
-//        Log.i("addItemToYourPlaylist","playlistID: $playlistID \n trackUris: $trackUris")
-//        uiScope.launch {
-//            try {
-//                ToneApi.retrofitService2.addItemsToPlaylist(
-//                    "Bearer $token",
-//                    playlistID,
-//                    trackUris
-//                    ).enqueue(object: Callback<String>{
-//                    override fun onResponse(call: Call<String>, response: Response<String>) {
-//                        Log.i("addItemToYourPlaylist","success ${response.body()}")
-//                    }
-//
-//                    override fun onFailure(call: Call<String>, t: Throwable) {
-//                        Log.i("addItemToYourPlaylist","Failure s $t")
-//
-//                    }
-//                })
-//            }catch (e: Exception){
-//                Log.i("addItemToYourPlaylist","Failure $e")
-//            }
-//        }
     }
 
     private fun submitListYourPlaylists(){
-        yourLibraryViewModel.userPlaylists.observe(viewLifecycleOwner){ playlists ->
-            if(playlists!=null){
-                val listYourPlaylists = playlists?.filter { it.owner!!.id == yourLibraryViewModel.user.id }
+        val user = mainViewModel.firebaseAuth.value!!
+        yourLibraryViewModel.dataItems.observe(viewLifecycleOwner){ objects ->
+            val playlists = ((objects.filter { it.typeName=="playlist" }
+                    as List<LibraryAdapter.DataItem.PlaylistItem>).filter {it.playlist.owner!!.id == user.uid }.map { it.playlist })
+
+            if(playlists!=null && playlists.isNotEmpty()){
                 val adapter = (binding.listYourPlaylist.adapter as LibraryAdapter)
                 adapter.apply {
-                    submitYourLibrary(listYourPlaylists, null, null,null)
+                    submitYourLibrary(playlists, null, null,null)
                     sortByDefault()
                 }
 
-                if(listYourPlaylists?.isEmpty() == true){
+                if(playlists.isEmpty()){
                     yourLibraryViewModel.requestToCreatePlaylist()
                 }
             }

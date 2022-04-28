@@ -22,9 +22,6 @@ import com.example.tonezone.MainViewModelFactory
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
-import com.example.tonezone.network.Albums
-import com.example.tonezone.network.Artists
-import com.example.tonezone.network.Playlists
 import com.example.tonezone.utils.ModalBottomSheet
 import com.example.tonezone.utils.ModalBottomSheetViewModel
 import com.example.tonezone.utils.ObjectRequest
@@ -38,7 +35,7 @@ class YourLibraryFragment : Fragment() {
         MainViewModelFactory(requireActivity())
     }
     private val viewModel: YourLibraryViewModel by viewModels {
-        YourLibraryViewModelFactory(mainViewModel.token,mainViewModel.user.value!!)
+        YourLibraryViewModelFactory( mainViewModel.firebaseAuth.value!!)
     }
 
     private val modalBottomSheetViewModel : ModalBottomSheetViewModel by activityViewModels()
@@ -61,7 +58,7 @@ class YourLibraryFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
-        viewModel.getDataUserPlaylists()
+//        viewModel.getDataUserPlaylists()
 
         setupYourLibraryAdapter()
         observeNavigateToPlaylistDetails()
@@ -93,11 +90,22 @@ class YourLibraryFragment : Fragment() {
 
         binding.displayOption.viewModel = viewModel
 
-        viewModel.sortOption.observe(viewLifecycleOwner){
-            when(it){
-                SortOption.Alphabetical -> adapter.sortByAlphabetical()
-                SortOption.Creator -> adapter.sortByCreator()
-                else -> throw IllegalArgumentException("Unknown value")
+        viewModel.dataItems.observe(viewLifecycleOwner) { value ->
+            viewModel.sortOption.observe(viewLifecycleOwner) {
+                if (value != null)
+                    when (it) {
+                        SortOption.Alphabetical -> {
+                            val dataItems = viewModel.dataItems.value!!.sortedBy { it.name }
+                            adapter.submitList(dataItems.sortedByDescending { it.pin })
+                        }
+                        SortOption.Creator -> {
+                            val dataItems = viewModel.dataItems.value!!.sortedBy { it.type }
+                            adapter.submitList(dataItems.sortedByDescending { it.pin })
+                        }
+                        else -> {
+                            adapter.submitList(viewModel.dataItems.value!!.sortedBy { it.pin })
+                        }
+                    }
             }
         }
     }
@@ -106,17 +114,19 @@ class YourLibraryFragment : Fragment() {
     private fun bindChipGroup() {
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
 
-        viewModel.followedArtists.observe(viewLifecycleOwner) {
-            binding.chipGroup.artistData = Artists(it)
+        viewModel.dataItems.observe(viewLifecycleOwner){
         }
-
-        viewModel.userPlaylists.observe(viewLifecycleOwner) {
-            binding.chipGroup.playlistData = Playlists(it)
-        }
-
-        viewModel.saveAlbums.observe(viewLifecycleOwner){
-            binding.chipGroup.albumData = Albums(it)
-        }
+//        viewModel.dataItems.observe(viewLifecycleOwner) {
+//            binding.chipGroup.artistData = Artists(it)
+//        }
+//
+//        viewModel.userPlaylists.observe(viewLifecycleOwner) {
+//            binding.chipGroup.playlistData = Playlists(it)
+//        }
+//
+//        viewModel.saveAlbums.observe(viewLifecycleOwner){
+//            binding.chipGroup.albumData = Albums(it)
+//        }
 
         binding.chipGroup.filterTypeChipGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
@@ -225,7 +235,8 @@ class YourLibraryFragment : Fragment() {
             when(idButton){
                 null -> viewModel.displayPlaylistDetails(item)
                 Int.MIN_VALUE -> {
-                    viewModel.showBottomSheet(getObjectRequestFromTypeItem(item), item.id!!)
+                    if (item.id!="liked_track")
+                        viewModel.showBottomSheet(getObjectRequestBaseOnTypeItem(item), item.id!!)
                 }
                 else -> Log.i("libraryAdapter","Nothing")
                 }
@@ -234,12 +245,12 @@ class YourLibraryFragment : Fragment() {
         binding.yourLibraryList.adapter = adapter
     }
 
-    private fun getObjectRequestFromTypeItem(dataItem: LibraryAdapter.DataItem): ObjectRequest
+    private fun getObjectRequestBaseOnTypeItem(dataItem: LibraryAdapter.DataItem): ObjectRequest
         = when(dataItem.type){
             ARTIST -> ObjectRequest.ARTIST_FROM_LIBRARY
             PLAYLIST -> {
                 val playlist = (dataItem as LibraryAdapter.DataItem.PlaylistItem).playlist
-                if(playlist.owner!!.id==viewModel.user.id)
+                if(playlist.owner!!.id==viewModel.firebaseUser.uid)
                     ObjectRequest.OWNER_PLAYLIST_FROM_LIBRARY
                 else
                     ObjectRequest.PLAYLIST_FROM_LIBRARY
@@ -274,7 +285,8 @@ class YourLibraryFragment : Fragment() {
             when(it){
                 null -> Log.i("setupBottomSheet","objectRequest null")
                 else -> {
-                    modalBottomSheet = ModalBottomSheet(it.first,null)
+                    modalBottomSheet = ModalBottomSheet(it.first,null,
+                        viewModel.dataItems.value!!.find { item -> item.id!! == it.second }!!.pin)
                     modalBottomSheet.show(
                         requireActivity().supportFragmentManager,
                         ModalBottomSheet.TAG
@@ -289,12 +301,14 @@ class YourLibraryFragment : Fragment() {
         viewModel.navigateToDetailPlaylist.observe(viewLifecycleOwner) {
             if (it!=null){
                 when(it.type) {
-                    "playlist","album" -> this.findNavController()
-                        .navigate(
-                            YourLibraryFragmentDirections
-                                .actionYourLibraryFragmentToPlaylistDetailsFragment(it)
-                        )
+                    "playlist","album" -> {
 
+                        this.findNavController()
+                            .navigate(
+                                YourLibraryFragmentDirections
+                                    .actionYourLibraryFragmentToPlaylistDetailsFragment(it)
+                            )
+                    }
                     "artist" -> this.findNavController()
                         .navigate(YourLibraryFragmentDirections
                             .actionYourLibraryFragmentToArtistDetailsFragment(it))

@@ -181,6 +181,7 @@
                             android:background="@drawable/press_button"
                             android:backgroundTintMode="src_over"
                             playerState="@{viewModel.playerState}"
+                            isPlayerScreen="@{true}"
                             android:onClick="@{() -> viewModel.onChangeState()}"
                             android:tint="@{viewModel.darkTint}"
                             tools:ignore="UseAppTint"

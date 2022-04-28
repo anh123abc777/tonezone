@@ -6,10 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tonezone.network.*
-import com.example.tonezone.utils.convertArtistsToPlaylists
-import com.example.tonezone.utils.cosineSimilarity
-import com.example.tonezone.utils.sortByValue
-import com.example.tonezone.utils.subList
+import com.example.tonezone.utils.*
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 import java.util.*
 
 
-class HomeViewModel(val token: String, val user: User, private val firebaseUser: FirebaseUser) : ViewModel() {
+class HomeViewModel(val token: String, val user: User) : ViewModel() {
 
     private val firebaseRepo = FirebaseRepository()
 
@@ -34,7 +31,9 @@ class HomeViewModel(val token: String, val user: User, private val firebaseUser:
 
     init {
         getRelateArtists()
-        getRecommendedTracks()
+        getYourArtists()
+        getRecentlyPlaylists()
+//        getRecommendedTracks()
 //        getGroupPlaylistsData()
     }
 
@@ -51,7 +50,7 @@ class HomeViewModel(val token: String, val user: User, private val firebaseUser:
         val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
 
         firebaseRepo.db.collection("Recommendation")
-            .document(firebaseUser.uid)
+            .document(user.id)
             .get()
             .addOnSuccessListener { docs ->
                 if (docs != null && docs.exists()) {
@@ -61,7 +60,7 @@ class HomeViewModel(val token: String, val user: User, private val firebaseUser:
                     temp.addAll(_groupPlaylists.value?: listOf())
                     temp.add(GroupPlaylist("Mix for you",
                         listOf(Playlist(id="Day$today",
-                        "Mix for ${firebaseUser.displayName.toString()}",
+                        "Mix for ${user.display_name}",
                                 name = "Mix #$today"
                             ))))
                     _groupPlaylists.value = temp
@@ -69,17 +68,115 @@ class HomeViewModel(val token: String, val user: User, private val firebaseUser:
             }
     }
 
+    private fun getRecentlyPlaylists(){
+        firebaseRepo.db.collection("History")
+            .document(user.id)
+            .addSnapshotListener { value, error ->
+                if (value != null && value.exists() && value.get("playlists") != null) {
+                    val result = value.get("playlists") as List<HashMap<*, *>>
+
+                    val playlistIDs = mutableListOf<String>()
+                    result.forEach { item ->
+                        if (playlistIDs.size <= 10 && !playlistIDs.contains(item["id"])) {
+                            playlistIDs.add(item["id"].toString())
+                        }
+                    }
+
+                    firebaseRepo.db.collection("Playlist")
+                        .whereIn("id", playlistIDs)
+                        .addSnapshotListener { result,_ ->
+                            if (result != null && !result.isEmpty) {
+                                val playlists = result.toObjects(Playlist::class.java)
+                                val group = GroupPlaylist("Recently Playlist", playlists)
+
+                                val recentlyPlayedPlaylists =
+                                    _groupPlaylists.value?.find { it.title == "Recently Playlist" }
+
+                                if (recentlyPlayedPlaylists != null)
+                                    _groupPlaylists.value?.get(
+                                        _groupPlaylists.value!!.indexOf(
+                                            recentlyPlayedPlaylists
+                                        )
+                                    )?.playlists = playlists
+                                else {
+
+                                    val temp = mutableListOf<GroupPlaylist>()
+                                    temp += _groupPlaylists.value?: listOf()
+                                    temp.add(group)
+                                    _groupPlaylists.value = temp
+
+//                                    groupPlaylists.postValue(
+//                                        groupPlaylists.value?.plus(group)
+//                                    )
+//                                        _groupPlaylists.value = _groupPlaylists.value?.plus(group)
+                                }
+                            }
+                        }
+                }
+            }
+
+    }
+
+    private fun getYourArtists(){
+        firebaseRepo.db.collection("User")
+            .document(user.id)
+            .collection("Followed")
+            .addSnapshotListener { items, _ ->
+                if (items != null) {
+                    val artistIDGroups = subList(
+                        items.toObjects(FirebaseRepository.FollowedObject::class.java)
+                            .filter { it.type == Type.ARTIST.name }.map { it.id })
+                    val listData = mutableListOf<Artist>()
+                    artistIDGroups.forEach { artistIDs ->
+
+                        firebaseRepo.db.collection("Artist")
+                            .whereIn("id", artistIDs)
+                            .addSnapshotListener { documents, _ ->
+                                if (documents != null) {
+                                    listData += documents.toObjects(Artist::class.java)
+                                    val artists = convertArtistsToPlaylists(listData)
+
+                                    val group = GroupPlaylist("Your favorite artists", artists)
+
+                                    val recentlyPlayedPlaylists =
+                                        _groupPlaylists.value?.find { it.title == "Your favorite artists" }
+
+                                    if (recentlyPlayedPlaylists != null) {
+                                        _groupPlaylists.value?.get(
+                                            _groupPlaylists.value!!.indexOf(
+                                                recentlyPlayedPlaylists
+                                            )
+                                        )?.playlists = artists
+
+
+                                    } else {
+                                        val temp = mutableListOf<GroupPlaylist>()
+                                        temp += groupPlaylists.value ?: listOf()
+                                        temp.add(group)
+                                        _groupPlaylists.value = temp
+
+                                    }
+                                }
+                            }
+                    }
+                }
+            }
+    }
+
     private fun getRelateArtists(){
 
         runBlocking(Dispatchers.IO) {
-            firebaseRepo.db.collection("Followed")
+            firebaseRepo.db.collection("User")
                 .document(user.id)
+                .collection("Followed")
                 .get()
                 .addOnSuccessListener { docs ->
-                    if (docs != null && docs.exists() && docs["artists"] != null) {
+                    if (docs != null && !docs.isEmpty()) {
+                        Log.i("Relateartists","$docs")
 
                         //get id's artists was followed
-                        val artistIds = subList(docs["artists"] as List<*>)
+                        val artistIds = subList(docs.toObjects(FirebaseRepository.FollowedObject::class.java).filter { it.type=="ARTIST"}.map { it.id })
+                        Log.i("Relateartists","$artistIds")
 
                         artistIds.forEach { ids ->
                             firebaseRepo.db.collection("Artist")
@@ -122,7 +219,7 @@ class HomeViewModel(val token: String, val user: User, private val firebaseUser:
                     temp.add(GroupPlaylist("Relate artists",
                         convertArtistsToPlaylists(relateArtists.subList(0,8))))
                     _groupPlaylists.value = temp
-
+                    Log.i("Relateartists","$temp")
                 }
             }
     }

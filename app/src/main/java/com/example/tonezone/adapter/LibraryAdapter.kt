@@ -36,7 +36,6 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     @SuppressLint("NotifyDataSetChanged")
     fun setLimitItem(limit: Int){
         this.limit = limit
-        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
@@ -70,12 +69,12 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             when (holder) {
                 is ArtistViewHolder -> {
                     val artistItem = getItem(position) as DataItem.ArtistItem
-                    holder.bind(artistItem.artist, clickListener)
+                    holder.bind(artistItem.artist,artistItem.isPin, clickListener)
                 }
 
                 is PlaylistViewHolder -> {
                     val playlistItem = getItem(position) as DataItem.PlaylistItem
-                    holder.bind(playlistItem.playlist, clickListener)
+                    holder.bind(playlistItem.playlist,playlistItem.isPin ,clickListener)
                 }
 
                 is TrackViewHolder -> {
@@ -85,7 +84,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
                 is AlbumViewHolder -> {
                     val albumItem = getItem(position) as DataItem.AlbumItem
-                    holder.bind(albumItem.album, clickListener)
+                    holder.bind(albumItem.album, albumItem.isPin,clickListener)
                 }
             }
         }
@@ -102,6 +101,14 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             defaultData = items
 
     }
+
+    override fun submitList(list: List<DataItem>?) {
+        super.submitList(list)
+        if (list != null) {
+            defaultData = list
+        }
+    }
+
 
     @SuppressLint("NotifyDataSetChanged")
     fun filterQuery(query: String) {
@@ -139,11 +146,13 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
     fun sortByAlphabetical(){
         defaultData = defaultData.sortedBy { it.name }
+        defaultData = defaultData.sortedByDescending { it.pin }
         updateData(defaultData)
     }
 
     fun sortByCreator(){
         defaultData = defaultData.sortedBy { it.typeName }
+        defaultData = defaultData.sortedByDescending { it.pin }
         updateData(defaultData)
     }
 
@@ -174,9 +183,10 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     ): RecyclerView.ViewHolder(binding.root){
 
         @SuppressLint("ClickableViewAccessibility")
-        fun bind(artist: Artist, clickListener: OnClickListener){
+        fun bind(artist: Artist, isPin: Boolean, clickListener: OnClickListener){
             binding.artist = artist
             binding.clickListener = clickListener
+            binding.pin.visibility = if (isPin) View.VISIBLE else View.GONE
             binding.executePendingBindings()
 
             val gesture = CustomGesture().createGesture(clickListener,DataItem.ArtistItem(artist),itemView)
@@ -202,10 +212,14 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         (private val binding: ItemPlaylistInListBinding): RecyclerView.ViewHolder(binding.root) {
 
         @SuppressLint("ClickableViewAccessibility")
-        fun bind(playlist: Playlist, clickListener: OnClickListener){
+        fun bind(playlist: Playlist,isPin: Boolean,clickListener: OnClickListener){
             binding.playlist = playlist
             binding.clickListener = clickListener
+            binding.pin.visibility = if (isPin) View.VISIBLE else View.GONE
+
             binding.executePendingBindings()
+
+
 
             val gesture = CustomGesture().createGesture(clickListener,DataItem.PlaylistItem(playlist),itemView)
             itemView.allViews.all {
@@ -264,7 +278,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         (private val binding: ItemPlaylistInListBinding): RecyclerView.ViewHolder(binding.root) {
 
         @SuppressLint("ClickableViewAccessibility")
-        fun bind(album: Album, clickListener: OnClickListener){
+        fun bind(album: Album, isPin: Boolean, clickListener: OnClickListener){
             val playlist = Playlist(
                 album.id!!,
                 "",
@@ -274,6 +288,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
                 false,
                 album.type!!,
                 listOf())
+            binding.pin.visibility = if (isPin) View.VISIBLE else View.GONE
             binding.playlist = playlist
             binding.clickListener = clickListener
             binding.executePendingBindings()
@@ -313,7 +328,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
     }
 
     sealed class DataItem{
-        data class PlaylistItem(val playlist: Playlist): DataItem(){
+        data class PlaylistItem(val playlist: Playlist,val isPin: Boolean = false): DataItem(){
             override val id = playlist.id
             override val type = 1
             override val name = playlist.name
@@ -323,9 +338,10 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
                 if(playlist.images?.size!=0)
                 playlist.images?.get(0)?.url
             else ""
+            override val pin = isPin
         }
 
-        data class ArtistItem( val artist: Artist): DataItem(){
+        data class ArtistItem( val artist: Artist,val isPin: Boolean = false): DataItem(){
             override val id = artist.id
             override val type = 2
             override val name = artist.name
@@ -335,6 +351,8 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
                 if(artist.images?.size!=0)
                     artist.images?.get(0)?.url
             else ""
+            override val pin = isPin
+
 
         }
 
@@ -356,7 +374,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
         }
 
-        data class AlbumItem( val album: Album): DataItem(){
+        data class AlbumItem( val album: Album,val isPin: Boolean = false): DataItem(){
             override val id = album.id
             override val type = 4
             override val name = album.name
@@ -371,6 +389,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
             override val image = if(album.images?.size!=0)
                 album.images?.get(0)?.url
             else ""
+            override val pin = isPin
 
         }
 
@@ -380,6 +399,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         abstract val typeName: String?
         abstract val description: String?
         abstract val image: String?
+        open val pin: Boolean = false
     }
 
     class OnClickListener(val clickListener: (dataItem: DataItem, idButton: Int?) -> Unit){

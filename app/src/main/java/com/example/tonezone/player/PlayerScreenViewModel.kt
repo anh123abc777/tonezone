@@ -29,7 +29,7 @@ import kotlinx.coroutines.*
 import java.util.*
 
 
-class PlayerScreenViewModel(val application: Application,val user: FirebaseUser) : ViewModel() {
+class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?) : ViewModel() {
 
     private val tokenRepository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
     val token = runBlocking(Dispatchers.IO) { tokenRepository.token}
@@ -152,7 +152,7 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser)
             }
         }catch (e: Exception){
             try {
-                exoPlayer.seekTo(0, posMs)
+                exoPlayer.seekTo(2, posMs)
                 exoPlayer.prepare()
                 exoPlayer.play()
                 _playerState.value = PlayerState.PLAY
@@ -173,7 +173,6 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser)
             _currentTrack.value = track
             _playerState.value = PlayerState.PLAY
         }
-
     }
 
     fun onChangeState(){
@@ -251,7 +250,7 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser)
         }
         jobs.invokeOnCompletion {
             val time = (System.nanoTime() - start).toDouble()/1e6
-            firebaseRepo.saveHistory(user.uid,previousTrack!!.id,time/previousTrack.duration_ms!!,Type.TRACK)
+            user?.let { it1 -> firebaseRepo.saveHistory(it1.uid,previousTrack!!.id,time/previousTrack.duration_ms!!,Type.TRACK) }
 
         }
     }
@@ -472,26 +471,37 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser)
     }
 
     fun checkIsLikeTrack(){
-        firebaseRepo.db.collection("Followed")
-            .document(user.uid)
-            .get()
-            .addOnSuccessListener {
-                if (it["tracks"] != null) {
-                    val followedObjects = it["tracks"] as List<String>
-                    _isFavorite.value = followedObjects.contains(_currentTrack.value!!.id)
-                } else {
-                    _isFavorite.value = false
+        user?.let {
+            firebaseRepo.db.collection("Followed")
+                .document(it.uid)
+                .get()
+                .addOnSuccessListener {
+                    if (it["tracks"] != null) {
+                        val followedObjects = it["tracks"] as List<String>
+                        _isFavorite.value = followedObjects.contains(_currentTrack.value!!.id)
+                    } else {
+                        _isFavorite.value = false
+                    }
                 }
-            }
+        }
     }
 
     fun likeTrack(){
         if (_isFavorite.value != true)
-            firebaseRepo.followObject(user.uid, _currentTrack.value!!.id,Type.TRACK)
+            user?.let { firebaseRepo.followObject(it.uid, _currentTrack.value!!.id,Type.TRACK) }
         else
-            firebaseRepo.unfollowObject(user.uid, _currentTrack.value!!.id,Type.TRACK)
+            user?.let { firebaseRepo.unfollowObject(it.uid, _currentTrack.value!!.id) }
 
         _isFavorite.value = !_isFavorite.value!!
+    }
+
+    fun addToQueue(track: Track){
+        originPlaylist.add(track)
+        _currentPlaylist.value = _currentPlaylist.value?.plus(track)
+        if (shuffleIndexes.isNotEmpty()){
+            shuffleIndexes.add(shuffleIndexes.size)
+        }
+        exoPlayer.addMediaItem(MediaItem.Builder().setUri(track.preview_url).setMediaId(track.id).build())
     }
 
     override fun onCleared() {

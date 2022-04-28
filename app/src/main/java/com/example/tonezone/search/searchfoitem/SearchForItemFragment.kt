@@ -59,7 +59,7 @@ class SearchForItemFragment : Fragment() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun afterTextChanged(p0: Editable?) {
-                viewModel.search(p0)
+                viewModel.searchInFirebase(p0)
             }
         })
 
@@ -86,10 +86,10 @@ class SearchForItemFragment : Fragment() {
 
     private fun bindChipGroup(){
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
-        binding.chipGroup.playlistData = viewModel.searchedItems.value?.playlists ?: Playlists()
-        binding.chipGroup.artistData = viewModel.searchedItems.value?.artists ?: Artists()
-        binding.chipGroup.trackData = viewModel.searchedItems.value?.tracks ?: Tracks()
-        binding.chipGroup.albumData = viewModel.searchedItems.value?.albums ?: Albums(listOf())
+//        binding.chipGroup.playlistData = viewModel.searchedItems.value?. ?: Playlists()
+//        binding.chipGroup.artistData = viewModel.searchedItems.value?.artists ?: Artists()
+//        binding.chipGroup.trackData = viewModel.searchedItems.value?.tracks ?: Tracks()
+//        binding.chipGroup.albumData = viewModel.searchedItems.value?.albums ?: Albums(listOf())
 
         binding.chipGroup.filterTypeChipGroup.setOnCheckedChangeListener { _, checkedId ->
 

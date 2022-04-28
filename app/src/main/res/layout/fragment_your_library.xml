@@ -27,7 +27,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/white"
             android:paddingBottom="8dp"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
             >
@@ -91,13 +90,9 @@
                 android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:orientation="vertical"
-                artistData="@{viewModel.followedArtists}"
-                playlistData="@{viewModel.userPlaylists}"
-                albumData="@{viewModel.saveAlbums}"
-                sortOption="@{viewModel.sortOption}"
                 android:nestedScrollingEnabled="false"
                 android:paddingBottom="112dp"
-                />
+                 />
 
 
             </LinearLayout>

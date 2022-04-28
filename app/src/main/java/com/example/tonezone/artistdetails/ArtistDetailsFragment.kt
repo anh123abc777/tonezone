@@ -1,12 +1,14 @@
 package com.example.tonezone.artistdetails
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -17,10 +19,14 @@ import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentArtistDetailsBinding
 import com.example.tonezone.network.Artist
 import com.example.tonezone.network.PlaylistInfo
+import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.playlistdetails.PlaylistDetailsViewModel
 import com.example.tonezone.playlistdetails.PlaylistDetailsViewModelFactory
 import com.example.tonezone.utils.*
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.AppBarLayout.OnOffsetChangedListener
+
 
 class ArtistDetailsFragment : Fragment() {
 
@@ -33,13 +39,13 @@ class ArtistDetailsFragment : Fragment() {
     }
 
     private val playlistDetailsViewModel: PlaylistDetailsViewModel by viewModels {
-        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.user.value!!)
+        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.firebaseAuth.value!!)
     }
 
     private val playerViewModel: PlayerScreenViewModel by activityViewModels()
 
     private val viewModel: ArtistDetailsViewModel by viewModels {
-        ArtistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.user.value!!)
+        ArtistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.firebaseAuth.value!!)
     }
 
     private val modalBottomSheetViewModel: ModalBottomSheetViewModel by activityViewModels()
@@ -60,19 +66,61 @@ class ArtistDetailsFragment : Fragment() {
         setupShowMoreTracks()
         setupShowMoreAlbums()
         handleOnPlay()
+        handlePlayingTrack()
         setupBottomSheet()
         handleSignalFromBottomSheet()
         setupShowingArtistsBottomSheet()
         handleNavigateToPlaylistDetails()
         handleBackPress()
+        setupAppbar()
+        initStateLikedItems()
 
-        viewModel.artist.observe(viewLifecycleOwner){
-            if (it!=null){
-                Log.i("getArtist","$it")
-            }
-        }
+//        viewModel.artist.observe(viewLifecycleOwner){
+//            if (it!=null){
+//                Log.i("getArtist","$it")
+//            }
+//        }
 
         return binding.root
+    }
+
+    private fun initStateLikedItems(){
+        playlistDetailsViewModel.playlistItems.observe(viewLifecycleOwner){
+            if (it!=null){
+                playlistDetailsViewModel.initStateLikedItems()
+            }
+        }
+    }
+
+    private fun setupAppbar(){
+        binding.appBarLayout.addOnOffsetChangedListener(object : OnOffsetChangedListener {
+            var scrollRange = -1
+            override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
+                //Initialize the size of the scroll
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.totalScrollRange
+                }
+                //Check if the view is collapsed
+                if (scrollRange + verticalOffset == 0) {
+                    binding.toolbar.setBackgroundColor(
+                        ContextCompat.getColor(
+                            context!!,
+                            R.color.black
+                        )
+                    )
+                    binding.collapsingToolbarLayout.title = viewModel.artist.value?.name
+                    binding.toolbar.setTitleTextColor(Color.WHITE)
+
+                } else {
+                    binding.toolbar.setBackgroundColor(
+                            Color.TRANSPARENT
+                    )
+                    binding.toolbar.setTitleTextColor(Color.TRANSPARENT)
+                    binding.toolbar.title = ""
+                    binding.collapsingToolbarLayout.title = ""
+                }
+            }
+        })
     }
 
     private fun handleBackPress(){
@@ -87,6 +135,18 @@ class ArtistDetailsFragment : Fragment() {
         }
     }
 
+    private fun handlePlayingTrack(){
+        if (playerViewModel.playerState.value==PlayerScreenViewModel.PlayerState.NONE) {
+            playerViewModel.currentTrack.observe(requireActivity()) {
+                if (it != Track()) {
+                    playerViewModel.initSeekBar()
+                    playerViewModel.onPlay()
+                    playerViewModel.initPrimaryColor()
+                }
+            }
+        }
+    }
+
     private fun createArtistTopTracksAdapter(){
         val tracksAdapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, idButton ->
             val trackItem = item as LibraryAdapter.DataItem.TrackItem
@@ -94,7 +154,7 @@ class ArtistDetailsFragment : Fragment() {
             when(idButton) {
                 null -> {
                     val pos = playlistDetailsViewModel.playlistItems.value!!.indexOf(trackItem.track)
-//                    playerViewModel.onInit(playlistInfo.uri, pos)
+                    playerViewModel.onInit(pos,viewModel.tracks.value)
                 }
 
                 else -> {
@@ -102,7 +162,6 @@ class ArtistDetailsFragment : Fragment() {
                 }
             }
         })
-        tracksAdapter.setLimitItem(6)
         binding.topTracksOfArtist.adapter = tracksAdapter
     }
 

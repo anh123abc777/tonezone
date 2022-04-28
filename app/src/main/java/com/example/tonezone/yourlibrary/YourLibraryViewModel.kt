@@ -5,39 +5,26 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.ObjectRequest
 import com.example.tonezone.utils.Signal
-import com.example.tonezone.utils.Type
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.*
 
 
-class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
+class YourLibraryViewModel(val firebaseUser: FirebaseUser) : ViewModel() {
 
     private val job = Job()
     private val uiScope = CoroutineScope(job + Dispatchers.Main)
     private val firebaseRepo = FirebaseRepository()
 
-    private var _userPlaylists = MutableLiveData<List<Playlist>>()
-    val userPlaylists : LiveData<List<Playlist>>
-        get() = _userPlaylists
+    private val _dataItems = firebaseRepo.getFollowedObjects(firebaseUser.uid)
+    val dataItems : LiveData<List<LibraryAdapter.DataItem>>
+        get() = _dataItems
 
-     private var _followedArtists = firebaseRepo.getFollowedArtists(user.id)
-    val followedArtists : LiveData<List<Artist>>
-        get() = _followedArtists
-
-    private val _savedTracks = firebaseRepo.getLikedTracks(user.id)
-    val savedTracks : LiveData<List<Track>>
-        get() = _savedTracks
-
-    private var _savedAlbums = MutableLiveData<List<Album>>()
-    val saveAlbums : LiveData<List<Album>>
-        get() = _savedAlbums
-
-    private val _sortOption = MutableLiveData<SortOption>()
-    val sortOption : LiveData<SortOption>
+    private val _sortOption = MutableLiveData<SortOption?>()
+    val sortOption : LiveData<SortOption?>
         get() = _sortOption
 
     private val _type = MutableLiveData<TypeItemLibrary>()
@@ -58,24 +45,24 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
 
     init {
 //        getDataFollowedArtists()
-        getDataUserPlaylists()
-        getDataSavedAlbums()
+//        getDataUserPlaylists()
+//        getDataSavedAlbums()
         _sortOption.value = SortOption.Alphabetical
         _type.value = TypeItemLibrary.All
 
     }
-
-     fun getDataUserPlaylists(){
-         _userPlaylists = firebaseRepo.getLikedPlaylists(user.id)
-    }
-
-    private fun getDataFollowedArtists(){
-        _followedArtists = firebaseRepo.getFollowedArtists(user.id)
-    }
-
-    private fun getDataSavedAlbums(){
-        _savedAlbums = firebaseRepo.getFollowedAlbums(user.id)
-    }
+//
+//     fun getDataUserPlaylists(){
+//         _userPlaylists = firebaseRepo.getLikedPlaylists(firebaseUser.uid)
+//    }
+//
+//    private fun getDataFollowedArtists(){
+//        _followedArtists = firebaseRepo.getFollowedArtists(firebaseUser.uid)
+//    }
+//
+//    private fun getDataSavedAlbums(){
+//        _savedAlbums = firebaseRepo.getFollowedAlbums(firebaseUser.uid)
+//    }
 
     fun changeSortOption(){
         _sortOption.value =
@@ -129,8 +116,8 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
 
     fun createPlaylist(playlistName: String){
 
-        val playlist = firebaseRepo.createPlaylist(playlistName,user)
-        getDataUserPlaylists()
+        val playlist = firebaseRepo.createPlaylist(playlistName,firebaseUser)
+//        getDataUserPlaylists()
         displayPlaylistDetails(playlist)
 
     }
@@ -139,14 +126,16 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
         _objectShowBottomSheet.value = Pair(objectRequest,itemId)
     }
 
-    @SuppressLint("NullSafeMutableLiveData")
-    fun showBottomSheetComplete(){
-        _objectShowBottomSheet.value = null
-    }
 
     @SuppressLint("NullSafeMutableLiveData")
     fun handleSignalComplete(){
         _receivedSignal.value = null
+        showBottomSheetComplete()
+    }
+
+    @SuppressLint("NullSafeMutableLiveData")
+    fun showBottomSheetComplete(){
+        _objectShowBottomSheet.value = null
     }
 
     fun handleSignal(){
@@ -159,23 +148,39 @@ class YourLibraryViewModel(val token: String, val user: User) : ViewModel() {
 
             Signal.STOP_FOLLOWING -> unfollowArtist()
 
+            Signal.PIN_PLAYLIST -> pinObject()
+
+            Signal.UNPIN_PLAYLIST -> unpinObject()
+
+            Signal.UNPIN_ARTIST -> unpinObject()
+
+            Signal.PIN_ARTIST -> pinObject()
+
             else -> Log.i("receivedSignal","what is this???????")
         }
     }
 
+    private fun unpinObject(){
+        firebaseRepo.unpinObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+    }
+
+    private fun pinObject(){
+        firebaseRepo.pinObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+    }
+
     private fun unfollowArtist(){
         firebaseRepo
-            .unfollowObject(user.id,_objectShowBottomSheet.value!!.second,Type.ARTIST)
-        getDataFollowedArtists()
+            .unfollowObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+//        getDataFollowedArtists()
     }
 
     private fun unlikePlaylist(){
-        firebaseRepo.unfollowObject(user.id,_objectShowBottomSheet.value!!.second,Type.PLAYLIST)
+        firebaseRepo.unfollowObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
     }
 
     private fun deletePlaylist(){
-        firebaseRepo.deletePlaylist(user.id,_objectShowBottomSheet.value!!.second)
-        getDataUserPlaylists()
+        firebaseRepo.deletePlaylist(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+//        getDataUserPlaylists()
     }
 
     fun receiveSignal(signal: Signal){

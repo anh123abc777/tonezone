@@ -10,7 +10,7 @@ import com.example.tonezone.databinding.ModalBottomSheetContentBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
-class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isFollowing: Boolean?) : BottomSheetDialogFragment() {
+class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isFollowing: Boolean?,private val isPin: Boolean = false) : BottomSheetDialogFragment() {
 
     private lateinit var binding: ModalBottomSheetContentBinding
 
@@ -24,13 +24,13 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
 
         binding = ModalBottomSheetContentBinding.inflate(inflater)
 
-        setupBottomSheetItems(objectRequest,isFollowing)
+        setupBottomSheetItems(objectRequest,isFollowing,isPin)
 
         return binding.root
 
     }
 
-    private fun setupBottomSheetItems(objectRequest: ObjectRequest,isFollowing: Boolean?){
+    private fun setupBottomSheetItems(objectRequest: ObjectRequest,isFollowing: Boolean?, isPin: Boolean){
         when(objectRequest){
 
             ObjectRequest.ARTIST -> submitBottomSheetList(listOf())
@@ -60,7 +60,6 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
                     Signal.DELETE_PLAYLIST,
                     Signal.EDIT_PLAYLIST,
                     Signal.ADD_SONGS,
-                    Signal.SHARE,
                 )
             )
 
@@ -68,17 +67,14 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
                 submitBottomSheetList(
                     listOf(
                         Signal.LIKED_PLAYLIST,
-                        Signal.PIN_PLAYLIST,
-                        Signal.SHARE)
-                )
+                        if (isPin) Signal.UNPIN_PLAYLIST else Signal.PIN_PLAYLIST,))
             }
 
             ObjectRequest.OWNER_PLAYLIST_FROM_LIBRARY -> {
                 submitBottomSheetList(
                     listOf(
-                        Signal.PIN_PLAYLIST,
+                        if (isPin) Signal.UNPIN_PLAYLIST else Signal.PIN_PLAYLIST,
                         Signal.DELETE_PLAYLIST,
-                        Signal.SHARE
                     )
                 )
             }
@@ -87,7 +83,7 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
                 submitBottomSheetList(
                     listOf(
                         Signal.STOP_FOLLOWING,
-                        Signal.UNPIN_ARTIST,
+                        if (isPin) Signal.UNPIN_ARTIST else Signal.PIN_ARTIST,
                     )
                 )
             }

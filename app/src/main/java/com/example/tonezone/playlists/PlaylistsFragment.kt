@@ -32,7 +32,7 @@ class PlaylistsFragment : Fragment() {
     }
 
     private val artistViewModel: ArtistDetailsViewModel by viewModels {
-        ArtistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.user.value!!)
+        ArtistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.firebaseAuth.value!!)
     }
 
     override fun onCreateView(

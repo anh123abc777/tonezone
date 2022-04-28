@@ -196,7 +196,7 @@ class CurrentPlaylistFragment : Fragment() {
     private fun handleClickEventSelectedOptionLayout(){
 //        }
         binding.addToPlaylistButton.setOnClickListener {
-            val yourPlaylistModalBottomSheet = YourPlaylistBottomSheet(playerViewModel.selectedTracks.value!!)
+            val yourPlaylistModalBottomSheet = YourPlaylistBottomSheet(playerViewModel.selectedTracks.value!!,playerViewModel.user!!)
             yourPlaylistModalBottomSheet.show(
                 requireActivity().supportFragmentManager,
                 ArtistsModalBottomSheet.TAG

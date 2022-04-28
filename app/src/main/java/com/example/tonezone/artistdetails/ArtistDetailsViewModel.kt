@@ -8,12 +8,13 @@ import androidx.lifecycle.ViewModel
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.Type
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.*
 
 class ArtistDetailsViewModel(
     val token: String,
     val playlistInfo: PlaylistInfo,
-    val user: User): ViewModel() {
+    val user: FirebaseUser): ViewModel() {
 
     private val firebaseRepo = FirebaseRepository()
 
@@ -29,7 +30,7 @@ class ArtistDetailsViewModel(
     val artistAlbums : LiveData<List<Album>>
         get() = _artistAlbums
 
-    private val _isFollowingArtist = firebaseRepo.checkObjectIsFollowed(user.id,playlistInfo.id,Type.ARTIST)
+    private val _isFollowingArtist = firebaseRepo.checkObjectIsFollowed(user.uid,playlistInfo.id,Type.ARTIST)
     val isFollowingArtist : LiveData<Boolean>
         get() = _isFollowingArtist
 
@@ -149,13 +150,13 @@ class ArtistDetailsViewModel(
     }
 
     private fun unfollowArtist(){
-        firebaseRepo.unfollowObject(user.id,playlistInfo.id,Type.ARTIST)
-//        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,0)
+        firebaseRepo.unfollowObject(user.uid,playlistInfo.id)
+//        firebaseRepo.submitArtistScore(user.uid,playlistInfo.id,0)
     }
 
     private fun followArtist(){
-        firebaseRepo.followObject(user.id,playlistInfo.id,Type.ARTIST)
-//        firebaseRepo.submitArtistScore(user.id,playlistInfo.id,1)
+        firebaseRepo.followObject(user.uid,playlistInfo.id,Type.ARTIST)
+//        firebaseRepo.submitArtistScore(user.uid,playlistInfo.id,1)
     }
 
     fun navigateToMoreTracks(){

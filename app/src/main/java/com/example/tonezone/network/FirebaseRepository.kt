@@ -7,13 +7,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.utils.*
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -266,15 +267,15 @@ class FirebaseRepository {
             .document()
             .delete()
 
-        unfollowObject(userID,id,Type.PLAYLIST)
+        unfollowObject(userID,id)
     }
 
-    fun createPlaylist(name: String,user: User): Playlist {
+    fun createPlaylist(name: String,user: FirebaseUser): Playlist {
         val playlist = Playlist(
             name = name,
             type = "playlist",
-            owner = Owner(user.display_name,user.id),
-            id = user.id
+            owner = Owner(user.displayName,user.uid),
+            id = user.uid
         )
         db.collection("Playlist")
             .document()
@@ -282,7 +283,7 @@ class FirebaseRepository {
             .addOnSuccessListener {
 
                 db.collection("Playlist")
-                    .whereEqualTo("id",user.id)
+                    .whereEqualTo("id",user.uid)
                     .addSnapshotListener { documents, _ ->
                         if (documents!=null){
                             for (doc in documents){
@@ -291,7 +292,7 @@ class FirebaseRepository {
                                     .document(doc.id)
                                     .set(playlist)
 
-                                followObject(user.id,doc.id,Type.PLAYLIST)
+                                followObject(user.uid,doc.id,Type.PLAYLIST)
                             }
                         }
                     }
@@ -300,52 +301,50 @@ class FirebaseRepository {
         return playlist
     }
 
-    fun getAllPlaylists(){
-        db.collection("Playlist")
-            .get()
-            .addOnSuccessListener {docs ->
-                for(doc in docs){
-                    val playlist = convertDocToPlaylist(doc)
-//                    val map = hashMapOf(
-//                        "id" to playlist.id,
-//                        "type" to playlist.type,
-//                        "search_keywords" to generateSearchKeywords(playlist.name!!)
-//                    )
-//                    db.collection("Search")
-//                        .document(playlist.id!!)
-//                        .set(map)
-                }
-            }
-    }
+//    fun getAllPlaylists(){
+//        db.collection("Playlist")
+//            .get()
+//            .addOnSuccessListener {docs ->
+//                for(doc in docs){
+//                    val playlist = convertDocToPlaylist(doc)
+////                    val map = hashMapOf(
+////                        "id" to playlist.id,
+////                        "type" to playlist.type,
+////                        "search_keywords" to generateSearchKeywords(playlist.name!!)
+////                    )
+////                    db.collection("Search")
+////                        .document(playlist.id!!)
+////                        .set(map)
+//                }
+//            }
+//    }
 
-    fun getPlaylist(id: String): MutableLiveData<Playlist>{
+    fun getPlaylist(id: String?): MutableLiveData<Playlist>{
         val playlist = MutableLiveData<Playlist>()
-        db.collection("Playlist")
-            .document(id)
-            .addSnapshotListener { value, error ->
-                if (error!=null){
-                    return@addSnapshotListener
-                }
+        if (id!=null && id!="")
+            db.collection("Playlist")
+                .document(id)
+                .addSnapshotListener { value, error ->
+                    if (error!=null){
+                        return@addSnapshotListener
+                    }
 
-                if(value!=null && value.exists()){
-                    playlist.value = Playlist()
-                    playlist.value!!.name = value.getString("name")
-                    playlist.value!!.id = value.getString("id")
-                    playlist.value!!.images = value.get("images") as List<Image>
-                    playlist.value!!.owner = value.toObject<Owner>()
-                    playlist.value!!.description = value.getString("description")
+                    if(value!=null && value.exists()){
+                        playlist.value = value.toObject(Playlist::class.java)
+                    }
                 }
-            }
         return playlist
     }
 
     fun addItemToYourPlaylist(playlistID: String, newTrackIDs: List<String>){
 
+        val date = Calendar.getInstance().time.toString()
         newTrackIDs.forEach {
+            val item = hashMapOf("added_at" to date,"id" to it)
             db.collection("Playlist")
                 .document(playlistID)
 //            .set(hashMapOf("tracks" to newTrackIDs), SetOptions.mergeFields("tracks"))
-                .update("tracks", FieldValue.arrayUnion(it))
+                .update("tracks", FieldValue.arrayUnion(item))
         }
     }
 
@@ -565,7 +564,6 @@ class FirebaseRepository {
 
     /** user **/
 
-
     fun addUser(user: User){
         var user = user
         db.collection("User")
@@ -605,21 +603,224 @@ class FirebaseRepository {
     }
 
     /** Follow **/
+
+    fun getFollowedObjects(userID: String): MutableLiveData<List<LibraryAdapter.DataItem>>{
+        val dataItems = MutableLiveData<List<LibraryAdapter.DataItem>>()
+        val list = mutableListOf<Pair<LibraryAdapter.DataItem,Boolean>>()
+
+        db.collection("User")
+            .document(userID)
+            .collection("Followed")
+            .orderBy("pin",Query.Direction.DESCENDING)
+            .addSnapshotListener { value, _ ->
+                list.clear()
+                if (value!=null && !value.isEmpty){
+                    val followedObjectsRaw = value.toObjects(FollowedObject::class.java)
+                    followedObjectsRaw.forEach { item ->
+                        when(item.type) {
+                            Type.TRACK.name -> {
+                                db.collection("Track")
+                                    .whereEqualTo("id", item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful) {
+                                            val track = doc.result.toObjects(Track::class.java)
+                                            if (list.find { it.first.id == "liked_track" }==null) {
+
+                                                list += listOf(
+                                                    Pair(
+                                                        LibraryAdapter.DataItem.PlaylistItem(
+                                                            Playlist(
+                                                                id = "liked_track",
+                                                                name = "Liked Tracks",
+                                                                images = track[0].album?.images,
+                                                            ),true
+                                                        ),
+                                                        true
+                                                    )
+                                                )
+                                                list.sortBy { it.first.name }
+                                                list.sortByDescending { it.second }
+                                                dataItems.value = list.map { it.first }
+                                            }
+                                        }
+                                    }
+                            }
+
+                            Type.ALBUM.name -> {
+                                db.collection("Album")
+                                    .whereEqualTo("id", item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful) {
+                                            val album = doc.result.toObjects(Album::class.java)
+                                            if (!list.contains(Pair(LibraryAdapter.DataItem.AlbumItem(album[0],item.pin),item.pin))) {
+                                                list += listOf(
+                                                    Pair(
+                                                        LibraryAdapter.DataItem.AlbumItem(
+                                                            album[0],
+                                                            item.pin
+                                                        ), item.pin
+                                                    )
+                                                )
+                                                list.sortBy { it.first.name }
+                                                list.sortByDescending { it.second }
+                                                dataItems.value = list.map { it.first }
+                                            }
+                                        }
+                                    }
+                            }
+
+                            Type.ARTIST.name -> {
+                                db.collection("Artist")
+                                    .whereEqualTo("id", item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful) {
+                                            val artist = doc.result.toObjects(Artist::class.java)
+                                            if (!list.contains( Pair(LibraryAdapter.DataItem.ArtistItem(artist[0], item.pin), item.pin))) {
+                                                list += listOf(
+                                                    Pair(
+                                                        LibraryAdapter.DataItem.ArtistItem(
+                                                            artist[0],
+                                                            item.pin
+                                                        ), item.pin
+                                                    )
+                                                )
+                                                list.sortBy { it.first.name }
+                                                list.sortByDescending { it.second }
+                                                dataItems.value = list.map { it.first }
+                                            }
+                                        }
+                                    }
+                            }
+
+                            Type.PLAYLIST.name -> {
+                                db.collection("Playlist")
+                                    .whereEqualTo("id", item.id)
+                                    .get()
+                                    .addOnCompleteListener { doc ->
+                                        if (doc.isSuccessful) {
+                                            val playlist =
+                                                doc.result.toObjects(Playlist::class.java)
+                                            if (playlist.isNotEmpty() && !list.contains(Pair(LibraryAdapter.DataItem.PlaylistItem(playlist[0], item.pin), item.pin))
+                                            ) {
+                                                list += listOf(
+                                                    Pair(
+                                                        LibraryAdapter.DataItem.PlaylistItem(
+                                                            playlist[0],
+                                                            item.pin
+                                                        ), item.pin
+                                                    )
+                                                )
+                                                list.sortBy { it.first.name }
+                                                list.sortByDescending { it.second }
+                                                dataItems.value = list.map { it.first }
+                                            }
+                                        }
+                                    }
+                            }
+
+                        }
+                    }
+                }
+            }
+        return dataItems
+    }
+
+    data class FollowedObject(
+        val id: String = "",
+        val type: String = "",
+        val pin: Boolean = false
+    )
+
+    fun pinObject(userID: String,id: String) {
+        db.collection("User")
+            .document(userID)
+            .collection("Followed")
+            .document(id)
+            .update("pin",true)
+//        val field = convertTypeToField(type)
+//        val savedObject = hashMapOf("id" to id, "pin" to true)
+//        val removedObject = hashMapOf("id" to id, "pin" to false)
+//        if (field != "error") {
+//
+//            db.collection("Followed")
+//                .document(userID)
+//                .update(field, FieldValue.arrayRemove(removedObject))
+//
+//
+//            db.collection("Followed")
+//                .document(userID)
+//                .update(field, FieldValue.arrayUnion(savedObject))
+//                .addOnFailureListener {
+//
+//                    db.collection("Followed")
+//                        .document(userID)
+//                        .set(hashMapOf(field to listOf(savedObject)))
+//
+//                }
+//        }
+    }
+
+    fun unpinObject(userID: String,id: String) {
+        db.collection("User")
+            .document(userID)
+            .collection("Followed")
+            .document(id)
+            .update("pin",false)
+//        val field = convertTypeToField(type)
+//        val savedObject = hashMapOf("id" to id, "pin" to false)
+//        val removedObject = hashMapOf("id" to id, "pin" to true)
+//
+//        if (field != "error") {
+//
+//            db.collection("Followed")
+//                .document(userID)
+//                .update(field, FieldValue.arrayRemove(removedObject))
+//
+//            db.collection("Followed")
+//                .document(userID)
+//                .update(field, FieldValue.arrayUnion(savedObject))
+//                .addOnFailureListener {
+//
+//                    db.collection("Followed")
+//                        .document(userID)
+//                        .set(hashMapOf(field to listOf(savedObject)))
+//
+//                }
+//        }
+    }
+
     fun followObject(userID: String,id: String, type: Type){
 
-        val field = convertTypeToField(type)
+        val savedObject = hashMapOf("id" to id, "type" to type.name,"pin" to false )
 
-        if (field!= "error") {
-            db.collection("Followed")
-                .document(userID)
-                .update(field,FieldValue.arrayUnion(id))
-                .addOnFailureListener {
+        db.collection("User")
+            .document(userID)
+            .collection("Followed")
+            .document(id)
+            .set(savedObject)
 
-                    db.collection("Followed")
-                        .document(userID)
-                        .set(hashMapOf(field to listOf(id)))
-
-                }
+//
+//        val field = convertTypeToField(type)
+//        val savedObject =
+//            if (type==Type.TRACK)
+//                id
+//            else
+//                hashMapOf("id" to id, "pin" to false)
+//
+//        if (field!= "error") {
+//            db.collection("Followed")
+//                .document(userID)
+//                .update(field,FieldValue.arrayUnion(savedObject))
+//                .addOnFailureListener {
+//
+//                    db.collection("Followed")
+//                        .document(userID)
+//                        .set(hashMapOf(field to listOf(savedObject)))
+//
+//                }
 //                .addSnapshotListener { value, _ ->
 
 //                    val followedIDs = mutableListOf(id)
@@ -644,17 +845,43 @@ class FirebaseRepository {
 //                        .set(hashMapOf(field to followedIDs), SetOptions.merge())
 
 //                }
-        }
+//        }
     }
 
-    fun unfollowObject(userID: String,id: String, type: Type){
+    fun unfollowObject(userID: String,id: String) {
 
-        val field = convertTypeToField(type)
+        db.collection("User")
+            .document(userID)
+            .collection("Followed")
+            .document(id)
+            .delete()
 
-        if (field!= "error") {
-            db.collection("Followed")
-                .document(userID)
-                .update(field,FieldValue.arrayRemove(id))
+//        val field = convertTypeToField(type)
+//
+//        if (field != "error") {
+//
+//            if (type==Type.TRACK){
+//                db.collection("Followed")
+//                    .document(userID)
+//                    .update(field,FieldValue.arrayRemove(id))
+//            }
+//            else
+//                db.collection("Followed")
+//                    .document(userID)
+//                    .get()
+//                    .addOnSuccessListener { docs ->
+//                        if (docs != null && docs.exists() && docs[field] != null) {
+//                            val fieldObject = docs[field] as List<HashMap<*, *>>
+//                            val unfollowedObject = fieldObject.find { it["id"].toString() == id }
+//                            db.collection("Followed")
+//                                .document(userID)
+//                                .update(field, FieldValue.arrayRemove(unfollowedObject))
+//                        }
+//
+//
+//                    }
+//        }
+    }
 //                .get()
 //                .addOnSuccessListener{ value ->
 //
@@ -679,8 +906,7 @@ class FirebaseRepository {
 
 //                }
 
-        }
-    }
+
 
     fun checkObjectIsFollowed(userID: String,playlistID: String, type: Type): MutableLiveData<Boolean>{
 
@@ -692,7 +918,7 @@ class FirebaseRepository {
                 .get()
                 .addOnSuccessListener {
                     if (it[field] != null) {
-                        val followedObjects = it[field] as List<String>
+                        val followedObjects = (it[field] as List<HashMap<*,*>>).map { it["id"] }
                         isFollowed.value = followedObjects.contains(playlistID)
                     } else {
                         isFollowed.value = false
@@ -705,54 +931,55 @@ class FirebaseRepository {
 
         val field = convertTypeToField(type)
         var isFollowedList = MutableLiveData<List<Boolean>>()
-        var dataList = mutableListOf<Boolean>()
+        var dataList = MutableList(playlistIDs.size){false}
 
-            db.collection("Followed")
+        playlistIDs.forEachIndexed { index, id  ->
+            db.collection("User")
                 .document(userID)
-                .get()
-                .addOnSuccessListener{ doc ->
+                .collection("Followed")
+                .document(id)
+                .addSnapshotListener { doc, _ ->
                     if (doc != null) {
-                        if (doc[field] != null) {
-                            val followedObjects = doc[field] as List<String>
-                            playlistIDs.forEach { id ->
-                                dataList.add(followedObjects.contains(id))
-                            }
-                        }else{
-                            dataList = MutableList(playlistIDs.size){false}
-                        }
-                        isFollowedList.value = dataList
-                        Log.i("likeTrack","$dataList")
+                        dataList[index] = doc.exists()
+                        val temp = dataList
+                        isFollowedList.value = temp
                     }
                 }
+        }
         return isFollowedList
     }
 
-    fun getLikedPlaylists(userID: String): MutableLiveData<List<Playlist>>{
-        val playlists = MutableLiveData<List<Playlist>>()
-        db.collection("Followed")
+    fun getLikedPlaylists(userID: String): MutableLiveData<List<Pair<Playlist,Boolean>>>{
+        val playlistWithPinsObserve = MutableLiveData<List<Pair<Playlist,Boolean>>>()
+        db.collection("User")
             .document(userID)
-            .addSnapshotListener { items, error ->
+            .collection("Followed")
+            .whereEqualTo("type",Type.PLAYLIST.name)
+            .addSnapshotListener { items, _ ->
 
-                if (items!=null){
-                    if (items["playlists"] !=null) {
-                        val playlistIDGroups = subList((items.get("playlists") as List<*>))
-                        val listData = mutableListOf<Playlist>()
+                if (items!=null && !items.isEmpty){
+                    val playlistWithPins = items as List<HashMap<*,*>>
+                    val playlistIDGroups = subList(playlistWithPins.map { it["id"] })
+                    val listData = mutableListOf<Pair<Playlist,Boolean>>()
 
-                        playlistIDGroups.forEach { playlistIDs ->
-                            db.collection("Playlist")
-                                .whereIn("id", playlistIDs)
-                                .addSnapshotListener { documents, _ ->
-                                    if (documents != null) {
-                                        listData += documents.toObjects(Playlist::class.java)
-                                        val currentData = listData
-                                        playlists.value = currentData
+                    playlistIDGroups.forEach { playlistIDs ->
+                        db.collection("Playlist")
+                            .whereIn("id", playlistIDs)
+                            .addSnapshotListener { documents, _ ->
+                                if (documents != null) {
+                                    val playlists = documents.toObjects(Playlist::class.java)
+                                    listData += playlists.map { playlist ->
+                                        val isPin = (playlistWithPins.find { playlist.id==it["id"] }!!["pin"] as Boolean)
+                                        Pair(playlist,isPin)
                                     }
+                                    val currentData = listData
+                                    playlistWithPinsObserve.value = currentData
                                 }
-                        }
+                            }
                     }
                 }
             }
-        return playlists
+        return playlistWithPinsObserve
     }
 
     fun getFollowedAlbums(userID: String): MutableLiveData<List<Album>>{
@@ -763,7 +990,7 @@ class FirebaseRepository {
 
                 if (items!=null){
                     if (items["albums"] !=null) {
-                        val albumIDGroups = subList((items.get("albums") as List<*>))
+                        val albumIDGroups = subList((items.get("albums") as List<HashMap<*,*>>).map { it["id"] })
                         val listData = mutableListOf<Album>()
 
                         albumIDGroups.forEach { albumIDs ->
@@ -790,7 +1017,7 @@ class FirebaseRepository {
             .addSnapshotListener { items, _ ->
                 if (items!=null) {
                     if (items["artists"] != null) {
-                        val artistIDGroups = subList(items.get("artists") as List<*>)
+                        val artistIDGroups = subList((items.get("artists") as List<HashMap<*,*>>).map { it["id"] })
                         val listData = mutableListOf<Artist>()
                         artistIDGroups.forEach { artistIDs ->
 
@@ -812,21 +1039,24 @@ class FirebaseRepository {
 
     fun getLikedTracks(userID: String): MutableLiveData<List<Track>>{
         val tracks = MutableLiveData<List<Track>>()
-        db.collection("Followed")
+        db.collection("User")
             .document(userID)
+            .collection("Followed")
+            .whereEqualTo("type",Type.TRACK.name)
             .addSnapshotListener { items, _ ->
-                if (items!=null){
-                    val trackIDGroups = subList(items.get("tracks") as List<*>)
+                if (items!=null && !items.isEmpty){
+                    val trackIDGroups = subList((items.toObjects(FollowedObject::class.java).map { it.id }))
                     val listData = mutableListOf<Track>()
+                    Log.i("trackABCs","$trackIDGroups")
 
                     trackIDGroups.forEach { trackIDs ->
                         db.collection("Track")
                             .whereIn("id", trackIDs)
                             .addSnapshotListener { documents, _ ->
-                                if (documents != null) {
+                                if (documents != null && !documents.isEmpty) {
                                     listData += documents.toObjects(Track::class.java)
                                     val currentData = listData
-                                    tracks.value = listData
+                                    tracks.value = currentData
                                 }
                             }
                     }
@@ -964,124 +1194,36 @@ class FirebaseRepository {
                 }
             }
 
-        db.collection("Followed")
-            .document(user.id)
-            .addSnapshotListener { items, _ ->
-                if (items != null) {
-                    if (items["artists"] != null) {
-                        val artistIDGroups = subList(items.get("artists") as List<*>)
-                        val listData = mutableListOf<Artist>()
-                        artistIDGroups.forEach { artistIDs ->
+        return groupPlaylists
+    }
 
+    /** Recommendation **/
+    fun getRelateArtist(id: String?): MutableLiveData<List<Artist>>{
+
+        val relateArtists = MutableLiveData<List<Artist>>()
+        if (id!=null && id!="")
+            db.collection("Artist")
+                .document(id)
+                .get()
+                .addOnSuccessListener { artistDoc ->
+                    if(artistDoc!=null){
+                        if(artistDoc.get("genres")!=null) {
+                            val genres = artistDoc.get("genres") as List<*>
                             db.collection("Artist")
-                                .whereIn("id", artistIDs)
-                                .addSnapshotListener { documents, _ ->
-                                    if (documents != null) {
-                                        listData += documents.toObjects(Artist::class.java)
-                                        val artists = convertArtistsToPlaylists(listData)
-
-                                        val group = GroupPlaylist("Your favorite artists", artists)
-
-                                        val recentlyPlayedPlaylists =
-                                            groupPlaylists.value?.find { it.title == "Your favorite artists" }
-
-                                        if (recentlyPlayedPlaylists != null) {
-                                            groupPlaylists.value?.get(
-                                                groupPlaylists.value!!.indexOf(
-                                                    recentlyPlayedPlaylists
-                                                )
-                                            )?.playlists = artists
-
-
-                                        } else {
-                                            val temp = mutableListOf<GroupPlaylist>()
-                                            temp += groupPlaylists.value?: listOf()
-                                            temp.add(group)
-                                                groupPlaylists.value = temp
-
-                                        }
+                                .whereEqualTo("genres", genres)
+                                .get()
+                                .addOnSuccessListener { relateArtistsDoc ->
+                                    if (relateArtistsDoc != null && !relateArtistsDoc.isEmpty) {
+                                        val relateArtistData =
+                                            relateArtistsDoc.toObjects(Artist::class.java).toMutableList()
+                                        relateArtistData.remove(relateArtistData.find { it.id==id }!!)
+                                        relateArtists.value = relateArtistData
                                     }
                                 }
                         }
                     }
                 }
-            }
 
-        db.collection("History")
-            .document(user.id)
-            .addSnapshotListener { value, error ->
-                if (value != null && value.exists() && value.get("playlists") != null) {
-                    val result = value.get("playlists") as List<HashMap<*, *>>
-
-                    val playlistIDs = mutableListOf<String>()
-                    result.forEach { item ->
-                        if (playlistIDs.size <= 10 && !playlistIDs.contains(item["id"])) {
-                            playlistIDs.add(item["id"].toString())
-                        }
-                    }
-
-                    db.collection("Playlist")
-                        .whereIn("id", playlistIDs)
-                        .addSnapshotListener { result,_ ->
-                            if (result != null && !result.isEmpty) {
-                                val playlists = result.toObjects(Playlist::class.java)
-                                val group = GroupPlaylist("Recently Playlist", playlists)
-
-                                val recentlyPlayedPlaylists =
-                                    groupPlaylists.value?.find { it.title == "Recently Playlist" }
-
-                                if (recentlyPlayedPlaylists != null)
-                                    groupPlaylists.value?.get(
-                                        groupPlaylists.value!!.indexOf(
-                                            recentlyPlayedPlaylists
-                                        )
-                                    )?.playlists = playlists
-                                else {
-
-                                    val temp = mutableListOf<GroupPlaylist>()
-                                    temp += groupPlaylists.value?: listOf()
-                                    temp.add(group)
-                                    groupPlaylists.value = temp
-
-//                                    groupPlaylists.postValue(
-//                                        groupPlaylists.value?.plus(group)
-//                                    )
-//                                        _groupPlaylists.value = _groupPlaylists.value?.plus(group)
-                                }
-                            }
-                        }
-                }
-            }
-
-        return groupPlaylists
-    }
-
-    /** Recommendation **/
-    fun getRelateArtist(id: String): MutableLiveData<List<Artist>>{
-
-        val relateArtists = MutableLiveData<List<Artist>>()
-
-        db.collection("Artist")
-            .document(id)
-            .get()
-            .addOnSuccessListener { artistDoc ->
-                if(artistDoc!=null){
-                    if(artistDoc.get("genres")!=null) {
-                        val genres = artistDoc.get("genres") as List<*>
-                        db.collection("Artist")
-                            .whereEqualTo("genres", genres)
-                            .get()
-                            .addOnSuccessListener { relateArtistsDoc ->
-                                if (relateArtistsDoc != null && !relateArtistsDoc.isEmpty) {
-                                    val relateArtistData =
-                                        relateArtistsDoc.toObjects(Artist::class.java).toMutableList()
-                                    relateArtistData.remove(relateArtistData.find { it.id==id }!!)
-                                    relateArtists.value = relateArtistData
-                                }
-                            }
-                    }
-                }
-            }
         return relateArtists
     }
 
@@ -1310,8 +1452,8 @@ class FirebaseRepository {
                                     .get()
                                     .addOnCompleteListener { doc ->
                                         if (doc.isSuccessful){
-                                            val playlist = convertDocToPlaylist(doc.result.documents[0])
-                                            list += listOf(LibraryAdapter.DataItem.PlaylistItem(playlist))
+                                            val playlist = doc.result.toObjects(Playlist::class.java)
+                                            list += listOf(LibraryAdapter.DataItem.PlaylistItem(playlist[0]))
                                             searchList.value = list
                                         }
                                     }
@@ -1327,7 +1469,7 @@ class FirebaseRepository {
         return searchList
     }
 
-    private data class SearchModel(
+    data class SearchModel(
         val id: String= "" ,
         val type: String =""
     )

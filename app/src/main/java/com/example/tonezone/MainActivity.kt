@@ -135,11 +135,18 @@ class MainActivity : AppCompatActivity() {
 
         mainViewModel.firebaseAuth.observe(this){
             if (it!=null){
-                navigateToHome()
+                mainViewModel.initUserFirebase()
+                mainViewModel.userFirebase.observe(this){
+                    if (it!=null){
+                        navigateToHome()
+                    }
+                }
             }else{
                 navController.navigate(R.id.loginFragment)
             }
         }
+
+
     }
 
     private fun setupPlayerNotification(){
@@ -297,12 +304,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-//    override fun onSupportNavigateUp(): Boolean {
-//        val navController = this.findNavController(R.id.nav_host)
-//        return navController.navigateUp()
-//    }
-
-
 
     override fun onDestroy() {
         super.onDestroy()

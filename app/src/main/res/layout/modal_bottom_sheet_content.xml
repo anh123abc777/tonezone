@@ -15,7 +15,6 @@
             style="@style/Widget.MaterialComponents.BottomSheet.Modal"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             android:padding="8dp"
-            android:background="@color/white"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             />
 

@@ -1,12 +1,13 @@
 package com.example.tonezone.playlistdetails
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -14,17 +15,12 @@ import com.example.tonezone.MainViewModel
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentPlaylistDetailsBinding
-import com.example.tonezone.network.Artist
 import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.PlaylistInfo
-import com.example.tonezone.network.ToneApi
+import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.lang.Thread.sleep
+import com.google.android.material.appbar.AppBarLayout
 
 class PlaylistDetailsFragment : Fragment() {
 
@@ -36,7 +32,7 @@ class PlaylistDetailsFragment : Fragment() {
 
     private val viewModel: PlaylistDetailsViewModel by viewModels {
         PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,
-            mainViewModel.user.value!!
+             mainViewModel.firebaseAuth.value!!
         )
     }
 
@@ -70,19 +66,59 @@ class PlaylistDetailsFragment : Fragment() {
         handleLikeButtonVisibility()
 
         handlePlayPlaylist()
-
+        handleAddToQueue()
+        handlePlayingTrack()
+        setupAppbar()
         handleBackPress()
 
-        val firebaseRepo = FirebaseRepository()
         viewModel.playlistItems.observe(viewLifecycleOwner){
             if (it!=null){
-                viewModel.getStateItemsLiked()
-//                firebaseRepo.insertTracks(it)
-
+                viewModel.initStateLikedItems()
             }
         }
 
         return binding.root
+    }
+
+    private fun setupAppbar(){
+        binding.appBarLayout.addOnOffsetChangedListener(object :
+            AppBarLayout.OnOffsetChangedListener {
+            var scrollRange = -1
+            override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
+                //Initialize the size of the scroll
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.totalScrollRange
+                }
+                //Check if the view is collapsed
+                if (scrollRange + verticalOffset == 0) {
+                    binding.toolbar.setBackgroundColor(
+                        ContextCompat.getColor(
+                            context!!,
+                            R.color.black
+                        )
+                    )
+                    binding.collapsingToolbarLayout.title = viewModel.playlistInfo.name
+                    binding.toolbar.setTitleTextColor(Color.WHITE)
+
+                } else {
+                    binding.toolbar.setBackgroundColor(
+                        Color.TRANSPARENT
+                    )
+                    binding.toolbar.setTitleTextColor(Color.TRANSPARENT)
+                    binding.toolbar.title = ""
+                    binding.collapsingToolbarLayout.title = ""
+                }
+            }
+        })
+    }
+
+    private fun handleAddToQueue(){
+        viewModel.queueTrack.observe(viewLifecycleOwner){
+            if (it!=null){
+                playerViewModel.addToQueue(it)
+                viewModel.addToQueueComplete()
+            }
+        }
     }
 
     private fun handleBackPress(){
@@ -158,7 +194,6 @@ class PlaylistDetailsFragment : Fragment() {
             else -> {
                 val isSaved = viewModel.checkedTrackIsLiked()
                 modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
-                Toast.makeText(context,"WTF is this $buttonId",Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -183,6 +218,18 @@ class PlaylistDetailsFragment : Fragment() {
         binding.playlist.adapter = adapter
     }
 
+    private fun handlePlayingTrack(){
+        if (playerViewModel.playerState.value==PlayerScreenViewModel.PlayerState.NONE) {
+            playerViewModel.currentTrack.observe(requireActivity()) {
+                if (it != Track()) {
+                    playerViewModel.initSeekBar()
+                    playerViewModel.onPlay()
+                    playerViewModel.initPrimaryColor()
+                }
+            }
+        }
+    }
+
     private fun setupShowingArtistsBottomSheet(){
         viewModel.isShowingTrackDetails.observe(viewLifecycleOwner){
             when (it) {
@@ -191,7 +238,7 @@ class PlaylistDetailsFragment : Fragment() {
                     modalBottomSheet.dismiss()
                     val artistsOfTrack = viewModel.playlistItems.value?.find { track ->
                         track.id == viewModel.selectedObjectID.value?.first
-                    }?.artists ?: listOf()
+                    }?.album!!.artists ?: listOf()
 
                     val artistsModalBottomSheet = ArtistsModalBottomSheet(artistsOfTrack)
 

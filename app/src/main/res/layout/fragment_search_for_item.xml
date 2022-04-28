@@ -23,7 +23,6 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
             >
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -96,13 +95,14 @@
             android:clipToPadding="false"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:orientation="vertical"
-            playlistData="@{viewModel.searchedItems.playlists.items}"
+            dataItems="@{viewModel.searchedItems}"
+            />
+
+<!--                    playlistData="@{viewModel.searchedItems.playlists.items}"
             artistData="@{viewModel.searchedItems.artists.items}"
             trackData="@{viewModel.searchedItems.tracks.items}"
             albumData="@{viewModel.searchedItems.albums.items}"
-            sortOption="@{sortOption.MostRelate}"
-            keyWord="@{viewModel.searchKey}"
-            />
+-->
     </androidx.core.widget.NestedScrollView>
 
         <TextView
@@ -112,7 +112,7 @@
             android:text="@string/content_search_for_item"
             android:layout_gravity="center"
             android:gravity="center"
-            sizeSearchedItems="@{viewModel.searchedItems.tracks.items.size() +viewModel.searchedItems.artists.items.size() + viewModel.searchedItems.playlists.items.size()}"
+            sizeSearchedItems="@{viewModel.searchedItems.size()}"
             />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

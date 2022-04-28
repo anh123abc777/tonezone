@@ -11,8 +11,9 @@ import com.example.tonezone.databinding.ModalBottomSheetContentBinding
 import com.example.tonezone.network.*
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.firebase.auth.FirebaseUser
 
-class YourPlaylistBottomSheet (private val tracks: List<Track>) : BottomSheetDialogFragment() {
+class YourPlaylistBottomSheet (private val tracks: List<Track>,private val firebaseUser: FirebaseUser) : BottomSheetDialogFragment() {
 
     private lateinit var binding: ModalBottomSheetContentBinding
 
@@ -51,8 +52,8 @@ class YourPlaylistBottomSheet (private val tracks: List<Track>) : BottomSheetDia
 
         firebaseRepo.db.collection("Playlist")
             .whereEqualTo("owner",
-                Owner(display_name = "Godoflived",
-                    id = "dgusbmm3xvmzuix4sowbjb868",
+                Owner(display_name = firebaseUser.displayName,
+                    id = firebaseUser.uid,
                     type = "user",
                     uri = ""))
             .get().addOnCompleteListener {

@@ -25,4 +25,5 @@ Search for artist, songs and more</string>
     <string name="add_to_playlist">Add to playlist</string>
     <string name="delete">Delete</string>
     <string name="hide">Hide</string>
+    <string name="log_out">Log out</string>
 </resources>

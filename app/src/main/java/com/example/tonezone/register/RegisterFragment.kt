@@ -99,7 +99,7 @@ class RegisterFragment : Fragment() {
 
     private fun registerUserOnFirebase(user: User){
         db.collection("User")
-            .document()
+            .document(user.id)
             .set(user)
             .addOnCompleteListener { task ->
                 if(task.isSuccessful){
@@ -112,18 +112,18 @@ class RegisterFragment : Fragment() {
                 }
             }
 
-        db.collection("User")
-            .whereEqualTo("id",user.id)
-            .addSnapshotListener { documents, _ ->
-                if (documents!=null){
-                    for (doc in documents){
-                        user.id = doc.id
-                        db.collection("User")
-                            .document(doc.id)
-                            .set(user)
-                    }
-                }
-            }
+//        db.collection("User")
+//            .whereEqualTo("id",user.id)
+//            .addSnapshotListener { documents, _ ->
+//                if (documents!=null){
+//                    for (doc in documents){
+//                        user.id = doc.id
+//                        db.collection("User")
+//                            .document(doc.id)
+//                            .set(user)
+//                    }
+//                }
+//            }
     }
 
 }

@@ -2,6 +2,7 @@ package com.example.tonezone
 
 import android.content.res.ColorStateList
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -178,13 +179,20 @@ fun bindTextView(textView: TextView, list: List<Artist>){
     textView.text = artists
 }
 
-@BindingAdapter("playerState")
-fun bindStatePlayButton(button: ImageButton, state: PlayerScreenViewModel.PlayerState){
-    when(state){
-        PlayerScreenViewModel.PlayerState.PLAY -> button.setImageResource(R.drawable.ic_custom_pause)
-        PlayerScreenViewModel.PlayerState.PAUSE -> button.setImageResource(R.drawable.ic_custom_play)
-        else -> button.setImageResource(R.drawable.ic_custom_play)
-    }
+@BindingAdapter(value = ["playerState","isPlayerScreen"],requireAll = false)
+fun bindStatePlayButton(button: ImageButton, state: PlayerScreenViewModel.PlayerState, isPlayerScreen: Boolean){
+    if (isPlayerScreen)
+        when(state){
+            PlayerScreenViewModel.PlayerState.PLAY -> button.setImageResource(R.drawable.ic_custom_pause)
+            PlayerScreenViewModel.PlayerState.PAUSE -> button.setImageResource(R.drawable.ic_custom_play)
+            else -> button.setImageResource(R.drawable.ic_custom_play)
+        }
+    else
+        when(state){
+            PlayerScreenViewModel.PlayerState.PLAY -> button.setImageResource(R.drawable.ic_pause)
+            PlayerScreenViewModel.PlayerState.PAUSE -> button.setImageResource(R.drawable.ic_play_arrow)
+            else -> button.setImageResource(R.drawable.ic_play_arrow)
+        }
 }
 
 @BindingAdapter("sizeList")
@@ -295,4 +303,13 @@ fun bindStateButton(imageButton: ImageButton, isPositive: Boolean){
 @BindingAdapter("backgroundColor")
 fun bindBackGroundColor(relativeLayout: RelativeLayout,color: Int){
     relativeLayout.setBackgroundColor(color)
+}
+
+@BindingAdapter("dataItems")
+fun bindLibraryRecyclerView(recyclerView: RecyclerView,dataItems: List<LibraryAdapter.DataItem>?){
+    if (dataItems!=null){
+        val adapter = recyclerView.adapter as LibraryAdapter
+        adapter.submitList(dataItems)
+        adapter.sortByDefault()
+    }
 }

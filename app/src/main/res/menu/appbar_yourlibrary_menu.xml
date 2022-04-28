@@ -10,11 +10,14 @@
         android:id="@+id/search"
         android:title="@string/search"
         android:icon="@drawable/ic_search"
+        android:iconTint="@color/white"
         app:showAsAction="always"/>
 
     <item
         android:id="@+id/add_playlist"
         android:title="add"
+        android:iconTint="@color/white"
+        android:iconTintMode="src_over"
         android:icon="@drawable/ic_add"
         app:showAsAction="always"/>
     </group>

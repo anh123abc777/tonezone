@@ -36,7 +36,6 @@
             android:elevation="4dp"
             android:textStyle="bold"
             android:layout_marginBottom="4dp"
-            android:textColor="@color/white"
         />
     </RelativeLayout>
 </layout>

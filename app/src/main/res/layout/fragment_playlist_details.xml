@@ -27,7 +27,6 @@
                 android:layout_height="wrap_content"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
                 android:elevation="-1dp"
-                app:title="@{viewModel.playlistInfo.name}"
                 app:collapsedTitleGravity="left"
                 app:expandedTitleGravity="bottom"
                 app:titleCollapseMode="fade"
@@ -40,12 +39,13 @@
                     android:layout_height="56dp"
                     app:layout_collapseMode="pin"
                     app:navigationIcon="@drawable/ic_arrow_back"
+                    app:title="@{viewModel.playlistInfo.name}"
                     />
 
                 <ImageView
                     android:id="@+id/thumbnail"
-                    android:layout_width="300dp"
-                    android:layout_height="300dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
                     android:src="@drawable/ic_custom_play"
                     android:layout_gravity="center_horizontal"
                     imageUrl="@{viewModel.playlistInfo.image}"
@@ -61,8 +61,10 @@
             android:id="@+id/play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/exo_controls_play"
+            android:src="@drawable/ic_play_arrow"
+            android:background="?attr/colorOnPrimary"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_marginTop="36dp"
             android:layout_gravity="end|top"
             tools:ignore="ContentDescription"
             app:elevation="10dp"
@@ -136,7 +138,9 @@
                             android:layout_toRightOf="@id/more_option"
                             android:background="@drawable/press_button"
                             android:padding="8dp"
-                            android:src="@drawable/ic_favorite"
+                            android:src="@drawable/ic_unlike"
+                            stateButton="@{viewModel.isUserPlaylistFollowed()}"
+                            android:onClick="@{() -> viewModel.likePlaylist()}"
                             app:tint="@color/colorSecondary" />
 
 

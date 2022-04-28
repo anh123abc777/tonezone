@@ -7,9 +7,9 @@ import com.example.tonezone.network.User
 import com.google.firebase.auth.FirebaseUser
 
 @Suppress("UNCHECKED_CAST")
-class PlayerScreenViewModelFactory
-    (val application: Application,
-     val user: FirebaseUser
+class PlayerScreenViewModelFactory(
+    val application: Application,
+    val user: FirebaseUser?
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(PlayerScreenViewModel::class.java))
