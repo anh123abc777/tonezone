@@ -21,6 +21,8 @@ import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.*
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 
 class PlaylistDetailsFragment : Fragment() {
 
@@ -80,6 +82,8 @@ class PlaylistDetailsFragment : Fragment() {
         handleStatePlayer()
 
         handleAddToOtherPlaylist()
+
+        handleRemoveTrack()
 
         viewModel.playlistItems.observe(viewLifecycleOwner){
             if (it!=null){
@@ -342,6 +346,28 @@ class PlaylistDetailsFragment : Fragment() {
                 val bundle = bundleOf("trackIds" to viewModel.playlistItems.value!!.map { it.id }.toTypedArray())
                 findNavController().navigate(R.id.yourPlaylistFragment,bundle)
                 viewModel.addToOtherPlaylistComplete()
+            }
+        }
+    }
+
+    private fun handleRemoveTrack(){
+        viewModel.removeTrack.observe(viewLifecycleOwner){
+            if (it!=null){
+//                    (binding.playlist.adapter as LibraryAdapter).notifyItemRemoved(it.first)
+
+                Snackbar.make(requireActivity().window.decorView.findViewById(android.R.id.content), "Track is removed", Snackbar.LENGTH_LONG)
+                    .setAction("Undo") {
+                        viewModel.undoRemove()
+                    }.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>(){
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                            super.onDismissed(transientBottomBar, event)
+                            if (event == DISMISS_EVENT_TIMEOUT){
+                                viewModel.removeFromThisPlaylistForever()
+                                viewModel.removeTrackFromThisPlaylistComplete()
+                            }
+                        }
+                    })
+                    .show()
             }
         }
     }

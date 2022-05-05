@@ -66,6 +66,10 @@ class PlaylistDetailsViewModel
     val isRequestingToAddToOtherPlaylist: LiveData<Boolean>
         get() = _isRequestingToAddToOtherPlaylist
 
+    private var _removedTrack = MutableLiveData<Pair<Int,Track>?>()
+    val removeTrack : LiveData<Pair<Int,Track>?>
+        get() = _removedTrack
+
     private fun getDataPlaylistItems(): MutableLiveData<List<Track>> {
 
         return when (playlistInfo.type) {
@@ -152,7 +156,7 @@ class PlaylistDetailsViewModel
 
             Signal.ADD_SONGS -> requestToAddSongs()
 
-            Signal.REMOVE_FROM_THIS_PLAYLIST -> removeFromThisPlaylist()
+            Signal.REMOVE_FROM_THIS_PLAYLIST -> removeFromThisPlaylistTemp()
 
             Signal.EDIT_PLAYLIST -> TODO()
 
@@ -172,9 +176,33 @@ class PlaylistDetailsViewModel
         _isRequestingToAddToOtherPlaylist.value = false
     }
 
-    private fun removeFromThisPlaylist(){
+    private fun removeFromThisPlaylistTemp(){
+        _removedTrack.value = Pair(getIndexSelectedTrack(),getSelectedTrack())
+        _playlistItems.value = _playlistItems.value?.minus(listOf(getSelectedTrack()))
+    }
+
+     fun undoRemove(){
+         val previousPlaylist = _playlistItems.value!!.toMutableList()
+         previousPlaylist.add(_removedTrack.value!!.first,_removedTrack.value!!.second)
+         _playlistItems.value = previousPlaylist
+         _removedTrack.value = null
+     }
+
+     fun removeFromThisPlaylistForever(){
         firebaseRepo.removeTrackFromPlaylist(playlistInfo.id,_selectedObjectID.value!!.first)
     }
+
+    fun removeTrackFromThisPlaylistComplete(){
+        _removedTrack.value = null
+    }
+
+    private fun getIndexSelectedTrack(): Int =
+        playlistItems.value?.indexOf(getSelectedTrack())!!
+
+    private fun getSelectedTrack(): Track =
+        playlistItems.value!!.find { it.id == selectedObjectID.value!!.first }!!
+
+
 
     fun requestToAddSongs(){
         _isRequestingToAddTracks.value = playlistInfo.id
@@ -198,10 +226,6 @@ class PlaylistDetailsViewModel
     fun addToPlaylistComplete(){
         _navigateYourPlaylists.value = null
     }
-
-    private fun getCurrentTrack(): Track? =
-        playlistItems.value!!.find { it.id == selectedObjectID.value!!.first }
-
 
     private val _isShowingTrackDetails = MutableLiveData<Signal>()
     val isShowingTrackDetails : LiveData<Signal>

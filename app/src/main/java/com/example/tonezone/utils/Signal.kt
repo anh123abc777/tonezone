@@ -66,7 +66,7 @@ fun convertSignalToIcon(signal: Signal): Int =
         Signal.REMOVE_FROM_THIS_PLAYLIST -> R.drawable.ic_remove
         Signal.ADD_TO_QUEUE -> R.drawable.ic_baseline_playlist_play_24
         Signal.VIEW_ALBUM -> R.drawable.ic_view_album
-        Signal.ADD_SONGS -> R.drawable.ic_add_to_playlist
+        Signal.ADD_SONGS -> R.drawable.ic_group_1
         Signal.EDIT_PLAYLIST -> R.drawable.ic_grid
         Signal.DELETE_PLAYLIST -> R.drawable.ic_close
         Signal.LIKE_TRACK -> R.drawable.ic_unlike

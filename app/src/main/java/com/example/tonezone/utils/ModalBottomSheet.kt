@@ -61,7 +61,7 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
             ObjectRequest.YOUR_PLAYLIST -> submitBottomSheetList(
                 listOf(
                     Signal.DELETE_PLAYLIST,
-                    Signal.EDIT_PLAYLIST,
+//                    Signal.EDIT_PLAYLIST,
                     Signal.ADD_SONGS,
                 )
             )
