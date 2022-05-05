@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseUser
 
 @Suppress("UNCHECKED_CAST")
 class YourLibraryViewModelFactory
-    (val firebaseUser: FirebaseUser):ViewModelProvider.Factory {
+    (val firebaseUser: User):ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(YourLibraryViewModel::class.java))
             return YourLibraryViewModel(firebaseUser) as T

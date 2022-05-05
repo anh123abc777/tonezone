@@ -88,6 +88,19 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
                 )
             }
 
+            ObjectRequest.TRACK_IN_YOUR_PLAYLIST -> {
+                val itemLike = if(isFollowing == true) listOf(Signal.LIKED_TRACK) else listOf(Signal.LIKE_TRACK)
+
+                submitBottomSheetList(
+                    itemLike + listOf(
+                        Signal.REMOVE_FROM_THIS_PLAYLIST,
+                        Signal.ADD_TO_PLAYLIST,
+                        Signal.VIEW_ARTIST,
+                        Signal.VIEW_ALBUM
+                    )
+                )
+            }
+
 
             else -> submitBottomSheetList(listOf())
         }

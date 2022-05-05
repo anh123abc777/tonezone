@@ -200,6 +200,12 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?
         if(posSongSelectedInGroup()<_currentPlaylist.value!!.size-1){
             _currentTrack.value = _currentPlaylist.value?.get(posSongSelectedInGroup()+1)
             _playerState.value = PlayerState.PLAY
+
+        }
+        /** do something new*/
+        else{
+            _currentTrack.value = currentPlaylist.value?.get(0)
+            _playerState.value = PlayerState.PLAY
         }
     }
 
@@ -251,7 +257,8 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?
         jobs.invokeOnCompletion {
             val time = (System.nanoTime() - start).toDouble()/1e6
             user?.let { it1 -> firebaseRepo.saveHistory(it1.uid,previousTrack!!.id,time/previousTrack.duration_ms!!,Type.TRACK) }
-
+            if (_currentTrack.value == previousTrack)
+                _playerState.value = PlayerState.PAUSE
         }
     }
 

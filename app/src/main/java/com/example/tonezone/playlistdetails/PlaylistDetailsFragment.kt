@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -66,9 +67,15 @@ class PlaylistDetailsFragment : Fragment() {
         handleLikeButtonVisibility()
 
         handlePlayPlaylist()
+
         handleAddToQueue()
+
         handlePlayingTrack()
+
+        handleSignalAddTracks()
+
         setupAppbar()
+
         handleBackPress()
 
         viewModel.playlistItems.observe(viewLifecycleOwner){
@@ -78,6 +85,16 @@ class PlaylistDetailsFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun handleSignalAddTracks(){
+        viewModel.isRequestingToAddTracks.observe(viewLifecycleOwner){
+            if (it!=null){
+                val bundle = bundleOf("playlistID" to it)
+                findNavController().navigate(R.id.addTracksFragment,bundle)
+                viewModel.navigateToTheAddSongViewComplete()
+            }
+        }
     }
 
     private fun setupAppbar(){
@@ -176,10 +193,10 @@ class PlaylistDetailsFragment : Fragment() {
     }
 
     private fun setUpItemsBottomSheet(objectId: String, buttonId: Int){
+        val isOwned = viewModel.isOwnedByUser.value
         when(buttonId) {
             R.id.more_option -> {
                 val isSaved = viewModel.isUserPlaylistFollowed.value
-                val isOwned = viewModel.isOwnedByUser.value
                 modalBottomSheet = if (isOwned == true)
                     ModalBottomSheet(ObjectRequest.YOUR_PLAYLIST,isSaved)
                 else
@@ -187,8 +204,13 @@ class PlaylistDetailsFragment : Fragment() {
             }
 
             R.id.more_option_with_track -> {
+
                 val isSaved = viewModel.checkedTrackIsLiked()
-                modalBottomSheet = ModalBottomSheet(ObjectRequest.TRACK,isSaved)
+                modalBottomSheet = if (isOwned == true)
+                    ModalBottomSheet(ObjectRequest.TRACK_IN_YOUR_PLAYLIST,isSaved)
+                else
+                    ModalBottomSheet(ObjectRequest.TRACK,isSaved)
+
             }
 
             else -> {

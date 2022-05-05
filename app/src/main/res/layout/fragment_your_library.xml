@@ -15,10 +15,6 @@
         android:layout_height="match_parent"
         tools:context=".yourlibrary.YourLibraryFragment"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
         >
 
 
@@ -28,6 +24,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingBottom="8dp"
+            android:backgroundTint="#00FFFFFF"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
             >
 
@@ -64,7 +61,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             >
 
             <LinearLayout

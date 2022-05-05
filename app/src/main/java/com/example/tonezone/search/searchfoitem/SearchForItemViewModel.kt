@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
+import com.example.tonezone.utils.Type
 import com.example.tonezone.yourlibrary.TypeItemLibrary
 import kotlinx.coroutines.*
 
@@ -30,12 +31,19 @@ class SearchForItemViewModel(val token: String): ViewModel() {
 
     private val firebaseRepo = FirebaseRepository()
 
+    private fun searchInFirebaseOtherWay(query: Editable?){
+        if (query != null && query.isNotBlank() && query.isNotEmpty()){
+            firebaseRepo.db.collection("Artist")
+                .whereGreaterThanOrEqualTo("name",query.toString())
+        }
+    }
+
     fun searchInFirebase(query: Editable?){
         if (query != null)
             if(query.isNotBlank() && query.isNotEmpty()) {
                 firebaseRepo.db.collection("Search")
-                    .whereArrayContains("search_keywords", query.toString())
-                    .limit(20)
+                    .whereArrayContains("search_keywords", query.toString().lowercase())
+                    .limit(50)
                     .get()
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
@@ -59,7 +67,8 @@ class SearchForItemViewModel(val token: String): ViewModel() {
                                                             track[0]
                                                         )
                                                     )
-                                                    _searchedItems.value = list
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
+
                                                 }
                                             }
                                     }
@@ -77,7 +86,7 @@ class SearchForItemViewModel(val token: String): ViewModel() {
                                                             album[0]
                                                         )
                                                     )
-                                                    _searchedItems.value = list
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
                                                 }
                                             }
                                     }
@@ -95,7 +104,7 @@ class SearchForItemViewModel(val token: String): ViewModel() {
                                                             artist[0]
                                                         )
                                                     )
-                                                    _searchedItems.value = list
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
                                                 }
                                             }
                                     }
@@ -113,7 +122,7 @@ class SearchForItemViewModel(val token: String): ViewModel() {
                                                             playlist[0]
                                                         )
                                                     )
-                                                    _searchedItems.value = list
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
                                                 }
                                             }
                                     }
@@ -132,6 +141,106 @@ class SearchForItemViewModel(val token: String): ViewModel() {
         else
             _searchedItems.value = listOf()
 
+    }
+
+    fun searchInFirebase(query: Editable?, type: Type){
+        if (query != null)
+            if(query.isNotBlank() && query.isNotEmpty()) {
+                firebaseRepo.db.collection("Search")
+                    .whereArrayContains("search_keywords", query.toString().lowercase())
+                    .whereEqualTo("type",type.name.lowercase())
+                    .limit(20)
+                    .get()
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val result =
+                                it.result.toObjects(FirebaseRepository.SearchModel::class.java)
+
+                            var list = listOf<LibraryAdapter.DataItem>()
+                            result.forEach { item ->
+                                when (item.type) {
+                                    "track" -> {
+                                        firebaseRepo.db.collection("Track")
+                                            .whereEqualTo("id", item.id)
+                                            .get()
+                                            .addOnCompleteListener { doc ->
+                                                if (doc.isSuccessful) {
+                                                    val track =
+                                                        doc.result.toObjects(Track::class.java)
+                                                    list += listOf(
+                                                        LibraryAdapter.DataItem.TrackItem(
+                                                            track[0]
+                                                        )
+                                                    )
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
+                                                }
+                                            }
+                                    }
+
+                                    "album" -> {
+                                        firebaseRepo.db.collection("Album")
+                                            .whereEqualTo("id", item.id)
+                                            .get()
+                                            .addOnCompleteListener { doc ->
+                                                if (doc.isSuccessful) {
+                                                    val album =
+                                                        doc.result.toObjects(Album::class.java)
+                                                    list += listOf(
+                                                        LibraryAdapter.DataItem.AlbumItem(
+                                                            album[0]
+                                                        )
+                                                    )
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
+                                                }
+                                            }
+                                    }
+
+                                    "artist" -> {
+                                        firebaseRepo.db.collection("Artist")
+                                            .whereEqualTo("id", item.id)
+                                            .get()
+                                            .addOnCompleteListener { doc ->
+                                                if (doc.isSuccessful) {
+                                                    val artist =
+                                                        doc.result.toObjects(Artist::class.java)
+                                                    list += listOf(
+                                                        LibraryAdapter.DataItem.ArtistItem(
+                                                            artist[0]
+                                                        )
+                                                    )
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
+                                                }
+                                            }
+                                    }
+
+                                    "playlist" -> {
+                                        firebaseRepo.db.collection("Playlist")
+                                            .whereEqualTo("id", item.id)
+                                            .get()
+                                            .addOnCompleteListener { doc ->
+                                                if (doc.isSuccessful) {
+                                                    val playlist =
+                                                        doc.result.toObjects(Playlist::class.java)
+                                                    list += listOf(
+                                                        LibraryAdapter.DataItem.PlaylistItem(
+                                                            playlist[0]
+                                                        )
+                                                    )
+                                                    _searchedItems.value = list.sortedByDescending { it.name?.lowercase()?.compareTo(query.toString()) }
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+                        } else {
+                            Log.d(ContentValues.TAG, "Failure: ${it.exception!!.message}")
+                        }
+                    }
+            }
+    }
+
+    fun removeItem(item: LibraryAdapter.DataItem){
+        _searchedItems.value = _searchedItems.value?.minus(item)
     }
 
 

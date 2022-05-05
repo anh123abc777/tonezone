@@ -33,6 +33,12 @@
         <action
             android:id="@+id/action_playlistDetailsFragment_to_artistDetailsFragment"
             app:destination="@id/artistDetailsFragment" />
+        <action
+            android:id="@+id/action_playlistDetailsFragment_to_searchForItemFragment"
+            app:destination="@id/searchForItemFragment" />
+        <action
+            android:id="@+id/action_playlistDetailsFragment_to_addTracksFragment"
+            app:destination="@id/addTracksFragment" />
     </fragment>
     <fragment
         android:id="@+id/yourPlaylistFragment"
@@ -58,6 +64,9 @@
         <action
             android:id="@+id/action_artistDetailsFragment_to_playlistsFragment"
             app:destination="@id/playlistsFragment" />
+        <action
+            android:id="@+id/action_artistDetailsFragment_to_yourPlaylistFragment"
+            app:destination="@id/yourPlaylistFragment" />
     </fragment>
     <fragment
         android:id="@+id/playlistsFragment"
@@ -70,5 +79,26 @@
         <action
             android:id="@+id/action_playlistsFragment_to_playlistDetailsFragment"
             app:destination="@id/playlistDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/searchForItemFragment"
+        android:name="com.example.tonezone.search.searchfoitem.SearchForItemFragment"
+        android:label="SearchForItemFragment"
+        tools:layout="@layout/fragment_search_for_item"
+        >
+        <argument
+            android:name="playlistID"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/addTracksFragment"
+        android:name="com.example.tonezone.addtrack.AddTracksFragment"
+        android:label="AddTracksFragment" >
+        <argument
+            android:name="playlistID"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_addTracksFragment_to_searchForItemFragment"
+            app:destination="@id/searchForItemFragment" />
     </fragment>
 </navigation>

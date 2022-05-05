@@ -98,6 +98,7 @@ class CreateNotification {
                     .setMediaSession(mediaSessionCompat.sessionToken))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentIntent(contentIntent)
+                .setOngoing(true)
                 .build()
 
 

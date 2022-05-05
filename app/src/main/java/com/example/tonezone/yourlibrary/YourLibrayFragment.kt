@@ -22,6 +22,9 @@ import com.example.tonezone.MainViewModelFactory
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourLibraryBinding
+import com.example.tonezone.network.Albums
+import com.example.tonezone.network.Artists
+import com.example.tonezone.network.Playlists
 import com.example.tonezone.utils.ModalBottomSheet
 import com.example.tonezone.utils.ModalBottomSheetViewModel
 import com.example.tonezone.utils.ObjectRequest
@@ -35,7 +38,7 @@ class YourLibraryFragment : Fragment() {
         MainViewModelFactory(requireActivity())
     }
     private val viewModel: YourLibraryViewModel by viewModels {
-        YourLibraryViewModelFactory( mainViewModel.firebaseAuth.value!!)
+        YourLibraryViewModelFactory( mainViewModel.firebaseUser.value!!)
     }
 
     private val modalBottomSheetViewModel : ModalBottomSheetViewModel by activityViewModels()
@@ -96,14 +99,14 @@ class YourLibraryFragment : Fragment() {
                     when (it) {
                         SortOption.Alphabetical -> {
                             val dataItems = viewModel.dataItems.value!!.sortedBy { it.name }
-                            adapter.submitList(dataItems.sortedByDescending { it.pin })
+                            adapter.submitListDataItems(dataItems.sortedByDescending { it.pin })
                         }
                         SortOption.Creator -> {
                             val dataItems = viewModel.dataItems.value!!.sortedBy { it.type }
-                            adapter.submitList(dataItems.sortedByDescending { it.pin })
+                            adapter.submitListDataItems(dataItems.sortedByDescending { it.pin })
                         }
                         else -> {
-                            adapter.submitList(viewModel.dataItems.value!!.sortedBy { it.pin })
+                            adapter.submitListDataItems(viewModel.dataItems.value!!.sortedBy { it.pin })
                         }
                     }
             }
@@ -114,19 +117,12 @@ class YourLibraryFragment : Fragment() {
     private fun bindChipGroup() {
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
 
-        viewModel.dataItems.observe(viewLifecycleOwner){
+        viewModel.dataItems.observe(viewLifecycleOwner) {
+            binding.chipGroup.playlistData = Playlists(it.filter { it.typeName == "playlist" }.map { (it as LibraryAdapter.DataItem.PlaylistItem).playlist })
+            binding.chipGroup.artistData = Artists(it.filter { it.typeName == "artist" }.map { (it as LibraryAdapter.DataItem.ArtistItem).artist })
+            binding.chipGroup.albumData = Albums(it.filter { it.typeName == "album" }.map { (it as LibraryAdapter.DataItem.AlbumItem).album })
+
         }
-//        viewModel.dataItems.observe(viewLifecycleOwner) {
-//            binding.chipGroup.artistData = Artists(it)
-//        }
-//
-//        viewModel.userPlaylists.observe(viewLifecycleOwner) {
-//            binding.chipGroup.playlistData = Playlists(it)
-//        }
-//
-//        viewModel.saveAlbums.observe(viewLifecycleOwner){
-//            binding.chipGroup.albumData = Albums(it)
-//        }
 
         binding.chipGroup.filterTypeChipGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
@@ -145,7 +141,7 @@ class YourLibraryFragment : Fragment() {
             }
 
             override fun onTextChanged(query: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if(query!=null && query.isNotBlank()) {
+                if(query!=null) {
                     (binding.yourLibraryList.adapter as LibraryAdapter).filterQuery(query.toString())
                 }
             }
@@ -190,7 +186,7 @@ class YourLibraryFragment : Fragment() {
                 val alert = AlertDialog.Builder(context,R.style.AlertDialogTheme)
                 val input = EditText(context)
                 input.inputType = InputType.TYPE_CLASS_TEXT
-                input.setBackgroundColor(Color.WHITE)
+                input.setBackgroundColor(Color.BLACK)
                 input.gravity = Gravity.CENTER
                 input.setText("Playlist")
                 alert.setView(input)
@@ -250,7 +246,7 @@ class YourLibraryFragment : Fragment() {
             ARTIST -> ObjectRequest.ARTIST_FROM_LIBRARY
             PLAYLIST -> {
                 val playlist = (dataItem as LibraryAdapter.DataItem.PlaylistItem).playlist
-                if(playlist.owner!!.id==viewModel.firebaseUser.uid)
+                if(playlist.owner!!.id==viewModel.firebaseUser.id)
                     ObjectRequest.OWNER_PLAYLIST_FROM_LIBRARY
                 else
                     ObjectRequest.PLAYLIST_FROM_LIBRARY

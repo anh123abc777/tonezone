@@ -12,7 +12,6 @@ import com.example.tonezone.MainViewModel
 import com.example.tonezone.adapter.GroupPlaylistAdapter
 import com.example.tonezone.adapter.PlaylistAdapter
 import com.example.tonezone.databinding.FragmentHomeBinding
-import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.PlaylistInfo
 
 
@@ -24,7 +23,7 @@ class HomeFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val viewModel: HomeViewModel by viewModels {
-        HomeViewModelFactory(mainViewModel.token, mainViewModel.userFirebase.value!!)
+        HomeViewModelFactory(mainViewModel.token, mainViewModel.firebaseUser.value!!)
     }
 
     override fun onCreateView(

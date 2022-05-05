@@ -58,6 +58,10 @@ class PlaylistDetailsViewModel
     val queueTrack : LiveData<Track?>
         get() = _queueTrack
 
+    private var _isRequestingToAddTracks = MutableLiveData<String?>()
+    val isRequestingToAddTracks: LiveData<String?>
+        get() = _isRequestingToAddTracks
+
     private fun getDataPlaylistItems(): MutableLiveData<List<Track>> {
 
         return when (playlistInfo.type) {
@@ -142,7 +146,9 @@ class PlaylistDetailsViewModel
 
             Signal.DELETE_PLAYLIST -> deletePlaylist()
 
-            Signal.ADD_SONGS -> TODO()
+            Signal.ADD_SONGS -> requestToAddSongs()
+
+            Signal.REMOVE_FROM_THIS_PLAYLIST -> removeFromThisPlaylist()
 
             Signal.EDIT_PLAYLIST -> TODO()
 
@@ -151,6 +157,19 @@ class PlaylistDetailsViewModel
             else -> Log.i("receivedSignal","what is this???????")
         }
     }
+
+    private fun removeFromThisPlaylist(){
+        firebaseRepo.removeTrackFromPlaylist(playlistInfo.id,_selectedObjectID.value!!.first)
+    }
+
+    fun requestToAddSongs(){
+        _isRequestingToAddTracks.value = playlistInfo.id
+    }
+
+    fun navigateToTheAddSongViewComplete(){
+        _isRequestingToAddTracks.value = null
+    }
+
 
     private fun deletePlaylist(){
         firebaseRepo.unfollowObject(firebaseUser.uid,_selectedObjectID.value!!.first)

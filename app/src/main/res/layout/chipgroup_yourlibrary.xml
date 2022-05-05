@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="@string/all"
             style="@style/Widget.MaterialComponents.Chip.Filter"
-            sizeList="@{playlistData.items.size()+artistData.items.size()}"
+            sizeList="@{playlistData.items.size()+artistData.items.size() +trackData.items.size() + albumData.items.size()}"
             />
 <!--        android:onClick="@{() -> viewModel.filterType(type.All)}"-->
 

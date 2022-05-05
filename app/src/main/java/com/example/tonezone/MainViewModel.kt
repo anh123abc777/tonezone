@@ -27,9 +27,9 @@ class MainViewModel(private val activity: Activity): ViewModel() {
         get() = _firebaseAuth
 
     private val firebaseRepo = FirebaseRepository()
-    private lateinit var _userFirebase: MutableLiveData<User>
-    val userFirebase: LiveData<User>
-        get() = _userFirebase
+    private lateinit var _firebaseUser: MutableLiveData<User>
+    val firebaseUser: LiveData<User>
+        get() = _firebaseUser
 
 
     private val _user = MutableLiveData<User>()
@@ -58,7 +58,7 @@ class MainViewModel(private val activity: Activity): ViewModel() {
     }
 
     fun initUserFirebase(){
-        _userFirebase = firebaseRepo.getUserProfile(_firebaseAuth.value!!.uid)
+        _firebaseUser = firebaseRepo.getUserProfile(_firebaseAuth.value!!.uid)
     }
 
     fun initAuthorization(){

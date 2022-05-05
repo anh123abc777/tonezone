@@ -9,17 +9,18 @@ import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.network.*
 import com.example.tonezone.utils.ObjectRequest
 import com.example.tonezone.utils.Signal
+import com.example.tonezone.utils.Type
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.*
 
 
-class YourLibraryViewModel(val firebaseUser: FirebaseUser) : ViewModel() {
+class YourLibraryViewModel(val firebaseUser: User) : ViewModel() {
 
     private val job = Job()
     private val uiScope = CoroutineScope(job + Dispatchers.Main)
     private val firebaseRepo = FirebaseRepository()
 
-    private val _dataItems = firebaseRepo.getFollowedObjects(firebaseUser.uid)
+    private val _dataItems = firebaseRepo.getFollowedObjects(firebaseUser.id)
     val dataItems : LiveData<List<LibraryAdapter.DataItem>>
         get() = _dataItems
 
@@ -53,15 +54,15 @@ class YourLibraryViewModel(val firebaseUser: FirebaseUser) : ViewModel() {
     }
 //
 //     fun getDataUserPlaylists(){
-//         _userPlaylists = firebaseRepo.getLikedPlaylists(firebaseUser.uid)
+//         _userPlaylists = firebaseRepo.getLikedPlaylists(firebaseUser.id)
 //    }
 //
 //    private fun getDataFollowedArtists(){
-//        _followedArtists = firebaseRepo.getFollowedArtists(firebaseUser.uid)
+//        _followedArtists = firebaseRepo.getFollowedArtists(firebaseUser.id)
 //    }
 //
 //    private fun getDataSavedAlbums(){
-//        _savedAlbums = firebaseRepo.getFollowedAlbums(firebaseUser.uid)
+//        _savedAlbums = firebaseRepo.getFollowedAlbums(firebaseUser.id)
 //    }
 
     fun changeSortOption(){
@@ -87,13 +88,11 @@ class YourLibraryViewModel(val firebaseUser: FirebaseUser) : ViewModel() {
 
     private fun displayPlaylistDetails(playlist: Playlist){
         _navigateToDetailPlaylist.value = PlaylistInfo(
-            playlist.id!!,
-            playlist.name!!,
-            playlist.description!!,
-            if (playlist.images?.isNotEmpty() == true)
-                playlist.images!![0].url
-            else "",
-            playlist.type!!
+            id=playlist.id!!,
+            name = playlist.name!!,
+            description = playlist.description!!,
+            image = playlist.images?.get(0)?.url,
+            type = playlist.type!!
         )
     }
 
@@ -116,9 +115,35 @@ class YourLibraryViewModel(val firebaseUser: FirebaseUser) : ViewModel() {
 
     fun createPlaylist(playlistName: String){
 
-        val playlist = firebaseRepo.createPlaylist(playlistName,firebaseUser)
-//        getDataUserPlaylists()
-        displayPlaylistDetails(playlist)
+        val playlist = Playlist(
+            name = playlistName,
+            type = "playlist",
+            owner = Owner(firebaseUser.display_name,firebaseUser.id),
+            id = firebaseUser.id
+        )
+        firebaseRepo.db.collection("Playlist")
+            .document()
+            .set(playlist)
+            .addOnSuccessListener {
+
+                firebaseRepo.db.collection("Playlist")
+                    .whereEqualTo("id",firebaseUser.id)
+                    .addSnapshotListener { documents, _ ->
+                        if (documents!=null){
+                            for (doc in documents){
+                                playlist.id = doc.id
+                                firebaseRepo.db.collection("Playlist")
+                                    .document(doc.id)
+                                    .set(playlist)
+
+                                firebaseRepo.followObject(firebaseUser.id,doc.id, Type.PLAYLIST)
+                                displayPlaylistDetails(playlist)
+                            }
+                        }
+                    }
+            }
+//        val playlist = firebaseRepo.createPlaylist(playlistName,firebaseUser)
+////        getDataUserPlaylists()
 
     }
 
@@ -161,25 +186,25 @@ class YourLibraryViewModel(val firebaseUser: FirebaseUser) : ViewModel() {
     }
 
     private fun unpinObject(){
-        firebaseRepo.unpinObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+        firebaseRepo.unpinObject(firebaseUser.id,_objectShowBottomSheet.value!!.second)
     }
 
     private fun pinObject(){
-        firebaseRepo.pinObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+        firebaseRepo.pinObject(firebaseUser.id,_objectShowBottomSheet.value!!.second)
     }
 
     private fun unfollowArtist(){
         firebaseRepo
-            .unfollowObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+            .unfollowObject(firebaseUser.id,_objectShowBottomSheet.value!!.second)
 //        getDataFollowedArtists()
     }
 
     private fun unlikePlaylist(){
-        firebaseRepo.unfollowObject(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+        firebaseRepo.unfollowObject(firebaseUser.id,_objectShowBottomSheet.value!!.second)
     }
 
     private fun deletePlaylist(){
-        firebaseRepo.deletePlaylist(firebaseUser.uid,_objectShowBottomSheet.value!!.second)
+        firebaseRepo.deletePlaylist(firebaseUser.id,_objectShowBottomSheet.value!!.second)
 //        getDataUserPlaylists()
     }
 

@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.utils.*
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.Query
@@ -143,8 +142,7 @@ class FirebaseRepository {
         var tracks = MutableLiveData<List<Track>>()
                db.collection("Playlist")
                    .document(id)
-                   .get()
-                   .addOnSuccessListener{ value ->
+                   .addSnapshotListener { value, _ ->
 
                        if (value != null && value.exists()) {
                            val itemIDs =
@@ -156,24 +154,14 @@ class FirebaseRepository {
 
                                db.collection("Track")
                                    .whereIn("id", itemIDs)
-                                   .get()
-                                   .addOnSuccessListener { value ->
+                                   .addSnapshotListener { value, _ ->
                                        if (value != null) {
-                                           listData+=value.toObjects(Track::class.java)
-                                           val temp = listData
-
-//                                           temp.forEach {
-//                                               val map = hashMapOf(
-//                                                   "id" to it.id,
-//                                                   "type" to it.type,
-//                                                   "search_keywords" to generateSearchKeywords(it.name)
-//                                               )
-//                                               db.collection("Search")
-//                                                   .document(it.id)
-//                                                   .set(map)
-//                                           }
-
-                                           tracks.value = temp
+                                           val tracksRaw = value.toObjects(Track::class.java)
+                                           tracksRaw.forEach { track ->
+                                               if (!listData.contains(track))
+                                                   listData.add(track)
+                                           }
+                                           tracks.value = listData
                                        }
                                    }
                            }
@@ -248,6 +236,23 @@ class FirebaseRepository {
 //        }
 //    }
 
+    fun removeTrackFromPlaylist(playlistID: String, trackID: String){
+
+        db.collection("Playlist")
+            .document(playlistID)
+            .get()
+            .addOnSuccessListener { doc ->
+                if (doc!=null && doc.exists()){
+                    val trackInPlaylist = (doc["tracks"] as List<HashMap<*,*>>).find { it["id"] == trackID }
+
+                    db.collection("Playlist")
+                        .document(playlistID)
+                        .update("tracks",FieldValue.arrayRemove(trackInPlaylist))
+
+                }
+            }
+    }
+
     fun addItemToSystemPlaylist(playlistID: String,tracks: List<TrackInPlaylist>){
         val dataInserting = tracks.map {
             TrackInPlaylist(
@@ -270,12 +275,12 @@ class FirebaseRepository {
         unfollowObject(userID,id)
     }
 
-    fun createPlaylist(name: String,user: FirebaseUser): Playlist {
+    fun createPlaylist(name: String,user: User): Playlist {
         val playlist = Playlist(
             name = name,
             type = "playlist",
-            owner = Owner(user.displayName,user.uid),
-            id = user.uid
+            owner = Owner(user.display_name,user.id),
+            id = user.id
         )
         db.collection("Playlist")
             .document()
@@ -283,7 +288,7 @@ class FirebaseRepository {
             .addOnSuccessListener {
 
                 db.collection("Playlist")
-                    .whereEqualTo("id",user.uid)
+                    .whereEqualTo("id",user.id)
                     .addSnapshotListener { documents, _ ->
                         if (documents!=null){
                             for (doc in documents){
@@ -292,7 +297,7 @@ class FirebaseRepository {
                                     .document(doc.id)
                                     .set(playlist)
 
-                                followObject(user.uid,doc.id,Type.PLAYLIST)
+                                followObject(user.id,doc.id,Type.PLAYLIST)
                             }
                         }
                     }
@@ -913,16 +918,12 @@ class FirebaseRepository {
             val field = convertTypeToField(type)
             var isFollowed = MutableLiveData<Boolean>()
 
-           db.collection("Followed")
-                .document(userID)
-                .get()
-                .addOnSuccessListener {
-                    if (it[field] != null) {
-                        val followedObjects = (it[field] as List<HashMap<*,*>>).map { it["id"] }
-                        isFollowed.value = followedObjects.contains(playlistID)
-                    } else {
-                        isFollowed.value = false
-                    }
+           db.collection("User")
+               .document(userID)
+               .collection("Followed")
+               .whereEqualTo("id",playlistID)
+                .addSnapshotListener { docs, _ ->
+                    isFollowed.value = docs!=null && !docs.isEmpty
                 }
         return isFollowed
     }
@@ -1255,20 +1256,23 @@ class FirebaseRepository {
             }
     }
 
-     fun getRecommendedTracks(userID: String){
-        val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-        db.collection("Recommendation")
-            .document(userID)
-            .collection("Day$today")
-            .get()
-            .addOnSuccessListener { docs ->
-                if (docs != null && !docs.isEmpty) {
-                    val tracks = docs.toObjects(Track::class.java)
-                }
-            }
+     fun getRecommendedTracks(userID: String): MutableLiveData<List<Track>>{
+         val trackObserves = MutableLiveData<List<Track>>()
+         val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+         db.collection("Recommendation")
+             .document(userID)
+             .collection("Day6")
+             .get()
+             .addOnSuccessListener { docs ->
+                 if (docs != null && !docs.isEmpty) {
+                     val tracks = docs.toObjects(Track::class.java)
+                     trackObserves.value = tracks
+                 }
+             }
+         return trackObserves
     }
 
-    fun updateRecommendedTracks(userId: String, lifecycleOwner: LifecycleOwner){
+    fun putRecommendedTracks(userId: String, lifecycleOwner: LifecycleOwner){
         db.collection("History")
             .document(userId)
             .get()
@@ -1303,9 +1307,13 @@ class FirebaseRepository {
                     }
 
                     tracksObserver.observe(lifecycleOwner){ tracks ->
+                        Log.i("FirebaseRepo","${tracks.size} ${recentlyPlayedIds.toSet().toList().size} ${recentlyPlayedIds.size}")
                         if (tracks!=null && tracks.size == recentlyPlayedIds.toSet().toList().size){
+                            Log.i("FirebaseRepo","${tracks} ")
                             val artists = createArtistArray(tracks)
-                            val recentlyPlayedTracks = recentlyPlayedIds.map { id -> tracks.find { it.id==id.toString() }!! }
+//                            val recentlyPlayedTracks = tracks.filter { track -> recentlyPlayedIds.contains(track.id)}
+                            val recentlyPlayedTracks = recentlyPlayedIds.map { id -> tracks.find { it.id==id }?:Track(id = id) }
+
                             val itemProfiles = createTrackProfiles(recentlyPlayedTracks,artists)
 
                             val cosineSimilarityArray = calculateCosineSimilarity(userProfiles, itemProfiles, artists)
@@ -1462,6 +1470,36 @@ class FirebaseRepository {
                     }
 
 
+                }else{
+                    Log.d(TAG,"Failure: ${it.exception!!.message}")
+                }
+            }
+        return searchList
+    }
+
+    fun searchInFirebase(searchText: String, type: Type): MutableLiveData<List<LibraryAdapter.DataItem>>{
+        val searchList = MutableLiveData<List<LibraryAdapter.DataItem>>()
+        db.collection("Search")
+            .whereArrayContains("search_keywords",searchText)
+            .whereEqualTo("type",type.name.lowercase())
+            .get()
+            .addOnCompleteListener {
+                if (it.isSuccessful){
+                    val result = it.result.toObjects(SearchModel::class.java)
+
+                    var list = listOf<LibraryAdapter.DataItem>()
+                    result.forEach { item ->
+                        db.collection("Track")
+                            .whereEqualTo("id",item.id)
+                            .get()
+                            .addOnCompleteListener { doc ->
+                                if (doc.isSuccessful){
+                                    val track = doc.result.toObjects(Track::class.java)
+                                    list += listOf(LibraryAdapter.DataItem.TrackItem(track[0]))
+                                    searchList.value = list
+                                }
+                        }
+                    }
                 }else{
                     Log.d(TAG,"Failure: ${it.exception!!.message}")
                 }

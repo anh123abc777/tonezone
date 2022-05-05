@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         handleLogin()
         setupSeekbar()
         observeSomething()
+
     }
 
     private fun observeSomething(){
@@ -135,8 +136,10 @@ class MainActivity : AppCompatActivity() {
 
         mainViewModel.firebaseAuth.observe(this){
             if (it!=null){
+                val firebaseRepo = FirebaseRepository()
+                firebaseRepo.putRecommendedTracks(it.uid,this)
                 mainViewModel.initUserFirebase()
-                mainViewModel.userFirebase.observe(this){
+                mainViewModel.firebaseUser.observe(this){
                     if (it!=null){
                         navigateToHome()
                     }
@@ -307,10 +310,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-
-        val firebaseRepo = FirebaseRepository()
-        firebaseRepo.updateRecommendedTracks(mainViewModel.firebaseAuth.value!!.uid,this)
-
 
         runBlocking(Dispatchers.IO) {
             repository.clear()

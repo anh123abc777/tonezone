@@ -39,7 +39,7 @@
 
             <TextView
                 android:id="@+id/name"
-                android:layout_width="280sp"
+                android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:text="@{track.name}"
                 android:textSize="16dp"
@@ -50,6 +50,7 @@
                 android:marqueeRepeatLimit="marquee_forever"
                 android:ellipsize="marquee"
                 android:scrollHorizontally="true"
+                android:paddingEnd="100dp"
                 />
 
             <TextView
@@ -71,7 +72,6 @@
                 android:background="@drawable/press_button"
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
-                app:tint="@color/colorSecondary"
                 android:src="@drawable/ic_ver_more"
                 />
         </RelativeLayout>

@@ -32,7 +32,7 @@ class YourPlaylistFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val yourLibraryViewModel: YourLibraryViewModel by viewModels {
-        YourLibraryViewModelFactory(mainViewModel.firebaseAuth.value!!)
+        YourLibraryViewModelFactory(mainViewModel.firebaseUser.value!!)
     }
 
     private val trackUris : String by lazy {
@@ -97,7 +97,7 @@ class YourPlaylistFragment : Fragment() {
                 val alert = AlertDialog.Builder(context)
                 val input = EditText(context)
                 input.inputType = InputType.TYPE_CLASS_TEXT
-                input.setBackgroundColor(Color.WHITE)
+//                input.setBackgroundColor(Color.BLACK)
                 input.gravity = Gravity.CENTER
 
                 alert.setView(input)

@@ -21,6 +21,7 @@ import com.example.tonezone.network.Artist
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
+import com.example.tonezone.playlistdetails.PlaylistDetailsFragmentDirections
 import com.example.tonezone.playlistdetails.PlaylistDetailsViewModel
 import com.example.tonezone.playlistdetails.PlaylistDetailsViewModelFactory
 import com.example.tonezone.utils.*
@@ -74,6 +75,7 @@ class ArtistDetailsFragment : Fragment() {
         handleBackPress()
         setupAppbar()
         initStateLikedItems()
+        observeNavigateToYourPlaylists()
 
 //        viewModel.artist.observe(viewLifecycleOwner){
 //            if (it!=null){
@@ -296,6 +298,18 @@ class ArtistDetailsFragment : Fragment() {
                 }
 
                 else -> Log.i("isShowingTrackDetails","Nothing")
+            }
+        }
+    }
+
+    private fun observeNavigateToYourPlaylists(){
+        playlistDetailsViewModel.navigateYourPlaylists.observe(viewLifecycleOwner){
+            if (it!=null){
+                findNavController().navigate(
+                    ArtistDetailsFragmentDirections
+                        .actionArtistDetailsFragmentToYourPlaylistFragment(it))
+
+                playlistDetailsViewModel.addToPlaylistComplete()
             }
         }
     }

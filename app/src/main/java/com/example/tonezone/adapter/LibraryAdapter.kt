@@ -7,6 +7,7 @@ import androidx.core.view.allViews
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.tonezone.R
 import com.example.tonezone.databinding.ItemArtistBinding
 import com.example.tonezone.databinding.ItemPlaylistInListBinding
 import com.example.tonezone.databinding.ItemTrackBinding
@@ -15,7 +16,7 @@ import kotlin.math.abs
 import kotlin.math.min
 
 
-class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<LibraryAdapter.DataItem, RecyclerView.ViewHolder>(DiffCallBack) {
+class LibraryAdapter(private val clickListener: OnClickListener, private val isSearching: Boolean=false): ListAdapter<LibraryAdapter.DataItem, RecyclerView.ViewHolder>(DiffCallBack) {
 
     private val ARTIST = 2
     private val PLAYLIST = 1
@@ -79,7 +80,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
                 is TrackViewHolder -> {
                     val trackItem = getItem(position) as DataItem.TrackItem
-                    holder.bind(trackItem.track, clickListener)
+                    holder.bind(trackItem.track, clickListener,isSearching)
                 }
 
                 is AlbumViewHolder -> {
@@ -102,13 +103,15 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
 
     }
 
-    override fun submitList(list: List<DataItem>?) {
+
+    fun submitListDataItems(list: List<DataItem>?){
         super.submitList(list)
         if (list != null) {
             defaultData = list
         }
-    }
+        notifyDataSetChanged()
 
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     fun filterQuery(query: String) {
@@ -120,7 +123,7 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
                 }
             }
         }
-        if(query.isNullOrEmpty()) {
+        if(query.isBlank() || query.isEmpty()) {
             submitList(defaultData)
         }else{
             submitList(items)
@@ -244,8 +247,14 @@ class LibraryAdapter(private val clickListener: OnClickListener): ListAdapter<Li
         (private val binding: ItemTrackBinding): RecyclerView.ViewHolder(binding.root) {
 
         @SuppressLint("ClickableViewAccessibility")
-        fun bind(track: Track, clickListener: OnClickListener){
+        fun bind(track: Track, clickListener: OnClickListener, isSearching: Boolean){
             binding.track = track
+
+            if (isSearching){
+                binding.moreOptionWithTrack.setImageResource(R.drawable.ic_add_circle)
+            }else{
+                binding.moreOptionWithTrack.setImageResource(R.drawable.ic_ver_more)
+            }
 
             binding.moreOptionWithTrack.setOnClickListener {
                 clickListener.onClickMoreOption(track,binding.moreOptionWithTrack.id)

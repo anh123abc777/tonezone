@@ -10,4 +10,5 @@ data class Playlist(
     var public: Boolean? = false,
     var type: String? = "playlist",
     var tracks: List<TrackInPlaylist>? = listOf(),
+    var deltailTracks : List<Track>?= listOf()
 )

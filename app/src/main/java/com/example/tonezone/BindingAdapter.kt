@@ -20,6 +20,7 @@ import com.example.tonezone.utils.convertSignalToIcon
 import com.example.tonezone.utils.convertSignalToText
 import com.example.tonezone.yourlibrary.SortOption
 import com.google.android.exoplayer2.Player
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 
 @BindingAdapter("groupPlaylists")
@@ -96,19 +97,20 @@ fun bindImage(imageView: ImageView,imageUrl: String?,listImageUrl: List<Image>?)
             .apply(
                RequestOptions()
                    .placeholder(R.drawable.loading_animation)
-                   .error(R.drawable.ic_connection_error)
+                   .error(R.drawable.ic_baseline_album_24)
             )
             .into(imageView)
 
     }
-    if(imageUrl!=null)
+    if(imageUrl!=null && imageUrl!="")
         Glide.with(imageView.context)
             .load(imageUrl)
             .apply(RequestOptions()
                 .placeholder(R.drawable.loading_animation)
-                .error(R.drawable.ic_connection_error)
+                .error(R.drawable.ic_baseline_album_24)
                 )
             .into(imageView)
+
 }
 //
 //@BindingAdapter("backgroundUri")
@@ -309,7 +311,15 @@ fun bindBackGroundColor(relativeLayout: RelativeLayout,color: Int){
 fun bindLibraryRecyclerView(recyclerView: RecyclerView,dataItems: List<LibraryAdapter.DataItem>?){
     if (dataItems!=null){
         val adapter = recyclerView.adapter as LibraryAdapter
-        adapter.submitList(dataItems)
+        adapter.submitListDataItems(dataItems)
         adapter.sortByDefault()
     }
+}
+
+@BindingAdapter("isShowAddTracksButton")
+fun bindAddTracksButtonVisibility(button: MaterialButton,size: Int?){
+    if(size!=null && size != 0){
+        button.visibility = View.GONE
+    }else
+        button.visibility = View.VISIBLE
 }

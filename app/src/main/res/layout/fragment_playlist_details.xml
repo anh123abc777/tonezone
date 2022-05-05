@@ -12,7 +12,8 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
@@ -148,6 +149,19 @@
 
                 </LinearLayout>
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/add_tracks_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:text="add songs"
+                    android:textAllCaps="false"
+                    android:layout_gravity="center_horizontal"
+                    app:cornerRadius="16dp"
+                    isShowAddTracksButton="@{viewModel.playlistItems.size()}"
+                    android:onClick="@{() ->viewModel.requestToAddSongs()}"
+                    />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/playlist"
                     android:layout_width="match_parent"
@@ -161,6 +175,7 @@
                     android:nestedScrollingEnabled="false"
                     android:clipToPadding="false"
                     />
+
 
             </LinearLayout>
 

@@ -21,6 +21,7 @@ enum class Signal {
     LIKE_TRACK,
     LIKED_TRACK,
 
+
     PIN_ARTIST,
     UNPIN_ARTIST,
     PIN_PLAYLIST,

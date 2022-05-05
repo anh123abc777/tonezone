@@ -20,7 +20,6 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
             >
 
@@ -31,7 +30,6 @@
                 app:title="Add to playlist"
                 app:navigationIcon="@drawable/ic_arrow_back"
                 android:gravity="center"
-                app:titleTextColor="@color/black"
                 app:titleCentered="true"
                 android:textSize="16sp"
                 app:menu="@menu/add_to_playlist_menu"
@@ -42,11 +40,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
-                    android:textColor="@color/black"
                     android:hint="@string/search_for_playlist"
                     android:layout_marginTop="16dp"
                     android:visibility="gone"
-                    android:background="@color/white"
                     />
 
             </com.google.android.material.appbar.MaterialToolbar>
@@ -68,31 +64,22 @@
                 android:layout_marginTop="16dp"
                 >
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/border_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:cardCornerRadius="32dp"
-                    android:layout_gravity="center_horizontal"
-                    >
 
-                    <androidx.appcompat.widget.AppCompatButton
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/new_playlist_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/new_playlist"
-                        android:background="@color/colorSecondary"
                         android:textSize="16sp"
-                        android:textColor="@color/black"
                         android:gravity="center"
                         android:textAllCaps="false"
                         android:paddingStart="32dp"
                         android:paddingEnd="32dp"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="8dp"
+                        android:textColor="@color/black"
+                        android:layout_gravity="center_horizontal"
+                        app:cornerRadius="16dp"
+                        android:onClick="@{() ->viewModel.requestToCreatePlaylist()}"
                         />
-
-                </androidx.cardview.widget.CardView>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/list_your_playlist"
