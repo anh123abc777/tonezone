@@ -90,7 +90,7 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
                                 val group = GroupPlaylist("Recently Playlist", playlists)
 
                                 val recentlyPlayedPlaylists =
-                                    _groupPlaylists.value?.find { it.title == "Recently Playlist" }
+                                    _groupPlaylists.value?.find { it.title == "Recently playlist" }
 
                                 if (recentlyPlayedPlaylists != null)
                                     _groupPlaylists.value?.get(
@@ -216,7 +216,7 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
 
                     val temp = mutableListOf<GroupPlaylist>()
                     temp += _groupPlaylists.value?: listOf()
-                    temp.add(GroupPlaylist("Relate artists",
+                    temp.add(GroupPlaylist("Recommended artists",
                         convertArtistsToPlaylists(relateArtists.subList(0,8))))
                     _groupPlaylists.value = temp
                     Log.i("Relateartists","$temp")

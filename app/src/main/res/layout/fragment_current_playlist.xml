@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         tools:context=".player.currentplaylist.CurrentPlaylistFragment"
         android:orientation="vertical"
-        android:background="@{viewModel.darkBackgroundDrawable}"
+        android:background="@{viewModel.darkBackGround}"
         >
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -36,6 +36,8 @@
                 android:textColor="@{viewModel.darkColorOnPrimary}"
                 android:layout_gravity="center_vertical|end"
                 android:onClick="@{() -> viewModel.clearSelectedTracks()}"
+                android:textSize="20sp"
+                android:textAllCaps="false"
                 />
 
         </com.google.android.material.appbar.MaterialToolbar>
@@ -90,6 +92,9 @@
                 android:layout_gravity="center_vertical|start"
                 android:onClick="@{() -> viewModel.hideTracksFromPlaylist()}"
                 android:textColor="@{viewModel.darkColorOnPrimary}"
+                android:textAllCaps="false"
+                android:textSize="20sp"
+
                 />
 
             <Button
@@ -97,6 +102,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="@string/add_to_playlist"
+                android:textAllCaps="false"
+                android:textSize="20sp"
                 android:background="@drawable/press_button"
                 android:layout_gravity="center_vertical|end"
                 android:textColor="@{viewModel.darkColorOnPrimary}"

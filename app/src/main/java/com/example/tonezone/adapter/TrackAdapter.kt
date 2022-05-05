@@ -207,8 +207,11 @@ class TrackAdapter(private val clickListener: OnClickListener) : ListAdapter<Tra
             if (isPlaying){
                 binding.root.background = backgroundChoiceTrack
                 binding.root.requestFocus()
+                binding.buttonChoose.isClickable = false
+                binding.buttonChoose.isChecked = false
             } else{
                 binding.root.setBackgroundColor(Color.TRANSPARENT)
+                binding.buttonChoose.isClickable = true
             }
 
         }
