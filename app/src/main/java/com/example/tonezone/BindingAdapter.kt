@@ -237,7 +237,7 @@ fun setupButtonVisibility(imageButton: ImageButton, isOwned: Boolean){
 fun bindTextButton(button: Button,isFollowing: Boolean){
     if(isFollowing){
         button.text = "following"
-        button.setBackgroundColor(ContextCompat.getColor(button.context,R.color.colorSecondary))
+        button.setBackgroundColor(ContextCompat.getColor(button.context,R.color.color_title))
     }else {
         button.text = "follow"
         button.setBackgroundColor(ContextCompat.getColor(button.context,R.color.colorPrimary))
@@ -295,7 +295,7 @@ fun bindStateButton(imageButton: ImageButton, isPositive: Boolean){
             imageButton.setColorFilter(
                 ContextCompat.getColor(
                     imageButton.context,
-                    R.color.colorSecondary
+                    R.color.color_title
                 )
             )
         else

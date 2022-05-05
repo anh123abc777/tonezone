@@ -17,6 +17,7 @@ enum class Signal {
     ADD_SONGS,
     EDIT_PLAYLIST,
     DELETE_PLAYLIST,
+    ADD_TO_OTHER_PLAYLIST,
 
     LIKE_TRACK,
     LIKED_TRACK,
@@ -43,6 +44,7 @@ fun convertSignalToText(signal: Signal): String =
         Signal.ADD_SONGS -> "Add songs"
         Signal.EDIT_PLAYLIST -> "Edit playlist"
         Signal.DELETE_PLAYLIST -> "Delete playlist"
+        Signal.ADD_TO_OTHER_PLAYLIST -> "Add to other playlist"
         Signal.LIKE_TRACK -> "Like"
         Signal.LIKED_TRACK -> "Liked"
         Signal.PIN_ARTIST -> "Pin artist"
@@ -59,12 +61,12 @@ fun convertSignalToIcon(signal: Signal): Int =
         Signal.LIKE_PLAYLIST -> R.drawable.ic_unlike
         Signal.LIKED_PLAYLIST -> R.drawable.ic_favorite
         Signal.HIDE_THIS_SONG -> R.drawable.ic_hide
-        Signal.ADD_TO_PLAYLIST -> R.drawable.ic_add_playlist
+        Signal.ADD_TO_PLAYLIST -> R.drawable.ic_outline_queue_music_24
         Signal.VIEW_ARTIST -> R.drawable.ic_view_artist
         Signal.REMOVE_FROM_THIS_PLAYLIST -> R.drawable.ic_remove
-        Signal.ADD_TO_QUEUE -> R.drawable.ic_add_queue
+        Signal.ADD_TO_QUEUE -> R.drawable.ic_baseline_playlist_play_24
         Signal.VIEW_ALBUM -> R.drawable.ic_view_album
-        Signal.ADD_SONGS -> R.drawable.ic_playlist_add
+        Signal.ADD_SONGS -> R.drawable.ic_add_to_playlist
         Signal.EDIT_PLAYLIST -> R.drawable.ic_grid
         Signal.DELETE_PLAYLIST -> R.drawable.ic_close
         Signal.LIKE_TRACK -> R.drawable.ic_unlike
@@ -75,4 +77,6 @@ fun convertSignalToIcon(signal: Signal): Int =
         Signal.UNPIN_PLAYLIST -> R.drawable.ic_unpin
         Signal.SHARE -> R.drawable.ic_view_artist
         Signal.STOP_FOLLOWING -> R.drawable.ic_close
+        Signal.ADD_TO_OTHER_PLAYLIST -> R.drawable.ic_outline_queue_music_24
+
     }

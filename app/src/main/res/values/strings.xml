@@ -27,4 +27,5 @@ Search for artist, songs and more</string>
     <string name="hide">Hide</string>
     <string name="log_out">Log out</string>
     <string name="artists_songs_or_playlist">Artists, songs, or playlist</string>
+    <string name="your_library">Your library</string>
 </resources>

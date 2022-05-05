@@ -3,12 +3,12 @@ package com.example.tonezone.playlistdetails
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -16,7 +16,6 @@ import com.example.tonezone.MainViewModel
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentPlaylistDetailsBinding
-import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
@@ -78,6 +77,10 @@ class PlaylistDetailsFragment : Fragment() {
 
         handleBackPress()
 
+        handleStatePlayer()
+
+        handleAddToOtherPlaylist()
+
         viewModel.playlistItems.observe(viewLifecycleOwner){
             if (it!=null){
                 viewModel.initStateLikedItems()
@@ -85,6 +88,20 @@ class PlaylistDetailsFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun handleStatePlayer(){
+        playerViewModel.playerState.observe(viewLifecycleOwner){ state ->
+            playerViewModel.currentPlaylist.observe(viewLifecycleOwner) { tracks ->
+
+                /**Something new**/
+                if (state == PlayerScreenViewModel.PlayerState.PLAY && tracks == viewModel.playlistItems) {
+                    binding.play.setIconResource(R.drawable.ic_pause)
+                } else {
+                    binding.play.setIconResource(R.drawable.ic_play_arrow)
+                }
+            }
+        }
     }
 
     private fun handleSignalAddTracks(){
@@ -124,7 +141,23 @@ class PlaylistDetailsFragment : Fragment() {
                     binding.toolbar.setTitleTextColor(Color.TRANSPARENT)
                     binding.toolbar.title = ""
                     binding.collapsingToolbarLayout.title = ""
+
                 }
+
+                val percentage = Math.abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
+                if (Math.abs(verticalOffset) == appBarLayout.totalScrollRange) {
+                    //  Collapsed
+                    //Hide your TextView here
+                    binding.playlistProfile.visibility = View.INVISIBLE
+                } else if (verticalOffset == 0) {
+                    //Expanded
+                    //Show your TextView here
+                    binding.playlistProfile.visibility = View.VISIBLE
+                } else {
+                    //In Between
+                    binding.playlistProfile.visibility = View.VISIBLE
+                }
+
             }
         })
     }
@@ -302,4 +335,16 @@ class PlaylistDetailsFragment : Fragment() {
             }
         }
     }
+
+    private fun handleAddToOtherPlaylist(){
+        viewModel.isRequestingToAddToOtherPlaylist.observe(viewLifecycleOwner){
+            if (it){
+                val bundle = bundleOf("trackIds" to viewModel.playlistItems.value!!.map { it.id }.toTypedArray())
+                findNavController().navigate(R.id.yourPlaylistFragment,bundle)
+                viewModel.addToOtherPlaylistComplete()
+            }
+        }
+    }
+
+
 }

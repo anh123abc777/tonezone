@@ -62,6 +62,10 @@ class PlaylistDetailsViewModel
     val isRequestingToAddTracks: LiveData<String?>
         get() = _isRequestingToAddTracks
 
+    private var _isRequestingToAddToOtherPlaylist = MutableLiveData<Boolean>()
+    val isRequestingToAddToOtherPlaylist: LiveData<Boolean>
+        get() = _isRequestingToAddToOtherPlaylist
+
     private fun getDataPlaylistItems(): MutableLiveData<List<Track>> {
 
         return when (playlistInfo.type) {
@@ -154,8 +158,18 @@ class PlaylistDetailsViewModel
 
             Signal.SHARE -> TODO()
 
+            Signal.ADD_TO_OTHER_PLAYLIST -> addToOtherPlaylist()
+
             else -> Log.i("receivedSignal","what is this???????")
         }
+    }
+
+    private fun addToOtherPlaylist(){
+        _isRequestingToAddToOtherPlaylist.value = true
+    }
+
+    fun addToOtherPlaylistComplete(){
+        _isRequestingToAddToOtherPlaylist.value = false
     }
 
     private fun removeFromThisPlaylist(){

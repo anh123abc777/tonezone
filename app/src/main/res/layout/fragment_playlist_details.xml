@@ -20,6 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
+            android:backgroundTint="#00FFFFFF"
             >
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -32,17 +33,27 @@
                 app:expandedTitleGravity="bottom"
                 app:titleCollapseMode="fade"
                 app:navigationIcon="@drawable/ic_arrow_back"
+                android:backgroundTint="#00FFFFFF"
+
                 >
 
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="?attr/actionBarSize"
                     app:layout_collapseMode="pin"
                     app:navigationIcon="@drawable/ic_arrow_back"
                     app:title="@{viewModel.playlistInfo.name}"
+                    android:backgroundTint="#00FFFFFF"
                     />
 
+                <LinearLayout
+                    android:id="@+id/layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_collapseMode="none"
+                    >
                 <ImageView
                     android:id="@+id/thumbnail"
                     android:layout_width="match_parent"
@@ -54,22 +65,54 @@
                     imageProfileVisibility="@{viewModel.playlistInfo}"
                     />
 
+                    <LinearLayout
+                        android:id="@+id/playlist_profile"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        profileVisibility="@{viewModel.playlistInfo}"
+                        android:layout_marginStart="16dp"
+                        >
+
+                        <TextView
+                            android:id="@+id/playlist_name"
+                            android:layout_width="300dp"
+                            android:layout_height="wrap_content"
+                            android:text="@{viewModel.playlistInfo.name}"
+                            android:textSize="16dp"
+                            />
+
+                        <TextView
+                            android:id="@+id/description"
+                            android:layout_width="300dp"
+                            android:layout_height="wrap_content"
+                            android:text="@{viewModel.playlistInfo.description}"
+                            />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
             </com.google.android.material.appbar.CollapsingToolbarLayout>
+
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_play_arrow"
-            android:background="?attr/colorOnPrimary"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            android:layout_marginTop="36dp"
-            android:layout_gravity="end|top"
+            app:icon="@drawable/ic_play_arrow"
+            app:iconTint="@color/white"
+            app:rippleColor="@color/white"
+            app:backgroundTint="?attr/colorPrimary"
+            android:layout_gravity="end|bottom"
             tools:ignore="ContentDescription"
             app:elevation="10dp"
+            app:layout_anchor="@id/collapsing_toolbar_layout"
+            app:layout_anchorGravity="bottom|end"
             />
+
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nestedScrollView"
@@ -77,6 +120,7 @@
             android:layout_height="wrap_content"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             >
+
             <LinearLayout
                 android:id="@+id/content_container"
                 android:layout_width="match_parent"
@@ -85,69 +129,44 @@
                 android:orientation="vertical"
                 android:padding="8dp"
                 >
-                <LinearLayout
-                    android:id="@+id/playlist_profile"
+
+                <RelativeLayout
+                    android:id="@+id/controller_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    profileVisibility="@{viewModel.playlistInfo}"
                     >
 
-                    <TextView
-                        android:id="@+id/playlist_name"
-                        android:layout_width="300dp"
+                    <ImageButton
+                        android:id="@+id/more_option"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{viewModel.playlistInfo.name}"
-                        android:textSize="16dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/press_button"
+                        android:foregroundTint="@color/colorSecondary"
+                        android:onClick="@{() -> viewModel.showBottomSheet()}"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_ver_more"
                         />
 
-                    <TextView
-                        android:id="@+id/description"
-                        android:layout_width="300dp"
+                    <!--                        isChoosing="@{viewModel.isUserPlaylistFollowed()}"-->
+
+                    <ImageButton
+                        android:id="@+id/like"
+                        isVisibility="@{viewModel.isOwnedByUser}"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{viewModel.playlistInfo.description}"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_toRightOf="@id/more_option"
+                        android:background="@drawable/press_button"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_unlike"
+                        stateButton="@{viewModel.isUserPlaylistFollowed()}"
+                        android:onClick="@{() -> viewModel.likePlaylist()}"
                         />
 
-                    <RelativeLayout
-                        android:id="@+id/controller_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        >
-
-                        <ImageButton
-                            android:id="@+id/more_option"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:background="@drawable/press_button"
-                            android:foregroundTint="@color/colorSecondary"
-                            android:onClick="@{() -> viewModel.showBottomSheet()}"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_ver_more"
-                            app:tint="@color/colorSecondary" />
-
-<!--                        isChoosing="@{viewModel.isUserPlaylistFollowed()}"-->
-
-                        <ImageButton
-                            android:id="@+id/like"
-                            isVisibility="@{viewModel.isOwnedByUser}"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="16dp"
-                            android:layout_toRightOf="@id/more_option"
-                            android:background="@drawable/press_button"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_unlike"
-                            stateButton="@{viewModel.isUserPlaylistFollowed()}"
-                            android:onClick="@{() -> viewModel.likePlaylist()}"
-                            app:tint="@color/colorSecondary" />
-
-
-                    </RelativeLayout>
-
-                </LinearLayout>
+                </RelativeLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/add_tracks_button"

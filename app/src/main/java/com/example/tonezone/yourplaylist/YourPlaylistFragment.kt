@@ -2,7 +2,6 @@ package com.example.tonezone.yourplaylist
 
 import android.app.AlertDialog
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
@@ -21,7 +20,6 @@ import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.FragmentYourPlaylistBinding
 import com.example.tonezone.network.FirebaseRepository
-import com.example.tonezone.network.Owner
 import com.example.tonezone.yourlibrary.YourLibraryViewModel
 import com.example.tonezone.yourlibrary.YourLibraryViewModelFactory
 
@@ -35,9 +33,15 @@ class YourPlaylistFragment : Fragment() {
         YourLibraryViewModelFactory(mainViewModel.firebaseUser.value!!)
     }
 
-    private val trackUris : String by lazy {
+    private val trackId: String by lazy {
         YourPlaylistFragmentArgs.fromBundle(requireArguments()).trackID
     }
+
+    private val trackIds : List<String> by lazy {
+        requireArguments().getStringArray("trackIds")?.toList() ?: listOf()
+    }
+
+    private val firebaseRepo = FirebaseRepository()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,15 +63,22 @@ class YourPlaylistFragment : Fragment() {
 
     private fun setupYourPlaylistsAdapter(){
         val adapter = LibraryAdapter(LibraryAdapter.OnClickListener{ dataItem, _ ->
-            addItemToPlaylist(dataItem.id!!,trackUris)
+            if (trackIds.isNotEmpty())
+                addItemsToPlaylist(dataItem.id!!,trackIds)
+            else
+            addItemToPlaylist(dataItem.id!!,trackId)
+
             requireActivity().onBackPressed()
         })
         binding.listYourPlaylist.adapter = adapter
     }
 
-    private fun addItemToPlaylist(playlistID: String, trackIDs: String){
-        val firebaseRepo = FirebaseRepository()
-        firebaseRepo.addItemToYourPlaylist(playlistID, listOf(trackIDs))
+    private fun addItemToPlaylist(playlistID: String, trackID: String){
+        firebaseRepo.addItemToYourPlaylist(playlistID, listOf(trackID))
+    }
+
+    private fun addItemsToPlaylist(playlistID: String,trackIDs: List<String>){
+        firebaseRepo.addItemToYourPlaylist(playlistID, trackIDs)
     }
 
     private fun submitListYourPlaylists(){
