@@ -70,6 +70,10 @@ class PlaylistDetailsViewModel
     val removeTrack : LiveData<Pair<Int,Track>?>
         get() = _removedTrack
 
+    fun setPlaylists(list: List<Track>){
+        _playlistItems.value = list
+    }
+
     private fun getDataPlaylistItems(): MutableLiveData<List<Track>> {
 
         return when (playlistInfo.type) {
@@ -81,11 +85,16 @@ class PlaylistDetailsViewModel
                     getAlbumTracks()
                 }
 
-                else -> {
+                "playlist" -> {
                     if(playlistInfo.id=="liked_track")
                         getUserSavedTracks()
                     else
                         getPlaylistTracks()
+                }
+
+                else -> {
+
+                        MutableLiveData()
                 }
             }
     }

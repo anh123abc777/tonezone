@@ -5,11 +5,11 @@ data class AlbumsObject(
 )
 
 data class Albums(
-    val items: List<Album>
+    val items: List<Album> = listOf()
 )
 
 data class SavedAlbums(
-    val items: List<SavedAlbum>
+    val items: List<SavedAlbum> = listOf()
 )
 
 data class SavedAlbum(

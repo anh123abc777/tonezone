@@ -1,65 +1,45 @@
-package com.example.tonezone.playlistdetails
+package com.example.tonezone.utils
 
-import android.graphics.Color
-import android.os.Bundle
+import android.app.Activity
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import com.example.tonezone.MainViewModel
 import com.example.tonezone.R
-import com.example.tonezone.adapter.LibraryAdapter
-import com.example.tonezone.databinding.FragmentPlaylistDetailsBinding
-import com.example.tonezone.network.PlaylistInfo
 import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
-import com.example.tonezone.utils.*
-import com.google.android.material.appbar.AppBarLayout
+import com.example.tonezone.playlistdetails.PlaylistDetailsFragmentDirections
+import com.example.tonezone.playlistdetails.PlaylistDetailsViewModel
+import com.example.tonezone.playlistdetails.PlaylistDetailsViewModelFactory
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
-class PlaylistDetailsFragment : Fragment() {
+class BottomSheetProcessor(
+                           private val playerViewModel: PlayerScreenViewModel,
+                           private val viewModel: PlaylistDetailsViewModel,
+                            private val viewLifecycleOwner: LifecycleOwner,
+                           private val activity: FragmentActivity,
+                           ) {
 
-    private lateinit var binding: FragmentPlaylistDetailsBinding
-
-    private val mainViewModel : MainViewModel by activityViewModels()
-
-    private lateinit var playlistInfo : PlaylistInfo
-
-    private val viewModel: PlaylistDetailsViewModel by viewModels {
-        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,
-             mainViewModel.firebaseAuth.value!!
-        )
+    private val modalBottomSheetViewModel: ModalBottomSheetViewModel by lazy {
+        ViewModelProvider(activity).get(ModalBottomSheetViewModel::class.java)
     }
 
-    private val modalBottomSheetViewModel: ModalBottomSheetViewModel by activityViewModels()
-
-    private val playerViewModel : PlayerScreenViewModel by activityViewModels()
+    private val navController: NavController by lazy {
+        activity.findNavController(R.id.nav_host)
+    }
 
     private lateinit var modalBottomSheet: ModalBottomSheet
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-
-        binding = FragmentPlaylistDetailsBinding.inflate(inflater)
-        playlistInfo = PlaylistDetailsFragmentArgs.fromBundle(requireArguments()).playlistInfo
-
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = viewLifecycleOwner
-
+    init {
         setupBottomSheet()
-
-        createAdapterPlaylist()
 
         handleSignalFromBottomSheet()
 
@@ -69,132 +49,23 @@ class PlaylistDetailsFragment : Fragment() {
 
         handleLikeButtonVisibility()
 
-        handlePlayPlaylist()
-
-        handleAddToQueue()
-
         handlePlayingTrack()
 
         handleSignalAddTracks()
-
-        setupAppbar()
-
-        handleBackPress()
-
-        handleStatePlayer()
 
         handleAddToOtherPlaylist()
 
         handleRemoveTrack()
 
+        initStateLikedItems()
+
+    }
+
+    private fun initStateLikedItems(){
         viewModel.playlistItems.observe(viewLifecycleOwner){
             if (it!=null){
                 viewModel.initStateLikedItems()
-            }
-        }
-
-        return binding.root
-    }
-
-    private fun handleStatePlayer(){
-            playerViewModel.currentPlaylist.observe(viewLifecycleOwner) { tracks ->
-                playerViewModel.playerState.observe(viewLifecycleOwner){ state ->
-                /**Something new**/
-                if (state == PlayerScreenViewModel.PlayerState.PLAY && tracks == viewModel.playlistItems.value) {
-                    binding.play.setIconResource(R.drawable.ic_pause)
-                } else {
-                    binding.play.setIconResource(R.drawable.ic_play_arrow)
-                }
-            }
-        }
-    }
-
-    private fun setupAppbar(){
-        binding.appBarLayout.addOnOffsetChangedListener(object :
-            AppBarLayout.OnOffsetChangedListener {
-            var scrollRange = -1
-            override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
-                //Initialize the size of the scroll
-                if (scrollRange == -1) {
-                    scrollRange = appBarLayout.totalScrollRange
-                }
-                //Check if the view is collapsed
-                if (scrollRange + verticalOffset == 0) {
-                    binding.toolbar.setBackgroundColor(
-                        ContextCompat.getColor(
-                            context!!,
-                            R.color.black
-                        )
-                    )
-                    binding.collapsingToolbarLayout.title = viewModel.playlistInfo.name
-                    binding.toolbar.setTitleTextColor(Color.WHITE)
-
-                } else {
-                    binding.toolbar.setBackgroundColor(
-                        Color.TRANSPARENT
-                    )
-                    binding.toolbar.setTitleTextColor(Color.TRANSPARENT)
-                    binding.toolbar.title = ""
-                    binding.collapsingToolbarLayout.title = ""
-
-                }
-
-                val percentage = Math.abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
-                if (Math.abs(verticalOffset) == appBarLayout.totalScrollRange) {
-                    //  Collapsed
-                    //Hide your TextView here
-                    binding.playlistProfile.visibility = View.INVISIBLE
-                } else if (verticalOffset == 0) {
-                    //Expanded
-                    //Show your TextView here
-                    binding.playlistProfile.visibility = View.VISIBLE
-                } else {
-                    //In Between
-                    binding.playlistProfile.visibility = View.VISIBLE
-                }
-
-            }
-        })
-    }
-
-    private fun handleBackPress(){
-        binding.toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressed()
-        }
-    }
-
-    private fun createAdapterPlaylist(){
-        val adapter = LibraryAdapter(LibraryAdapter.OnClickListener { item, id ->
-            val trackItem = item as LibraryAdapter.DataItem.TrackItem
-
-            when(id) {
-                null -> {
-                    val pos = viewModel.playlistItems.value!!.indexOf(trackItem.track)
-                    playerViewModel.onInit(pos,viewModel.playlistItems.value)
-                    viewModel.saveHistory()
-                }
-
-                else -> {
-                    viewModel.showBottomSheet(trackItem.track.id,id)
-                }
-            }
-        })
-
-        binding.playlist.adapter = adapter
-    }
-
-    private fun handlePlayPlaylist(){
-        binding.play.setOnClickListener {
-            playerViewModel.onInit(0,viewModel.playlistItems.value)
-            viewModel.saveHistory()
-        }
-    }
-
-    private fun handleAddToQueue(){
-        viewModel.queueTrack.observe(viewLifecycleOwner){
-            if (it!=null){
-                playerViewModel.addToQueue(it)
-                viewModel.addToQueueComplete()
+                Log.i("bottomSheet","$it")
             }
         }
     }
@@ -225,7 +96,7 @@ class PlaylistDetailsFragment : Fragment() {
                 viewModel.handleSignal()
                 viewModel.handleSignalComplete()
                 if (it==Signal.DELETE_PLAYLIST){
-                    requireActivity().onBackPressed()
+                    activity.onBackPressed()
                 }
             }
         }
@@ -235,7 +106,7 @@ class PlaylistDetailsFragment : Fragment() {
         viewModel.selectedObjectID.observe(viewLifecycleOwner){
             if(it!=null){
                 setUpItemsBottomSheet(it.first,it.second)
-                modalBottomSheet.show(requireActivity().supportFragmentManager, ModalBottomSheet.TAG)
+                modalBottomSheet.show(activity.supportFragmentManager, ModalBottomSheet.TAG)
             }
         }
     }
@@ -268,8 +139,8 @@ class PlaylistDetailsFragment : Fragment() {
     }
 
     private fun handlePlayingTrack(){
-        if (playerViewModel.playerState.value==PlayerScreenViewModel.PlayerState.NONE) {
-            playerViewModel.currentTrack.observe(requireActivity()) {
+        if (playerViewModel.playerState.value== PlayerScreenViewModel.PlayerState.NONE) {
+            playerViewModel.currentTrack.observe(activity) {
                 if (it != Track()) {
                     playerViewModel.initSeekBar()
                     playerViewModel.onPlay()
@@ -292,7 +163,7 @@ class PlaylistDetailsFragment : Fragment() {
                     val artistsModalBottomSheet = ArtistsModalBottomSheet(artistsOfTrack)
 
                     artistsModalBottomSheet.show(
-                        requireActivity().supportFragmentManager,
+                        activity.supportFragmentManager,
                         ArtistsModalBottomSheet.TAG
                     )
 
@@ -321,9 +192,8 @@ class PlaylistDetailsFragment : Fragment() {
     private fun observeNavigateToYourPlaylists(){
         viewModel.navigateYourPlaylists.observe(viewLifecycleOwner){
             if (it!=null){
-                findNavController().navigate(
-                    PlaylistDetailsFragmentDirections
-                        .actionPlaylistDetailsFragmentToYourPlaylistFragment(it))
+                val bundle = bundleOf("trackID" to it)
+                navController.navigate(R.id.yourPlaylistFragment,bundle)
 
                 viewModel.addToPlaylistComplete()
             }
@@ -334,7 +204,7 @@ class PlaylistDetailsFragment : Fragment() {
         viewModel.isRequestingToAddToOtherPlaylist.observe(viewLifecycleOwner){
             if (it){
                 val bundle = bundleOf("trackIds" to viewModel.playlistItems.value!!.map { it.id }.toTypedArray())
-                findNavController().navigate(R.id.yourPlaylistFragment,bundle)
+                navController.navigate(R.id.yourPlaylistFragment,bundle)
                 viewModel.addToOtherPlaylistComplete()
             }
         }
@@ -345,7 +215,7 @@ class PlaylistDetailsFragment : Fragment() {
             if (it!=null){
 //                    (binding.playlist.adapter as LibraryAdapter).notifyItemRemoved(it.first)
 
-                Snackbar.make(requireActivity().window.decorView.findViewById(android.R.id.content), "Track is removed", Snackbar.LENGTH_LONG)
+                Snackbar.make(activity.window.decorView.findViewById(android.R.id.content), "Track is removed", Snackbar.LENGTH_LONG)
                     .setAction("Undo") {
                         viewModel.undoRemove()
                     }.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>(){
@@ -366,7 +236,7 @@ class PlaylistDetailsFragment : Fragment() {
         viewModel.isRequestingToAddTracks.observe(viewLifecycleOwner){
             if (it!=null){
                 val bundle = bundleOf("playlistID" to it)
-                findNavController().navigate(R.id.addTracksFragment,bundle)
+                navController.navigate(R.id.addTracksFragment,bundle)
                 viewModel.navigateToTheAddSongViewComplete()
             }
         }
