@@ -269,7 +269,7 @@ class FirebaseRepository {
 
     fun deletePlaylist(userID: String,id: String){
         db.collection("Playlist")
-            .document()
+            .document(id)
             .delete()
 
         unfollowObject(userID,id)

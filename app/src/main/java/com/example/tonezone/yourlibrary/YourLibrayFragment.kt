@@ -1,7 +1,9 @@
 package com.example.tonezone.yourlibrary
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -12,7 +14,9 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -94,6 +98,13 @@ class YourLibraryFragment : Fragment() {
         binding.displayOption.viewModel = viewModel
 
         viewModel.dataItems.observe(viewLifecycleOwner) { value ->
+            val dataItems = viewModel.dataItems.value!!.sortedBy { it.name }
+            adapter.submitListDataItems(dataItems.sortedByDescending { it.pin })
+
+//            viewModel.yourPlaylistNum= dataItems!!.filter { it.typeName=="playlist" }
+//                .map { (it as LibraryAdapter.DataItem.PlaylistItem).playlist }
+//                .filter { it.owner!!.id==viewModel.firebaseUser.id }.size+1
+
             viewModel.sortOption.observe(viewLifecycleOwner) {
                 if (value != null)
                     when (it) {
@@ -116,6 +127,7 @@ class YourLibraryFragment : Fragment() {
     @SuppressLint("ResourceAsColor")
     private fun bindChipGroup() {
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
+        binding.chipGroup.allType.isChecked = true
 
         viewModel.dataItems.observe(viewLifecycleOwner) {
             binding.chipGroup.playlistData = Playlists(it.filter { it.typeName == "playlist" }.map { (it as LibraryAdapter.DataItem.PlaylistItem).playlist })
@@ -141,7 +153,7 @@ class YourLibraryFragment : Fragment() {
             }
 
             override fun onTextChanged(query: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if(query!=null) {
+                if(query!=null && query.toString()!="") {
                     (binding.yourLibraryList.adapter as LibraryAdapter).filterQuery(query.toString())
                 }
             }
@@ -188,7 +200,7 @@ class YourLibraryFragment : Fragment() {
                 input.inputType = InputType.TYPE_CLASS_TEXT
                 input.setBackgroundColor(Color.BLACK)
                 input.gravity = Gravity.CENTER
-                input.setText("Playlist")
+                input.setText("")
                 alert.setView(input)
 
                 alert.setPositiveButton("Ok"
@@ -202,6 +214,12 @@ class YourLibraryFragment : Fragment() {
                 }
 
                 alert.show()
+                (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
+                        InputMethodManager).toggleSoftInputFromWindow(
+                            binding.root.windowToken,
+                            InputMethodManager.SHOW_FORCED,
+                            0
+                        )
 
 //                input.setOnFocusChangeListener { _, b ->
 //                    if(b)
@@ -299,20 +317,36 @@ class YourLibraryFragment : Fragment() {
                 when(it.type) {
                     "playlist","album" -> {
 
-                        this.findNavController()
-                            .navigate(
-                                YourLibraryFragmentDirections
-                                    .actionYourLibraryFragmentToPlaylistDetailsFragment(it)
-                            )
+                        if (findNavController().currentDestination?.id == R.id.yourLibraryFragment) {
+
+                            hideKeyboardFrom(binding.root.context,binding.root)
+
+                            findNavController()
+                                .navigate(
+                                    YourLibraryFragmentDirections
+                                        .actionYourLibraryFragmentToPlaylistDetailsFragment(it)
+                                )
+                        }
                     }
-                    "artist" -> this.findNavController()
-                        .navigate(YourLibraryFragmentDirections
-                            .actionYourLibraryFragmentToArtistDetailsFragment(it))
+                    "artist" -> {
+                        if (findNavController().currentDestination?.id == R.id.yourLibraryFragment)
+                            this.findNavController()
+                                .navigate(
+                                    YourLibraryFragmentDirections
+                                        .actionYourLibraryFragmentToArtistDetailsFragment(it)
+                                )
+                    }
 
                 }
                 viewModel.displayPlaylistDetailsComplete()
             }
         }
+    }
+
+    private fun hideKeyboardFrom(context: Context, view: View) {
+        val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.rootView.windowToken, 0)
+        view.clearFocus()
     }
 
 }

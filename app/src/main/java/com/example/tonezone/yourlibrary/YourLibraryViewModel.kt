@@ -11,6 +11,7 @@ import com.example.tonezone.utils.ObjectRequest
 import com.example.tonezone.utils.Signal
 import com.example.tonezone.utils.Type
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 
 
@@ -43,6 +44,7 @@ class YourLibraryViewModel(val firebaseUser: User) : ViewModel() {
     private var _receivedSignal = MutableLiveData<Signal>()
     val receivedSignal : LiveData<Signal>
         get() = _receivedSignal
+
 
     init {
 //        getDataFollowedArtists()
@@ -115,8 +117,14 @@ class YourLibraryViewModel(val firebaseUser: User) : ViewModel() {
 
     fun createPlaylist(playlistName: String){
 
+        val yourPlaylistNum= _dataItems.value!!.filter { it.typeName=="playlist" }
+            .map { (it as LibraryAdapter.DataItem.PlaylistItem).playlist }
+            .filter { it.owner!!.id==firebaseUser.id }.size+1
+
+        val name = if(playlistName=="") "My playlist #$yourPlaylistNum" else playlistName
+
         val playlist = Playlist(
-            name = playlistName,
+            name = name,
             type = "playlist",
             owner = Owner(firebaseUser.display_name,firebaseUser.id),
             id = firebaseUser.id
@@ -128,16 +136,24 @@ class YourLibraryViewModel(val firebaseUser: User) : ViewModel() {
 
                 firebaseRepo.db.collection("Playlist")
                     .whereEqualTo("id",firebaseUser.id)
-                    .addSnapshotListener { documents, _ ->
-                        if (documents!=null){
-                            for (doc in documents){
+                    .get()
+                    .addOnCompleteListener{ documents ->
+                        if (documents!=null && documents.isSuccessful){
+                            for (doc in documents.result.documents){
                                 playlist.id = doc.id
+
                                 firebaseRepo.db.collection("Playlist")
                                     .document(doc.id)
                                     .set(playlist)
+                                    .addOnCompleteListener {
 
-                                firebaseRepo.followObject(firebaseUser.id,doc.id, Type.PLAYLIST)
-                                displayPlaylistDetails(playlist)
+                                        firebaseRepo.followObject(
+                                            firebaseUser.id,
+                                            doc.id,
+                                            Type.PLAYLIST
+                                        )
+                                        displayPlaylistDetails(playlist)
+                                    }
                             }
                         }
                     }
