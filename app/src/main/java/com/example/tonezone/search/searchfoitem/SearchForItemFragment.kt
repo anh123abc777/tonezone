@@ -208,6 +208,7 @@ class SearchForItemFragment : Fragment() {
 //        binding.chipGroup.albumData = viewModel.searchedItems.value?.albums ?: Albums(listOf())
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
         binding.chipGroup.allType.isChecked = true
+        binding.chipGroup.filterTypeChipGroup.isSelectionRequired = true
 
         viewModel.searchedItems.observe(viewLifecycleOwner) {
             if (it != null && playlistID==null && viewModel.searchKey.value.toString()!="") {

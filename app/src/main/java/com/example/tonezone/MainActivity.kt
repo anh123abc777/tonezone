@@ -80,14 +80,7 @@ class MainActivity : AppCompatActivity() {
         setupPlayerNotification()
         handleLogin()
         setupSeekbar()
-        observeSomething()
 
-    }
-
-    private fun observeSomething(){
-        playerViewModel.isShuffling.observe(this){
-            Toast.makeText(this,"$it",Toast.LENGTH_SHORT).show()
-        }
     }
 
 

@@ -21,7 +21,7 @@
         android:id="@+id/filter_type_chip_group"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        style="@style/Widget.MaterialComponents.Chip.Filter"
+        style="@style/Widget.MaterialComponents.Chip.Choice"
         >
 
         <com.google.android.material.chip.Chip
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/all"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
             sizeList="@{playlistData.items.size()+artistData.items.size() +trackData.items.size() + albumData.items.size()}"
             />
 <!--        android:onClick="@{() -> viewModel.filterType(type.All)}"-->
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/playlist"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
             sizeList="@{playlistData.items.size()}"
             />
 
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/artist"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
             sizeList="@{artistData.items.size()}"
             />
 <!--        android:onClick="@{() -> viewModel.filterType(type.Artist)}"-->
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:text="@string/album"
             android:background="@color/white"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
             sizeList="@{albumData.items.size()}"
             />
 
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:text="@string/song"
             android:background="@color/white"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
             sizeList="@{trackData.items.size()}"
             />
 

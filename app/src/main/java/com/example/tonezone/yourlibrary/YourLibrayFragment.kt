@@ -128,6 +128,7 @@ class YourLibraryFragment : Fragment() {
     private fun bindChipGroup() {
         binding.chipGroup.filterTypeChipGroup.isSingleSelection = true
         binding.chipGroup.allType.isChecked = true
+        binding.chipGroup.filterTypeChipGroup.isSelectionRequired = true
 
         viewModel.dataItems.observe(viewLifecycleOwner) {
             binding.chipGroup.playlistData = Playlists(it.filter { it.typeName == "playlist" }.map { (it as LibraryAdapter.DataItem.PlaylistItem).playlist })
@@ -138,24 +139,40 @@ class YourLibraryFragment : Fragment() {
 
         binding.chipGroup.filterTypeChipGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
-                R.id.all_type -> viewModel.filterType(TypeItemLibrary.All)
-                R.id.playlist_type -> viewModel.filterType(TypeItemLibrary.Playlist)
-                R.id.artist_type -> viewModel.filterType(TypeItemLibrary.Artist)
-                R.id.albums_type -> viewModel.filterType(TypeItemLibrary.Album)
-                else -> viewModel.filterType(TypeItemLibrary.All)
+                R.id.all_type -> {
+                    viewModel.filterType(TypeItemLibrary.All)
+
+                }
+                R.id.playlist_type -> {
+                    viewModel.filterType(TypeItemLibrary.Playlist)
+                }
+                R.id.artist_type -> {
+                    viewModel.filterType(TypeItemLibrary.Artist)
+                }
+                R.id.albums_type -> {
+                    viewModel.filterType(TypeItemLibrary.Album)
+                }
+                else -> {
+                    viewModel.filterType(TypeItemLibrary.All)
+                }
             }
         }
     }
 
     private fun setupSearchBar() {
+        var initSearchBar = 0
         binding.searchBar.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
             override fun onTextChanged(query: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 if(query!=null && query.toString()!="") {
+                        initSearchBar = 1
                     (binding.yourLibraryList.adapter as LibraryAdapter).filterQuery(query.toString())
-                }
+                }else
+                    if (initSearchBar!=0)
+                        (binding.yourLibraryList.adapter as LibraryAdapter).filterQuery(query.toString())
+
             }
 
             override fun afterTextChanged(p0: Editable?) {
