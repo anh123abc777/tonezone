@@ -12,6 +12,8 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -233,6 +235,40 @@ class FirebaseRepository {
 //                .set(playlist, SetOptions.merge())
 //        }
 //    }
+
+    fun getRecentPlaylists(user: User): MutableLiveData<GroupPlaylist>{
+
+        val mutableLiveData = MutableLiveData<GroupPlaylist>()
+        db.collection("User")
+            .document(user.id)
+            .collection("History")
+            .whereEqualTo("type",Type.PLAYLIST)
+            .addSnapshotListener { value, error ->
+                if (value != null && !value.isEmpty()) {
+                    val result = value.toObjects(FirebaseRepository.History::class.java)
+
+                    val playlistIDs = mutableListOf<String>()
+                    result.forEach { item ->
+                        if (playlistIDs.size <= 10 && !playlistIDs.contains(item.id)) {
+                            playlistIDs.add(item.id)
+                        }
+                    }
+
+                    db.collection("Playlist")
+                        .whereIn("id", playlistIDs)
+                        .addSnapshotListener { result,_ ->
+                            if (result != null && !result.isEmpty) {
+                                val playlists = result.toObjects(Playlist::class.java)
+                                val group = GroupPlaylist("Recently Playlist", playlists)
+                                mutableLiveData.value = group
+                                }
+                            }
+                        }
+                }
+        return mutableLiveData
+
+    }
+
 
     fun removeTrackFromPlaylist(playlistID: String, trackID: String){
 
@@ -1160,12 +1196,13 @@ class FirebaseRepository {
         val groupPlaylists = MutableLiveData<List<GroupPlaylist>>()
         db.collection("System")
             .document("SystemTopic")
-            .addSnapshotListener { results, _ ->
+            .get()
+            .addOnSuccessListener{ results ->
+
+                val topic = results.data
+                val availableList = mutableListOf<GroupPlaylist>()
+
                 if (results != null) {
-
-                    val topic = results.data
-                    val availableList = mutableListOf<GroupPlaylist>()
-
                     topic!!.keys.forEach {
                         db.collection("Playlist")
                             .whereIn("id", topic[it] as List<String>)
@@ -1194,14 +1231,257 @@ class FirebaseRepository {
                                     )
                                     groupPlaylists.value = availableList
                                 }
-
                             }
+
                     }
                 }
+                getRecommendedPlaylists(user,groupPlaylists,availableList)
+                getRecentPlaylists(user,groupPlaylists,availableList)
+                getYourArtists(user,groupPlaylists,availableList)
+                getRelateArtists(user,groupPlaylists,availableList)
             }
 
         return groupPlaylists
     }
+
+    private fun getRecommendedPlaylists(user: User,
+                                        _groupPlaylists: MutableLiveData<List<GroupPlaylist>>,
+                                        availableList: MutableList<GroupPlaylist>){
+
+        db.collection("User")
+            .document(user.id)
+            .collection("Recommendation")
+            .get()
+            .addOnSuccessListener { docs ->
+                if (docs != null && !docs.isEmpty) {
+                    val playlists = docs.toObjects(Playlist::class.java)
+                    availableList.add(
+                        GroupPlaylist(
+                            "Mix for you",
+                            playlists
+                        )
+                    )
+                    _groupPlaylists.value = availableList
+
+                }
+            }
+    }
+
+    private fun getRecentPlaylists(user: User,
+                                   _groupPlaylists: MutableLiveData<List<GroupPlaylist>>,
+                                   availableList: MutableList<GroupPlaylist>){
+        db.collection("User")
+            .document(user.id)
+            .collection("History")
+            .whereEqualTo("type",Type.PLAYLIST)
+            .get()
+            .addOnSuccessListener{ value ->
+                if (value != null && !value.isEmpty) {
+                    val result = value.toObjects(FirebaseRepository.History::class.java)
+
+                    val playlistIDs = mutableListOf<String>()
+                    result.forEach { item ->
+                        if (playlistIDs.size <= 10 && !playlistIDs.contains(item.id)) {
+                            playlistIDs.add(item.id)
+                        }
+                    }
+
+                    db.collection("Playlist")
+                        .whereIn("id", playlistIDs)
+                        .get()
+                        .addOnSuccessListener{ result ->
+                            if (result != null && !result.isEmpty) {
+                                val playlists = result.toObjects(Playlist::class.java)
+                                val group = GroupPlaylist("Recent Playlists", playlists)
+
+                                val recentlyPlayedPlaylists =
+                                    availableList.find { it.title == "Recent playlist" }
+//
+                                if (recentlyPlayedPlaylists != null) {
+                                    availableList[availableList.indexOf(recentlyPlayedPlaylists)]
+                                        .playlists = playlists
+                                    _groupPlaylists.value = availableList
+                                }
+                                else {
+                                    availableList.add(group)
+                                    _groupPlaylists.value = availableList
+
+                                }
+
+                            }
+                        }
+                }
+            }
+
+    }
+
+    private fun getYourArtists(user: User,
+                               _groupPlaylists: MutableLiveData<List<GroupPlaylist>>,
+                               availableList: MutableList<GroupPlaylist>){
+        db.collection("User")
+            .document(user.id)
+            .collection("Followed")
+            .get()
+            .addOnSuccessListener{ items ->
+                if (items != null) {
+                    val artistIDGroups = subList(
+                        items.toObjects(FollowedObject::class.java)
+                            .filter { it.type == Type.ARTIST.name }.map { it.id })
+                    val listData = mutableListOf<Artist>()
+                    artistIDGroups.forEach { artistIDs ->
+
+                        db.collection("Artist")
+                            .whereIn("id", artistIDs)
+                            .get()
+                            .addOnSuccessListener{ documents ->
+                                if (documents != null) {
+                                    listData += documents.toObjects(Artist::class.java)
+                                    val artists = convertArtistsToPlaylists(listData)
+
+                                    val group = GroupPlaylist("Your favorite artists", artists)
+
+                                    val recentlyPlayedPlaylists =
+                                        availableList.find { it.title == "Your favorite artists" }
+
+                                    if (recentlyPlayedPlaylists != null) {
+                                        availableList[availableList.indexOf(recentlyPlayedPlaylists)]
+                                            .playlists = artists
+                                        _groupPlaylists.value = availableList
+                                    } else {
+                                        availableList.add(group)
+                                        _groupPlaylists.value = availableList
+
+                                    }
+
+                                }
+                            }
+                    }
+                }
+            }
+    }
+
+    private fun getRelateArtists(user: User,
+                                 _groupPlaylists: MutableLiveData<List<GroupPlaylist>>,
+                                 availableList: MutableList<GroupPlaylist>){
+
+        runBlocking(Dispatchers.IO) {
+            db.collection("User")
+                .document(user.id)
+                .collection("Followed")
+                .get()
+                .addOnSuccessListener { docs ->
+                    if (docs != null && !docs.isEmpty()) {
+
+                        //get id's artists was followed
+                        val artistIds = subList(docs.toObjects(FollowedObject::class.java).filter { it.type=="ARTIST"}.map { it.id })
+
+                        artistIds.forEach { ids ->
+                            db.collection("Artist")
+                                .whereIn("id", ids)
+                                .get()
+                                .addOnSuccessListener { results ->
+                                    if (results != null && !results.isEmpty) {
+                                        val artists = results.toObjects(Artist::class.java)
+
+                                        //create userProfiles array for calculate cosines similarity
+                                        val userProfiles = createUserProfile(artists)
+                                        val genres = createGenres(artists)
+                                        val itemProfiles = createItemProfile(artists,genres)
+
+                                        val sortedMap = calculateArtistsCosineSimilarity(userProfiles,itemProfiles,genres)
+                                        getArtistsBaseOnRelateGenres(_groupPlaylists,availableList,sortedMap,artists)
+                                    }
+                                }
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun getArtistsBaseOnRelateGenres(
+        _groupPlaylists: MutableLiveData<List<GroupPlaylist>>,
+        availableList: MutableList<GroupPlaylist>
+        ,sortedMap: Map<String,Double>, artists: List<Artist>){
+        db.collection("Artist")
+            .whereArrayContainsAny("genres",
+                sortedMap.keys.toList().subList(0,3))
+            .get()
+            .addOnSuccessListener { results ->
+                if (results!=null && !results.isEmpty){
+                    val relateArtists = results.toObjects(Artist::class.java)
+                    artists.forEach {
+                        relateArtists.remove(it)
+                    }
+                    relateArtists.sortByDescending { it.followers?.total }
+
+                    availableList.add(GroupPlaylist("Recommended artists",
+                        convertArtistsToPlaylists(relateArtists.subList(0,8))))
+                    _groupPlaylists.value = availableList
+                }
+            }
+    }
+
+    private fun createUserProfile(artists: List<Artist>): DoubleArray{
+        val userProfiles = arrayListOf<Double>()
+        artists.forEach { artist ->
+            userProfiles.add(
+                (artist.followers?.total?.toDouble() ?: 1.0)
+            )
+        }
+        // calculate value of each item in userProfile to decrease the value
+        val average = userProfiles.average()
+        userProfiles.onEach { it / average }
+        return userProfiles.toDoubleArray()
+    }
+
+    private fun createItemProfile(artists: List<Artist>,genres: MutableList<String>): Array<Array<Double>>{
+
+        //create itemProfiles array for calculate cosines similarity
+        val itemProfiles = Array(genres.size) { Array(artists.size) { 0.0 } }
+
+        genres.forEachIndexed { genreIndex, genre ->
+            artists.forEachIndexed { artistIndex, artist ->
+                if (artist.genres != null && artist.genres.contains(genre))
+                    itemProfiles[genreIndex][artistIndex] = 1.0
+            }
+        }
+        return itemProfiles
+    }
+
+    private fun createGenres(artists: List<Artist>): MutableList<String>{
+        val genres = mutableListOf<String>()
+        artists.forEach { artist ->
+            if (artist.genres != null) {
+                artist.genres.forEach { genre ->
+                    if (!genres.contains(genre))
+                        genres.add(genre)
+                }
+            }
+        }
+        return genres
+    }
+
+    private fun calculateArtistsCosineSimilarity(
+        userProfiles: DoubleArray,
+        itemProfiles: Array<Array<Double>>,
+        label: MutableList<String>
+    ): Map<String, Double> {
+        //calculate cosine similarity of each genre
+        val cosineSimilarityArray = itemProfiles.map {
+            cosineSimilarity(
+                it.toDoubleArray(),
+                userProfiles
+            )
+        }
+
+        val unsortMap = mutableMapOf<String, Double>()
+        cosineSimilarityArray.forEachIndexed { index, value ->
+            unsortMap[label[index]] = value
+        }
+
+        return sortByValue(unsortMap.toMap())
+    }
+
 
     /** Recommendation **/
     fun getRelateArtist(id: String?): MutableLiveData<List<Artist>>{
