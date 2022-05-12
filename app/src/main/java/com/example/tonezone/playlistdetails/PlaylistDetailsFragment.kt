@@ -37,7 +37,7 @@ class PlaylistDetailsFragment : Fragment() {
     private lateinit var playlistInfo : PlaylistInfo
 
     private val viewModel: PlaylistDetailsViewModel by viewModels {
-        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,
+        PlaylistDetailsViewModelFactory(playlistInfo,
              mainViewModel.firebaseAuth.value!!
         )
     }

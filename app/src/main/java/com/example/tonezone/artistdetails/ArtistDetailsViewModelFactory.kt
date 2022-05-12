@@ -8,12 +8,11 @@ import com.google.firebase.auth.FirebaseUser
 
 @Suppress("UNCHECKED_CAST")
 class ArtistDetailsViewModelFactory(
-    val token: String,
     val playlistInfo: PlaylistInfo,
     val user: FirebaseUser): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(ArtistDetailsViewModel::class.java))
-            return ArtistDetailsViewModel(token,playlistInfo,user) as T
+            return ArtistDetailsViewModel(playlistInfo,user) as T
         throw IllegalArgumentException("Unknown VM class")
     }
 }

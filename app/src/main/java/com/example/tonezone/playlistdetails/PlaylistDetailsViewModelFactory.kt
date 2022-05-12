@@ -7,14 +7,13 @@ import com.example.tonezone.network.User
 import com.google.firebase.auth.FirebaseUser
 
 @Suppress("UNCHECKED_CAST")
-class PlaylistDetailsViewModelFactory
-    (val token: String,
+class PlaylistDetailsViewModelFactory(
      val playlistInfo: PlaylistInfo,
      private val firebaseUser: FirebaseUser
      ): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(PlaylistDetailsViewModel::class.java))
-            return PlaylistDetailsViewModel(token,playlistInfo,firebaseUser) as T
+            return PlaylistDetailsViewModel(playlistInfo,firebaseUser) as T
         throw IllegalArgumentException("Unknown VM class")
     }
 }

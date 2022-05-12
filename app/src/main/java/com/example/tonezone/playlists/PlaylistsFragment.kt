@@ -28,11 +28,11 @@ class PlaylistsFragment : Fragment() {
     }
 
     private val viewModel: PlaylistsViewModel by viewModels {
-        PlaylistsViewModelFactory(mainViewModel.token, playlistInfo)
+        PlaylistsViewModelFactory( playlistInfo)
     }
 
     private val artistViewModel: ArtistDetailsViewModel by viewModels {
-        ArtistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.firebaseAuth.value!!)
+        ArtistDetailsViewModelFactory(playlistInfo,mainViewModel.firebaseAuth.value!!)
     }
 
     override fun onCreateView(

@@ -12,7 +12,6 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.*
 
 class ArtistDetailsViewModel(
-    val token: String,
     val playlistInfo: PlaylistInfo,
     val user: FirebaseUser): ViewModel() {
 
@@ -54,92 +53,92 @@ class ArtistDetailsViewModel(
     private val uiScope = CoroutineScope(job + Dispatchers.Main)
 
     init {
-        getArtistProfile()
-        getArtistAlbumsData()
+//        getArtistProfile()
+//        getArtistAlbumsData()
 //        checkIsFollowingArtist()
-        getRelatedArtists()
-        getArtistTopTracks()
+//        getRelatedArtists()
+//        getArtistTopTracks()
     }
 
-    private fun getArtistTopTracks() {
-        uiScope.launch {
-            try {
-                val artistTopTracksDeferred = ToneApi.retrofitService
-                    .getArtistTopTracksAsync(
-                        "Bearer $token",
-                        playlistInfo.id,
-                        "VN"
-                    )
-                artistTopTracksDeferred.tracks!!
-//                firebaseRepo.insertTracks(artistTopTracksDeferred.tracks!!)
-            } catch (e: Exception) {
-                Log.i("error", e.message!!)
-            }
-        }
-    }
+//    private fun getArtistTopTracks() {
+//        uiScope.launch {
+//            try {
+//                val artistTopTracksDeferred = ToneApi.retrofitService
+//                    .getArtistTopTracksAsync(
+//                        "Bearer $token",
+//                        playlistInfo.id,
+//                        "VN"
+//                    )
+//                artistTopTracksDeferred.tracks!!
+////                firebaseRepo.insertTracks(artistTopTracksDeferred.tracks!!)
+//            } catch (e: Exception) {
+//                Log.i("error", e.message!!)
+//            }
+//        }
+//    }
 
-    private fun getRelatedArtists(){
-        uiScope.launch {
-            try {
-                val relatedArtist = ToneApi.retrofitService
-                    .getRelatedArtists(
-                        "Bearer $token",
-                        playlistInfo.id
-                    ).artists
-                Log.i("relatedArtists","$relatedArtist")
-//                relatedArtist?.let { firebaseRepo.insertArtists(it) }
-            } catch (e: Exception) {
-                Log.i("error", "$e")
-            }
-        }
-    }
+//    private fun getRelatedArtists(){
+//        uiScope.launch {
+//            try {
+//                val relatedArtist = ToneApi.retrofitService
+//                    .getRelatedArtists(
+//                        "Bearer $token",
+//                        playlistInfo.id
+//                    ).artists
+//                Log.i("relatedArtists","$relatedArtist")
+////                relatedArtist?.let { firebaseRepo.insertArtists(it) }
+//            } catch (e: Exception) {
+//                Log.i("error", "$e")
+//            }
+//        }
+//    }
 
-    private fun getArtistProfile(){
-        uiScope.launch {
-               try {
-                   _artist.value = ToneApi.retrofitService
-                       .getArtist(
-                           "Bearer $token",
-                           playlistInfo.id)
-//                   firebaseRepo.insertArtist(_artist.value!!)
-                   Log.i("getArtist","Failure ${_artist.value}")
-               }catch (e: Exception){
-                   Log.i("getArtist","Failure $e")
+//    private fun getArtistProfile(){
+//        uiScope.launch {
+//               try {
+//                   _artist.value = ToneApi.retrofitService
+//                       .getArtist(
+//                           "Bearer $token",
+//                           playlistInfo.id)
+////                   firebaseRepo.insertArtist(_artist.value!!)
+//                   Log.i("getArtist","Failure ${_artist.value}")
+//               }catch (e: Exception){
+//                   Log.i("getArtist","Failure $e")
+//
+//               }
+//        }
+//    }
 
-               }
-        }
-    }
+//    private fun getArtistAlbumsData(){
+//        uiScope.launch {
+//            try {
+//                _artistAlbums.value = ToneApi.retrofitService
+//                    .getArtistAlbums("Bearer $token",
+//                    playlistInfo.id).items
+////                    firebaseRepo.insertAlbums(_artistAlbums.value!!)
+//                Log.i("artistAlbums","${_artistAlbums.value}")
+//
+//            }catch (e: Exception){
+//
+//            }
+//        }
+//    }
 
-    private fun getArtistAlbumsData(){
-        uiScope.launch {
-            try {
-                _artistAlbums.value = ToneApi.retrofitService
-                    .getArtistAlbums("Bearer $token",
-                    playlistInfo.id).items
-//                    firebaseRepo.insertAlbums(_artistAlbums.value!!)
-                Log.i("artistAlbums","${_artistAlbums.value}")
-
-            }catch (e: Exception){
-
-            }
-        }
-    }
-
-    private fun checkIsFollowingArtist(){
-        uiScope.launch {
-            _isFollowingArtist.value =
-                try {
-                    ToneApi.retrofitService
-                        .checkUserIsFollowingArtist(
-                            "Bearer $token",
-                            playlistInfo.id
-                        )[0]
-                }catch (e: Exception){
-                    Log.i("isFollowingArtist","Failure $e")
-                    false
-                }
-        }
-    }
+//    private fun checkIsFollowingArtist(){
+//        uiScope.launch {
+//            _isFollowingArtist.value =
+//                try {
+//                    ToneApi.retrofitService
+//                        .checkUserIsFollowingArtist(
+//                            "Bearer $token",
+//                            playlistInfo.id
+//                        )[0]
+//                }catch (e: Exception){
+//                    Log.i("isFollowingArtist","Failure $e")
+//                    false
+//                }
+//        }
+//    }
 
     fun changeStateFollowArtist(){
         if(_isFollowingArtist.value != true){

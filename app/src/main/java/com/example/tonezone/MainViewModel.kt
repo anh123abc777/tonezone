@@ -19,8 +19,6 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(private val activity: Activity): ViewModel() {
 
-    var token = ""
-
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val _firebaseAuth = MutableLiveData<FirebaseUser?>()
     val firebaseAuth: LiveData<FirebaseUser?>
@@ -31,10 +29,6 @@ class MainViewModel(private val activity: Activity): ViewModel() {
     val firebaseUser: LiveData<User>
         get() = _firebaseUser
 
-
-    private val _user = MutableLiveData<User>()
-    val user : LiveData<User>
-        get() = _user
 
     private val builder =
         AuthorizationRequest.Builder(
@@ -61,32 +55,32 @@ class MainViewModel(private val activity: Activity): ViewModel() {
         _firebaseUser = firebaseRepo.getUserProfile(_firebaseAuth.value!!.uid)
     }
 
-    fun initAuthorization(){
-        builder.setScopes(arrayOf("streaming",
-            "playlist-read-private",
-            "playlist-read-collaborative",
-            "user-follow-read",
-            "user-library-read",
-            "playlist-modify-private",
-            "playlist-modify-public",
-            "user-library-modify",
-            "user-follow-modify",
-        ))
-        val request = builder.build()
+//    fun initAuthorization(){
+//        builder.setScopes(arrayOf("streaming",
+//            "playlist-read-private",
+//            "playlist-read-collaborative",
+//            "user-follow-read",
+//            "user-library-read",
+//            "playlist-modify-private",
+//            "playlist-modify-public",
+//            "user-library-modify",
+//            "user-follow-modify",
+//        ))
+//        val request = builder.build()
+//
+//        AuthorizationClient.openLoginActivity(activity, REQUEST_CODE, request)
+//
+//    }
 
-        AuthorizationClient.openLoginActivity(activity, REQUEST_CODE, request)
-
-    }
-
-    fun getCurrentUserProfileData(){
-        viewModelScope.launch {
-            _user.value = try {
-                ToneApi.retrofitService.getCurrentUserProfile("Bearer $token")
-            }catch (e: Exception){
-                User()
-            }
-        }
-    }
+//    fun getCurrentUserProfileData(){
+//        viewModelScope.launch {
+//            _user.value = try {
+//                ToneApi.retrofitService.getCurrentUserProfile("Bearer $token")
+//            }catch (e: Exception){
+//                User()
+//            }
+//        }
+//    }
 
     fun logout(){
         auth.signOut()

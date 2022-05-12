@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import java.lang.IllegalArgumentException
 
 @Suppress("UNCHECKED_CAST")
-class SearchViewModelFactory(val token: String): ViewModelProvider.Factory {
+class SearchViewModelFactory(): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(SearchViewModel::class.java))
-            return SearchViewModel(token) as T
+            return SearchViewModel() as T
         throw IllegalArgumentException("Unknown VM class")
     }
 }

@@ -185,3 +185,22 @@ fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observ
     })
 }
 
+fun sublistByDay(list: List<FirebaseRepository.History>): List<List<FirebaseRepository.History>>{
+
+    val days = MutableList(7){mutableListOf<FirebaseRepository.History>()}
+    list.forEach { history ->
+        if (history.type == Type.TRACK)
+            days[history.date-1].add(history)
+    }
+//
+//    var i = 0
+//    while(i< days.size){
+//        if(days[i].isEmpty()){
+//            days.remove(days[i])
+//        }else{
+//            i++
+//        }
+//    }
+    return days
+}
+

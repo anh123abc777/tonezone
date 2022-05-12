@@ -9,7 +9,7 @@ import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.ToneApi
 import kotlinx.coroutines.*
 
-class SearchViewModel(private val token: String) : ViewModel() {
+class SearchViewModel() : ViewModel() {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)

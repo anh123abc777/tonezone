@@ -23,7 +23,7 @@ class HomeFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val viewModel: HomeViewModel by viewModels {
-        HomeViewModelFactory(mainViewModel.token, mainViewModel.firebaseUser.value!!)
+        HomeViewModelFactory(mainViewModel.firebaseUser.value!!)
     }
 
     override fun onCreateView(

@@ -8,13 +8,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.tonezone.MainViewModel
+import com.example.tonezone.MainViewModelFactory
 import com.example.tonezone.databinding.FragmentPlayerScreenBinding
 import com.example.tonezone.network.Track
 
 class PlayerScreenFragment : Fragment() {
 
     private lateinit var binding: FragmentPlayerScreenBinding
-    private val mainViewModel : MainViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels {
+        MainViewModelFactory(requireActivity())
+    }
     private val viewModel: PlayerScreenViewModel by activityViewModels{
         PlayerScreenViewModelFactory(requireNotNull(activity).application,mainViewModel.firebaseAuth.value)
     }

@@ -13,15 +13,12 @@ import com.example.tonezone.R
 
 class SplashScreenFragment : Fragment() {
 
-    private val mainViewModel: MainViewModel by activityViewModels {
-        MainViewModelFactory(requireActivity())
-    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
-        mainViewModel.initAuthorization()
         return inflater.inflate(R.layout.fragment_splash_screen, container, false)
     }
 

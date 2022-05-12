@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 import java.util.*
 
 
-class HomeViewModel(val token: String, val user: User) : ViewModel() {
+class HomeViewModel(val user: User) : ViewModel() {
 
     private val firebaseRepo = FirebaseRepository()
 
@@ -33,8 +33,7 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
         getRelateArtists()
         getYourArtists()
         getRecentlyPlaylists()
-//        getRecommendedTracks()
-//        getGroupPlaylistsData()
+        getRecommendedTracks()
     }
 
      fun displayPlaylistDetails(playlistInfo: PlaylistInfo){
@@ -46,39 +45,38 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
         _navigateToPlaylistDetails.value = null
     }
 
-    fun getRecommendedTracks(){
+    private fun getRecommendedTracks(){
         val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
 
-        firebaseRepo.db.collection("Recommendation")
+        firebaseRepo.db.collection("User")
             .document(user.id)
+            .collection("Recommendation")
             .get()
             .addOnSuccessListener { docs ->
-                if (docs != null && docs.exists()) {
-                    val tracks = docs.data
-                    Log.i("HomeViewModel","ys $tracks")
+                if (docs != null && !docs.isEmpty) {
+                    val playlists = docs.toObjects(Playlist::class.java)
+
                     val temp = mutableListOf<GroupPlaylist>()
-                    temp.addAll(_groupPlaylists.value?: listOf())
-                    temp.add(GroupPlaylist("Mix for you",
-                        listOf(Playlist(id="Day$today",
-                        "Mix for ${user.display_name}",
-                                name = "Mix #$today"
-                            ))))
+                    temp += _groupPlaylists.value?: listOf()
+                    temp.add(GroupPlaylist("Mix for you",playlists))
                     _groupPlaylists.value = temp
                 }
             }
     }
 
     private fun getRecentlyPlaylists(){
-        firebaseRepo.db.collection("History")
+        firebaseRepo.db.collection("User")
             .document(user.id)
+            .collection("History")
+            .whereEqualTo("type",Type.PLAYLIST)
             .addSnapshotListener { value, error ->
-                if (value != null && value.exists() && value.get("playlists") != null) {
-                    val result = value.get("playlists") as List<HashMap<*, *>>
+                if (value != null && !value.isEmpty()) {
+                    val result = value.toObjects(FirebaseRepository.History::class.java)
 
                     val playlistIDs = mutableListOf<String>()
                     result.forEach { item ->
-                        if (playlistIDs.size <= 10 && !playlistIDs.contains(item["id"])) {
-                            playlistIDs.add(item["id"].toString())
+                        if (playlistIDs.size <= 10 && !playlistIDs.contains(item.id)) {
+                            playlistIDs.add(item.id)
                         }
                     }
 
@@ -105,10 +103,6 @@ class HomeViewModel(val token: String, val user: User) : ViewModel() {
                                     temp.add(group)
                                     _groupPlaylists.value = temp
 
-//                                    groupPlaylists.postValue(
-//                                        groupPlaylists.value?.plus(group)
-//                                    )
-//                                        _groupPlaylists.value = _groupPlaylists.value?.plus(group)
                                 }
                             }
                         }

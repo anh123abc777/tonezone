@@ -40,13 +40,13 @@ class ArtistDetailsFragment : Fragment() {
     }
 
     private val playlistDetailsViewModel: PlaylistDetailsViewModel by viewModels {
-        PlaylistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.firebaseAuth.value!!)
+        PlaylistDetailsViewModelFactory(playlistInfo,mainViewModel.firebaseAuth.value!!)
     }
 
     private val playerViewModel: PlayerScreenViewModel by activityViewModels()
 
     private val viewModel: ArtistDetailsViewModel by viewModels {
-        ArtistDetailsViewModelFactory(mainViewModel.token,playlistInfo,mainViewModel.firebaseAuth.value!!)
+        ArtistDetailsViewModelFactory(playlistInfo,mainViewModel.firebaseAuth.value!!)
     }
 
     private val modalBottomSheetViewModel: ModalBottomSheetViewModel by activityViewModels()

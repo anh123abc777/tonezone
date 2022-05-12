@@ -7,10 +7,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.utils.*
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.SetOptions
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -273,6 +271,13 @@ class FirebaseRepository {
             .delete()
 
         unfollowObject(userID,id)
+    }
+
+    private fun createPlaylist(playlist: Playlist): Task<Void> {
+
+        return db.collection("Playlist")
+            .document()
+            .set(playlist)
     }
 
     fun createPlaylist(name: String,user: User): Playlist {
@@ -1128,7 +1133,7 @@ class FirebaseRepository {
 
 
 //
-//    fun insertCategories(categories: List<Category>){
+//    fun uploadCategories(categories: List<Category>){
 //        categories.forEach { category ->
 //            db.collection("Category")
 //                .document(category.id!!)
@@ -1136,7 +1141,7 @@ class FirebaseRepository {
 //        }
 //    }
 //
-//    fun insertItemsToCategory(categoryID: String,playlistIDs: List<String>){
+//    fun uploadToCategoryItems(categoryID: String,playlistIDs: List<String>){
 //        db.collection("Category")
 //            .document(categoryID)
 //            .set(hashMapOf("playlists" to playlistIDs), SetOptions.merge())
@@ -1230,30 +1235,13 @@ class FirebaseRepository {
 
 
     fun saveHistory(userID: String,trackID: String,score: Double, type: Type){
-        val field = convertTypeToField(type)
         val currentTime = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-        val newHistory = hashMapOf("id" to trackID, "date" to currentTime.toString(), "score" to score )
-        db.collection("History")
+        val newHistory = hashMapOf("id" to trackID, "date" to currentTime, "score" to score, "type" to type )
+        db.collection("User")
             .document(userID)
-            .addSnapshotListener { result, error ->
-
-                if (!result!!.exists()){
-                    db.collection("History")
-                        .document(userID)
-                        .set(hashMapOf(field to listOf(newHistory)))
-
-                }else{
-                    db.collection("History")
-                        .document(userID)
-                        .update(field,FieldValue.arrayUnion(newHistory))
-                        .addOnFailureListener {
-                            db.collection("History")
-                                .document(userID)
-                                .set(hashMapOf(field to listOf(newHistory)))
-                        }
-
-                }
-            }
+            .collection("History")
+            .document()
+            .set(newHistory)
     }
 
      fun getRecommendedTracks(userID: String): MutableLiveData<List<Track>>{
@@ -1272,59 +1260,93 @@ class FirebaseRepository {
          return trackObserves
     }
 
+    data class History(
+        val id: String = "",
+        val date: Int = 0,
+        val score: Double = 0.0,
+        val type: Type = Type.TRACK
+    )
+
     fun putRecommendedTracks(userId: String, lifecycleOwner: LifecycleOwner){
-        db.collection("History")
+        db.collection("User")
             .document(userId)
+            .collection("History")
+            .whereEqualTo("type",Type.TRACK.name)
             .get()
             .addOnSuccessListener { docs ->
-                if (docs!=null && docs.exists()){
+                if (docs != null && !docs.isEmpty) {
 
-                    val recentlyPlayedInformation = (docs["tracks"] as List<HashMap<String,*>>)
-                        .map { Pair(it["id"].toString(),it["score"].toString().toDouble()) }.sortedBy { it.toString() }
+                    val histories = docs.toObjects(History::class.java)
+                    val days = sublistByDay(histories)
 
-                    val recentlyPlayedIds = recentlyPlayedInformation.map { it.first }
-                    val recentlyPlayedTrackIdsSublist = subList(recentlyPlayedIds)
+                    val day = days[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]
 
-                    val userProfiles = recentlyPlayedInformation.map { it.second }.toDoubleArray()
+                    if (day.isNotEmpty() && day.size>10) {
+                        val recentlyPlayedIds = day.map { it.id }
+                        val recentlyPlayedTrackIdsSublist = subList(recentlyPlayedIds)
 
-                    val tracksObserver = MutableLiveData<List<Track>>()
-                    val trackData = mutableListOf<Track>()
+                        val userProfiles = day.map { it.score }.toDoubleArray()
 
-                    recentlyPlayedTrackIdsSublist.forEachIndexed { index, trackIds ->
-                        db.collection("Track")
-                            .whereIn("id",trackIds)
-                            .get()
-                            .addOnSuccessListener { results ->
-                                if (results!=null && !results.isEmpty){
-                                    val recentlyPlayedTracks = results.toObjects(Track::class.java)
+                        val tracksObserver = MutableLiveData<List<Track>>()
+                        val trackData = mutableListOf<Track>()
 
-                                    trackData.addAll(recentlyPlayedTracks)
-                                    trackData.sortBy { it.id }
-                                    tracksObserver.value = trackData
+                        recentlyPlayedTrackIdsSublist.forEachIndexed { index, trackIds ->
+                            db.collection("Track")
+                                .whereIn("id", trackIds)
+                                .get()
+                                .addOnSuccessListener { results ->
+                                    if (results != null && !results.isEmpty) {
+                                        val recentlyPlayedTracks =
+                                            results.toObjects(Track::class.java)
 
+                                        recentlyPlayedTracks.forEach {
+                                            if (!trackData.contains(it))
+                                                trackData.add(it)
+                                        }
+
+                                        trackData.sortBy { it.id }
+                                        tracksObserver.value = trackData
+
+                                    }
                                 }
-                            }
-                    }
+                        }
 
-                    tracksObserver.observe(lifecycleOwner){ tracks ->
-                        Log.i("FirebaseRepo","${tracks.size} ${recentlyPlayedIds.toSet().toList().size} ${recentlyPlayedIds.size}")
-                        if (tracks!=null && tracks.size == recentlyPlayedIds.toSet().toList().size){
-                            Log.i("FirebaseRepo","${tracks} ")
-                            val artists = createArtistArray(tracks)
+                        tracksObserver.observe(lifecycleOwner) { tracks ->
+                            Log.i(
+                                "FirebaseRepo",
+                                "${tracks.size} ${
+                                    recentlyPlayedIds.toSet().toList().size
+                                } ${recentlyPlayedIds.size}"
+                            )
+                            Log.i("FirebaseRepo","${tracks.map { it.id }}")
+                            if (tracks != null && tracks.size == recentlyPlayedIds.toSet()
+                                    .toList().size
+                            ) {
+                                Log.i("FirebaseRepo", "${tracks} ")
+                                val artists = createArtistArray(tracks)
 //                            val recentlyPlayedTracks = tracks.filter { track -> recentlyPlayedIds.contains(track.id)}
-                            val recentlyPlayedTracks = recentlyPlayedIds.map { id -> tracks.find { it.id==id }?:Track(id = id) }
+                                val recentlyPlayedTracks = recentlyPlayedIds.map { id ->
+                                    tracks.find { it.id == id } ?: Track(id = id)
+                                }
 
-                            val itemProfiles = createTrackProfiles(recentlyPlayedTracks,artists)
+                                val itemProfiles =
+                                    createTrackProfiles(recentlyPlayedTracks, artists)
 
-                            val cosineSimilarityArray = calculateCosineSimilarity(userProfiles, itemProfiles, artists)
+                                val cosineSimilarityArray =
+                                    calculateCosineSimilarity(userProfiles, itemProfiles, artists)
 
-                            postRecommendedTracks(userId,cosineSimilarityArray.keys.toList().subList(0,3))
+                                postRecommendedTracks(
+                                    userId,
+                                    cosineSimilarityArray.keys.toList().subList(0, 3)
+                                )
 
-                            tracksObserver.removeObservers(lifecycleOwner)
+                                tracksObserver.removeObservers(lifecycleOwner)
+                            }
                         }
                     }
                 }
             }
+
     }
 
 
@@ -1333,23 +1355,65 @@ class FirebaseRepository {
             .whereArrayContainsAny("album.artists",topArtists)
             .get()
             .addOnSuccessListener { docs ->
-                Log.i("HomeViewModel","day ${topArtists[1]}")
+                Log.i("HomeViewModel", "day ${topArtists[1]}")
 
-                if (docs!=null && !docs.isEmpty){
+                if (docs != null && !docs.isEmpty) {
                     val recommendedTracks = docs.toObjects(Track::class.java)
 
                     val day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-                    Log.i("HomeViewModel","recommend ${docs.documents}")
-                    recommendedTracks.forEach { track ->
-                    db.collection("Recommendation")
-                        .document(userId)
-                        .collection("Day$day")
-                        .document(track.id)
-                        .set(track)
+                    Log.i("HomeViewModel", "recommend ${docs.documents}")
+
+                    val trackInPlaylists = recommendedTracks.map {
+                        TrackInPlaylist(
+                            it.id,
+                            Calendar.getInstance().get(Calendar.DATE).toString()
+                        )
                     }
+                    val playlist = Playlist(
+                        id = "temp",
+                        tracks = trackInPlaylists,
+                        owner = Owner("ToneZone"),
+                        description = "Mix for you #${day}",
+                        images = recommendedTracks[0].album?.images
+                    )
+                    Log.i("recommendation","$playlist")
+
+
+                    db.collection("Playlist")
+                        .document()
+                        .set(playlist)
+                        .addOnSuccessListener {
+
+                            db.collection("Playlist")
+                                .whereEqualTo("id", playlist.id)
+                                .addSnapshotListener { documents, _ ->
+                                    if (documents != null) {
+                                        for (doc in documents) {
+
+
+                                            playlist.id = doc.id
+                                            db.collection("Playlist")
+                                                .document(doc.id)
+                                                .set(playlist)
+                                                .addOnSuccessListener {
+                                                    db.collection("User")
+                                                        .document(userId)
+                                                        .collection("Recommendation")
+                                                        .document("day${day}")
+                                                        .set(playlist)
+                                                }
+                                        }
+                                    }
+                                }
+                        }
+                    }
+
+
                 }
             }
-    }
+
+
+
 
     private fun calculateCosineSimilarity(
         userProfiles: DoubleArray,

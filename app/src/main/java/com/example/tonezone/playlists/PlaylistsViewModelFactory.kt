@@ -6,12 +6,11 @@ import com.example.tonezone.network.PlaylistInfo
 import java.lang.IllegalArgumentException
 
 @Suppress("UNCHECKED_CAST")
-class PlaylistsViewModelFactory
-    (val token: String,
+class PlaylistsViewModelFactory(
      private val playlistInfo: PlaylistInfo): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(PlaylistsViewModel::class.java))
-            return PlaylistsViewModel(token,playlistInfo) as T
+            return PlaylistsViewModel(playlistInfo) as T
         throw IllegalArgumentException("Unknown VM class")
     }
 }

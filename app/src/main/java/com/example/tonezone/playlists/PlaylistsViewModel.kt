@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.tonezone.network.*
 import kotlinx.coroutines.*
 
-class PlaylistsViewModel(val token: String, val playlistInfo: PlaylistInfo) : ViewModel() {
+class PlaylistsViewModel(val playlistInfo: PlaylistInfo) : ViewModel() {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -17,24 +17,21 @@ class PlaylistsViewModel(val token: String, val playlistInfo: PlaylistInfo) : Vi
     val categoryPlaylists : LiveData<List<Playlist>>
         get() = _categoryPlaylists
 
-    init {
-        getPlaylistsOfCategory()
-    }
-
-    private fun getPlaylistsOfCategory() {
-        uiScope.launch {
-            try {
-                val temp = ToneApi.retrofitService
-                    .getCategoryPlaylistsAsync("Bearer $token", playlistInfo.id).playlists.items!!
-                val playlistIDs = temp.map { it.id!! }
-
-//                firebaseRepo.insertItemsToCategory(playlistInfo.id,playlistIDs)
-//                firebaseRepo.insertPlaylist(temp)
 //
-            } catch (e: Exception) {
-                Log.i("result", e.message!!)
-            }
-        }
-    }
+//    private fun getPlaylistsOfCategory() {
+//        uiScope.launch {
+//            try {
+//                val temp = ToneApi.retrofitService
+//                    .getCategoryPlaylistsAsync("Bearer $token", playlistInfo.id).playlists.items!!
+//                val playlistIDs = temp.map { it.id!! }
+//
+////                firebaseRepo.insertItemsToCategory(playlistInfo.id,playlistIDs)
+////                firebaseRepo.insertPlaylist(temp)
+////
+//            } catch (e: Exception) {
+//                Log.i("result", e.message!!)
+//            }
+//        }
+//    }
 
 }

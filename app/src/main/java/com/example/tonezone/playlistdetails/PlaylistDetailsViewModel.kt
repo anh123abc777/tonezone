@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.*
 
 class PlaylistDetailsViewModel
-    (val token: String, var playlistInfo: PlaylistInfo, val firebaseUser: FirebaseUser) : ViewModel() {
+    ( var playlistInfo: PlaylistInfo, val firebaseUser: FirebaseUser) : ViewModel() {
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(viewModelJob+ Dispatchers.Main)
     private val firebaseRepo = FirebaseRepository()

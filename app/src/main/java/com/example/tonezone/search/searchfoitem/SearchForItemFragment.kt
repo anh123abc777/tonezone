@@ -35,12 +35,10 @@ class SearchForItemFragment : Fragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private val viewModel: SearchForItemViewModel by viewModels {
-        SearchForItemViewModelFactory(mainViewModel.token)
-    }
+    private val viewModel: SearchForItemViewModel by viewModels()
 
     private val playlistViewModel : PlaylistDetailsViewModel by lazy {
-        val factory = PlaylistDetailsViewModelFactory("",PlaylistInfo("","","","",""),mainViewModel.firebaseAuth.value!!)
+        val factory = PlaylistDetailsViewModelFactory(PlaylistInfo("","","","",""),mainViewModel.firebaseAuth.value!!)
         ViewModelProvider(this,factory).get(PlaylistDetailsViewModel::class.java)
     }
 

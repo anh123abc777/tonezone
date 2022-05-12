@@ -18,9 +18,7 @@ class SearchFragment : Fragment() {
 
     private lateinit var binding: FragmentSearchBinding
     private val mainViewModel : MainViewModel by activityViewModels()
-    private val viewModel: SearchViewModel by viewModels{
-        SearchViewModelFactory(mainViewModel.token)
-    }
+    private val viewModel: SearchViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

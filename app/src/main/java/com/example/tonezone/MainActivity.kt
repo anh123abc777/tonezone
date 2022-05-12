@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -49,9 +50,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var notificationManager: NotificationManager
 
-    private val mainViewModel: MainViewModel by viewModels {
-        MainViewModelFactory(this)
-    }
+    private lateinit var mainViewModel: MainViewModel
 
     private val playerViewModel: PlayerScreenViewModel by viewModels()
 
@@ -62,6 +61,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+
+        val factory = MainViewModelFactory(this)
+        mainViewModel = ViewModelProvider(this,factory).get(MainViewModel::class.java)
 
         binding.viewModel = playerViewModel
         binding.lifecycleOwner = this
@@ -273,34 +275,34 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, intent)
 
         // Check if result comes from the correct activity
-        if (requestCode == LoginActivity.REQUEST_CODE) {
-            val response = AuthorizationClient.getResponse(resultCode, intent)
-            when (response.type) {
-                AuthorizationResponse.Type.TOKEN -> {
-                    mainViewModel.token = response.accessToken
-                    mainViewModel.getCurrentUserProfileData()
-                }
-                AuthorizationResponse.Type.ERROR -> {
-                    mainViewModel.token =  "Not Found"
-
-                }
-                else -> {
-                    mainViewModel.token =  "Not Found"
-                }
-            }
-
-            runBlocking(Dispatchers.IO) {
-                repository.clear()
-            }
-
-            runBlocking(Dispatchers.IO) {
-                repository.insert(Token(response.accessToken))
-            }
-        }
+//        if (requestCode == LoginActivity.REQUEST_CODE) {
+//            val response = AuthorizationClient.getResponse(resultCode, intent)
+//            when (response.type) {
+//                AuthorizationResponse.Type.TOKEN -> {
+//                    mainViewModel.token = response.accessToken
+//                    mainViewModel.getCurrentUserProfileData()
+//                }
+//                AuthorizationResponse.Type.ERROR -> {
+//                    mainViewModel.token =  "Not Found"
+//
+//                }
+//                else -> {
+//                    mainViewModel.token =  "Not Found"
+//                }
+//            }
+//
+//            runBlocking(Dispatchers.IO) {
+//                repository.clear()
+//            }
+//
+//            runBlocking(Dispatchers.IO) {
+//                repository.insert(Token(response.accessToken))
+//            }
+//        }
     }
 
     private fun navigateToHome(){
-        mainViewModel.user.observe(this) {
+        mainViewModel.firebaseUser.observe(this) {
             if(it!=null) {
                 navController.popBackStack()
                 navController.navigate(R.id.home)

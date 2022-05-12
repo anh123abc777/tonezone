@@ -13,7 +13,7 @@ import com.example.tonezone.yourlibrary.TypeItemLibrary
 import kotlinx.coroutines.*
 import kotlin.math.abs
 
-class SearchForItemViewModel(val token: String): ViewModel() {
+class SearchForItemViewModel(): ViewModel() {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
