@@ -1206,7 +1206,8 @@ class FirebaseRepository {
                     topic!!.keys.forEach {
                         db.collection("Playlist")
                             .whereIn("id", topic[it] as List<String>)
-                            .addSnapshotListener { documents, _ ->
+                            .get()
+                            .addOnSuccessListener{ documents ->
                                 val listData = mutableListOf<Playlist>()
                                 if (documents != null && !documents.isEmpty) {
                                     for (doc in documents) {
@@ -1220,7 +1221,8 @@ class FirebaseRepository {
 
                         db.collection("Album")
                             .whereIn("id", topic[it] as List<String>)
-                            .addSnapshotListener { documents, _ ->
+                            .get()
+                            .addOnSuccessListener{ documents ->
                                 if (documents != null && !documents.isEmpty) {
                                     val albums = documents.toObjects(Album::class.java)
                                     availableList.add(
@@ -1653,7 +1655,8 @@ class FirebaseRepository {
                         id = "temp",
                         tracks = trackInPlaylists,
                         owner = Owner("ToneZone"),
-                        description = "Mix for you #${day}",
+                        name= "Daily Mix ${day}",
+                        description = getArtistNames(recommendedTracks[0].artists?: listOf()),
                         images = recommendedTracks[0].album?.images
                     )
                     Log.i("recommendation","$playlist")

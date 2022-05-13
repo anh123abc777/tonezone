@@ -48,232 +48,216 @@
             android:id="@+id/bottomSheet"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clickable="true"
             android:elevation="16dp"
+            android:fillViewport="true"
+            android:focusable="true"
             app:behavior_hideable="true"
             app:behavior_peekHeight="0dp"
-            android:fillViewport="true"
-            android:clickable="true"
-            android:background="@{viewModel.darkBackgroundDrawable}"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-            android:focusable="true">
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <fragment
                 android:id="@+id/nav_player"
                 android:name="androidx.navigation.fragment.NavHostFragment"
-                app:navGraph="@navigation/player_nav_graph"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="top"/>
+                android:layout_gravity="top"
+                app:navGraph="@navigation/player_nav_graph" />
 
+
+            <LinearLayout
+                android:id="@+id/player_controller"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="@{viewModel.backgroundController}"
+                android:orientation="vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="@{viewModel.isLongPress}">
 
                 <LinearLayout
-                    android:id="@+id/player_controller"
+                    android:id="@+id/fullSeekBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_gravity="bottom"
-                    android:background="@{viewModel.backgroundController}"
-                    android:paddingBottom="16dp"
-                    android:paddingTop="16dp"
-                    android:visibility="@{viewModel.isLongPress}"
-                    >
+                    android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/fullSeekBar"
+                    <SeekBar
+                        android:id="@+id/simpleSeekBar"
+                        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        >
+                        android:max="@{30}"
+                        android:progress="@{viewModel.progress.intValue()/1000}"
+                        android:progressTint="@{viewModel.darkTint}"
+                        android:thumbTint="@{viewModel.darkTint}" />
 
-                        <SeekBar
-                            android:id="@+id/simpleSeekBar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                            android:progressTint="@{viewModel.darkTint}"
-                            android:thumbTint="@{viewModel.darkTint}"
-                            android:max="@{30}"
-                            android:progress="@{viewModel.progress.intValue()/1000}"
-                            />
-
-<!--                        android:max="@{viewModel.currentTrack.duration_ms.intValue()/1000}"-->
-
-
-                        <RelativeLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="8dp"
-                            >
-                            <TextView
-                                android:id="@+id/txt_progress"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentLeft="true"
-                                android:text="0:00"
-                                android:layout_marginBottom="8dp"
-                                formatTime="@{viewModel.progress}"
-                                android:textColor="@{viewModel.colorOnPrimary}"
-                                />
-
-                            <TextView
-                                android:id="@+id/txt_end_progress"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="4:00"
-                                android:layout_alignParentRight="true"
-                                formatTime="@{viewModel.currentTrack.duration_ms}"
-                                android:textColor="@{viewModel.colorOnPrimary}"
-                                />
-
-                        </RelativeLayout>
-
-                    </LinearLayout>
+                    <!--                        android:max="@{viewModel.currentTrack.duration_ms.intValue()/1000}"-->
 
 
                     <RelativeLayout
-                        android:id="@+id/controller"
-                        android:layout_width="match_parent"
-                        android:layout_height="80dp"
-                        >
-
-                        <ImageButton
-                            android:id="@+id/shuffle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_toLeftOf="@id/skip_previous"
-                            android:layout_marginEnd="16dp"
-                            android:src="@drawable/ic_shuffle_black_24dp"
-                            isChoosing="@{viewModel.isShuffling}"
-                            darkButtonTint="@{viewModel.colorOnPrimary}"
-                            lightButtonTint="@{viewModel.lightColorOnPrimary}"
-                            android:onClick="@{() -> viewModel.changeStateShuffle()}"
-                            android:padding="8dp"
-                            tools:ignore="UseAppTint"
-                            android:background="@drawable/press_button"
-                            />
-
-                        <ImageButton
-                            android:id="@+id/skip_previous"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_previous"
-                            android:padding="8dp"
-                            android:background="@drawable/press_button"
-                            android:layout_toLeftOf="@id/play"
-                            android:layout_marginEnd="16dp"
-                            android:layout_centerVertical="true"
-                            android:onClick="@{() -> viewModel.onPrevious()}"
-                            android:tint="@{viewModel.darkTint}"
-                            tools:ignore="UseAppTint"
-                            />
-
-
-                        <ImageButton
-                            android:id="@+id/play"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:padding="8dp"
-                            android:background="@drawable/press_button"
-                            android:backgroundTintMode="src_over"
-                            playerState="@{viewModel.playerState}"
-                            isPlayerScreen="@{true}"
-                            android:onClick="@{() -> viewModel.onChangeState()}"
-                            android:tint="@{viewModel.darkTint}"
-                            tools:ignore="UseAppTint"
-                            />
-
-
-                        <ImageButton
-                            android:id="@+id/skip_next"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_next"
-                            android:padding="8dp"
-                            android:background="@drawable/press_button"
-                            android:layout_toEndOf="@id/play"
-                            android:layout_marginStart="16dp"
-                            android:layout_centerVertical="true"
-                            android:onClick="@{() -> viewModel.onNext()}"
-                            android:tint="@{viewModel.darkTint}"
-                            tools:ignore="UseAppTint"
-                            />
-
-                        <ImageButton
-                            android:id="@+id/repeat"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_repeat"
-                            android:layout_centerVertical="true"
-                            android:layout_toRightOf="@id/skip_next"
-                            android:layout_marginStart="16dp"
-                            android:padding="8dp"
-                            android:background="@drawable/press_button"
-                            repeatMode="@{viewModel.repeatMode}"
-                            lightColor="@{viewModel.lightColorOnPrimary}"
-                            darkColor="@{viewModel.colorOnPrimary}"
-                            tools:ignore="UseAppTint"
-                            android:onClick="@{()-> viewModel.changeModeRepeat()}"
-                            />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/interact_current_track_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        isNavigatingCurrentPlaylist="@{viewModel.isShowingCurrentPlaylist()}"
-                        >
-
-                        <ImageButton
-                            android:id="@+id/button_like"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_favorite"
-                            android:padding="8dp"
-                            android:layout_centerVertical="true"
-                            android:layout_alignParentStart="true"
-                            android:background="@drawable/press_button"
-                            android:layout_marginStart="16dp"
-                            stateButton="@{viewModel.isFavorite}"
-                            android:onClick="@{() -> viewModel.likeTrack()}"
-                            />
-
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp">
 
                         <TextView
-                            android:id="@+id/txt_current_playlist"
+                            android:id="@+id/txt_progress"
+                            formatTime="@{viewModel.progress}"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="current playlist"
-                            android:layout_toLeftOf="@id/queue"
-                            android:layout_centerVertical="true"
-                            android:textColor="@{viewModel.colorOnPrimary}"
-                            android:onClick="@{() -> viewModel.showCurrentPlaylist()}"
-                            />
+                            android:layout_alignParentLeft="true"
+                            android:layout_marginBottom="8dp"
+                            android:text="0:00"
+                            android:textColor="@{viewModel.colorOnPrimary}" />
 
-                        <ImageButton
-                            android:id="@+id/queue"
+                        <TextView
+                            android:id="@+id/txt_end_progress"
+                            formatTime="@{viewModel.currentTrack.duration_ms}"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/ic_library_music_black_24dp"
-                            android:layout_centerVertical="true"
-                            android:layout_alignParentEnd="true"
-                            android:padding="8dp"
-                            android:background="@drawable/press_button"
-                            android:onClick="@{() -> viewModel.showCurrentPlaylist()}"
-                            android:tint="@{viewModel.darkTint}"
-                            tools:ignore="UseAppTint"
-                            android:layout_marginEnd="16dp"
-                            />
-
+                            android:layout_alignParentRight="true"
+                            android:text="4:00"
+                            android:textColor="@{viewModel.colorOnPrimary}" />
 
                     </RelativeLayout>
 
                 </LinearLayout>
+
+
+                <RelativeLayout
+                    android:id="@+id/controller"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp">
+
+                    <ImageButton
+                        android:id="@+id/shuffle"
+                        darkButtonTint="@{viewModel.colorOnPrimary}"
+                        isChoosing="@{viewModel.isShuffling}"
+                        lightButtonTint="@{viewModel.lightColorOnPrimary}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:layout_toLeftOf="@id/skip_previous"
+                        android:background="@drawable/press_button"
+                        android:onClick="@{() -> viewModel.changeStateShuffle()}"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_shuffle_black_24dp"
+                        tools:ignore="UseAppTint" />
+
+                    <ImageButton
+                        android:id="@+id/skip_previous"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:layout_toLeftOf="@id/play"
+                        android:background="@drawable/press_button"
+                        android:onClick="@{() -> viewModel.onPrevious()}"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_previous"
+                        android:tint="@{viewModel.darkTint}"
+                        tools:ignore="UseAppTint" />
+
+
+                    <ImageButton
+                        android:id="@+id/play"
+                        isPlayerScreen="@{true}"
+                        playerState="@{viewModel.playerState}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@drawable/press_button"
+                        android:backgroundTintMode="src_over"
+                        android:onClick="@{() -> viewModel.onChangeState()}"
+                        android:padding="8dp"
+                        android:tint="@{viewModel.darkTint}"
+                        tools:ignore="UseAppTint" />
+
+
+                    <ImageButton
+                        android:id="@+id/skip_next"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/play"
+                        android:background="@drawable/press_button"
+                        android:onClick="@{() -> viewModel.onNext()}"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_next"
+                        android:tint="@{viewModel.darkTint}"
+                        tools:ignore="UseAppTint" />
+
+                    <ImageButton
+                        android:id="@+id/repeat"
+                        darkColor="@{viewModel.colorOnPrimary}"
+                        lightColor="@{viewModel.lightColorOnPrimary}"
+                        repeatMode="@{viewModel.repeatMode}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_toRightOf="@id/skip_next"
+                        android:background="@drawable/press_button"
+                        android:onClick="@{()-> viewModel.changeModeRepeat()}"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_repeat"
+                        tools:ignore="UseAppTint" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/interact_current_track_container"
+                    isNavigatingCurrentPlaylist="@{viewModel.isShowingCurrentPlaylist()}"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp">
+
+                    <ImageButton
+                        android:id="@+id/button_like"
+                        stateButton="@{viewModel.isFavorite}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/press_button"
+                        android:onClick="@{() -> viewModel.likeTrack()}"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_favorite" />
+
+
+                    <TextView
+                        android:id="@+id/txt_current_playlist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@id/queue"
+                        android:onClick="@{() -> viewModel.showCurrentPlaylist()}"
+                        android:text="current playlist"
+                        android:textColor="@{viewModel.colorOnPrimary}" />
+
+                    <ImageButton
+                        android:id="@+id/queue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:background="@drawable/press_button"
+                        android:onClick="@{() -> viewModel.showCurrentPlaylist()}"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_library_music_black_24dp"
+                        android:tint="@{viewModel.darkTint}"
+                        tools:ignore="UseAppTint" />
+
+
+                </RelativeLayout>
+
+            </LinearLayout>
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

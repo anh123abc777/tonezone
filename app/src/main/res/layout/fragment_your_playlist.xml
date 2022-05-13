@@ -12,7 +12,8 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/parent_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:background="#121212"
         android:padding="8dp"
         tools:context=".yourplaylist.YourPlaylistFragment">
 
@@ -20,30 +21,27 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
-            >
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:title="Add to playlist"
-                app:navigationIcon="@drawable/ic_arrow_back"
                 android:gravity="center"
-                app:titleCentered="true"
                 android:textSize="16sp"
                 app:menu="@menu/add_to_playlist_menu"
-                >
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:title="Add to playlist"
+                app:titleCentered="true">
 
                 <EditText
                     android:id="@+id/search_bar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:hint="@string/search_for_playlist"
                     android:layout_marginTop="16dp"
-                    android:visibility="gone"
-                    />
+                    android:hint="@string/search_for_playlist"
+                    android:textSize="16sp"
+                    android:visibility="gone" />
 
             </com.google.android.material.appbar.MaterialToolbar>
 
@@ -53,45 +51,42 @@
             android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            >
+            app:background="@color/darkColor"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <LinearLayout
                 android:id="@+id/content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginTop="16dp"
-                >
+                android:orientation="vertical">
 
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/new_playlist_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/new_playlist"
-                        android:textSize="16sp"
-                        android:gravity="center"
-                        android:textAllCaps="false"
-                        android:paddingStart="32dp"
-                        android:paddingEnd="32dp"
-                        android:textColor="@color/black"
-                        android:layout_gravity="center_horizontal"
-                        app:cornerRadius="16dp"
-                        android:onClick="@{() ->viewModel.requestToCreatePlaylist()}"
-                        />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/new_playlist_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:onClick="@{() ->viewModel.requestToCreatePlaylist()}"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="32dp"
+                    android:text="@string/new_playlist"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    app:cornerRadius="16dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/list_your_playlist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    android:orientation="vertical"
                     android:layout_marginTop="8dp"
-                    tools:listitem="@layout/item_playlist_in_list"
                     android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
-                    />
+                    android:orientation="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_playlist_in_list" />
 
             </LinearLayout>
 

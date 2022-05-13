@@ -34,7 +34,7 @@ class YourPlaylistFragment : Fragment() {
     }
 
     private val trackId: String by lazy {
-        YourPlaylistFragmentArgs.fromBundle(requireArguments()).trackID
+        YourPlaylistFragmentArgs.fromBundle(requireArguments()).trackID ?: ""
     }
 
     private val trackIds : List<String> by lazy {

@@ -204,3 +204,11 @@ fun sublistByDay(list: List<FirebaseRepository.History>): List<List<FirebaseRepo
     return days
 }
 
+fun getArtistNames(artists: List<Artist>): String{
+    var artistNames = ""
+    artists.forEachIndexed { index, artist ->
+        artistNames += artist.name+ if(index!=artists.size-1) ", " else " and more"
+    }
+    return artistNames
+}
+

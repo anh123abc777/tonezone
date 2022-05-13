@@ -8,7 +8,9 @@
     <fragment
         android:id="@+id/playerScreenFragment"
         android:name="com.example.tonezone.player.PlayerScreenFragment"
-        android:label="PlayerScreenFragment" >
+        android:label="PlayerScreenFragment"
+        tools:layout="@layout/fragment_player_screen"
+        >
         <action
             android:id="@+id/action_playerScreenFragment_to_currentPlaylistFragment"
             app:destination="@id/currentPlaylistFragment" />
@@ -17,5 +19,15 @@
         android:id="@+id/currentPlaylistFragment"
         android:name="com.example.tonezone.player.currentplaylist.CurrentPlaylistFragment"
         android:label="fragment_current_playlist"
-        tools:layout="@layout/fragment_current_playlist" />
+        tools:layout="@layout/fragment_current_playlist" >
+        <action
+            android:id="@+id/action_currentPlaylistFragment_to_yourPlaylistFragment"
+            app:destination="@id/yourPlaylistFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/yourPlaylistFragment"
+        android:name="com.example.tonezone.yourplaylist.YourPlaylistFragment"
+        android:label="YourPlaylistFragment"
+        tools:layout="@layout/fragment_your_playlist"
+        />
 </navigation>

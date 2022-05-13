@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -196,12 +197,11 @@ class CurrentPlaylistFragment : Fragment() {
     private fun handleClickEventSelectedOptionLayout(){
 //        }
         binding.addToPlaylistButton.setOnClickListener {
-            val yourPlaylistModalBottomSheet = YourPlaylistBottomSheet(playerViewModel.selectedTracks.value!!,playerViewModel.user!!)
-            yourPlaylistModalBottomSheet.show(
-                requireActivity().supportFragmentManager,
-                ArtistsModalBottomSheet.TAG
-            )
+            val bundle = bundleOf("trackIds" to playerViewModel.selectedTracks.value!!.map { it.id }.toTypedArray())
+            findNavController().navigate(R.id.yourPlaylistFragment,bundle)
+
+            // do Something
+            playerViewModel.clearSelectedTracks()
         }
     }
-
 }

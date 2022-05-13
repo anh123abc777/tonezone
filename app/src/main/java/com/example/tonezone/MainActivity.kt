@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         setupPlayerNotification()
         handleLogin()
         setupSeekbar()
+        setupPlayerNavController()
 
     }
 
@@ -132,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.firebaseAuth.observe(this){
             if (it!=null){
                 val firebaseRepo = FirebaseRepository()
-                firebaseRepo.putRecommendedTracks(it.uid,this)
+//                firebaseRepo.putRecommendedTracks(it.uid,this)
                 mainViewModel.initUserFirebase()
                 mainViewModel.firebaseUser.observe(this){
                     if (it!=null){
@@ -242,13 +243,22 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onBackPressed() {
-        val currentDestination= navController.currentDestination
+    private fun setupPlayerNavController(){
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_player) as NavHostFragment
+
         val playerNavController =  navHostFragment.navController
         playerNavController.enableOnBackPressed(true)
 
+        if (playerNavController.currentDestination != null){
+            when(playerNavController.currentDestination?.id){
+                R.id.yourPlaylistFragment -> {binding.playerController.visibility = View.GONE}
+            }
+        }
+    }
+
+    override fun onBackPressed() {
+        val currentDestination= navController.currentDestination
         if (currentDestination != null) {
             when(currentDestination.id) {
                 R.id.loginFragment,R.id.splashScreenFragment -> {
@@ -256,7 +266,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 else -> {
-                        super.onBackPressed()
+                    super.onBackPressed()
                 }
             }
         }
