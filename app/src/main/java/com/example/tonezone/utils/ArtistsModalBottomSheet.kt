@@ -44,7 +44,7 @@ class ArtistsModalBottomSheet (private val list: List<*>) : BottomSheetDialogFra
                 item.name.toString(),
                 item.description.toString(),
                 item.image,
-                item.description.toString()
+                item.typeName.toString(),
             )
 
 

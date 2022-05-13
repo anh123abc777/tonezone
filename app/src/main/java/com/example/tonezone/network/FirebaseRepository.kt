@@ -217,7 +217,8 @@ class FirebaseRepository {
         val artists = MutableLiveData<List<Artist>>()
         db.collection("Artist")
             .whereIn("id",ids)
-            .addSnapshotListener { documents, _ ->
+            .get()
+            .addOnSuccessListener{ documents ->
                 if (documents!=null){
                     artists.value = documents.toObjects(Artist::class.java)
                 }
@@ -545,31 +546,16 @@ class FirebaseRepository {
     }
 
     fun getTracksOfAlbum(id: String): MutableLiveData<List<Track>>{
+        Log.i("Observer",id)
         val tracks = MutableLiveData<List<Track>>()
 
-        db.collection("Album")
-            .document(id)
-            .get()
-            .addOnSuccessListener { doc ->
-                val album = doc.toObject(Album::class.java)
                 db.collection("Track")
-                    .whereEqualTo("album", album)
+                    .whereEqualTo("album.id",id)
                     .get()
                     .addOnSuccessListener { results ->
-                        if (results != null) {
+                        if (!results.isEmpty) {
                             tracks.value = results.toObjects(Track::class.java)
-//                            tracks.value!!.forEach {
-//                                val map = hashMapOf(
-//                                    "id" to it.id,
-//                                    "type" to it.type,
-//                                    "search_keywords" to generateSearchKeywords(it.name)
-//                                )
-//                                db.collection("Search")
-//                                    .document(it.id)
-//                                    .set(map)
-//                            }
                         }
-                    }
             }
 
         return tracks

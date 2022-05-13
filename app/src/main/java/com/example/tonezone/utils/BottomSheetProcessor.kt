@@ -6,6 +6,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -13,6 +14,8 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.tonezone.R
+import com.example.tonezone.network.Artist
+import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.playlistdetails.PlaylistDetailsFragmentDirections
@@ -160,14 +163,25 @@ class BottomSheetProcessor(
                         track.id == viewModel.selectedObjectID.value?.first
                     }?.album!!.artists ?: listOf()
 
-                    val artistsModalBottomSheet = ArtistsModalBottomSheet(artistsOfTrack)
+                    val artistsLiveData = FirebaseRepository().getSeveralArtists(artistsOfTrack.map { it.id!! })
 
-                    artistsModalBottomSheet.show(
-                        activity.supportFragmentManager,
-                        ArtistsModalBottomSheet.TAG
-                    )
+                    var observer = Observer<List<Artist>>{}
 
-                    viewModel.showTracksDetailsComplete()
+                    observer = Observer { artists ->
+                        if (artists.size==artistsOfTrack.size){
+                            val artistsModalBottomSheet = ArtistsModalBottomSheet(artists)
+                            artistsModalBottomSheet.show(
+                                activity.supportFragmentManager,
+                                ArtistsModalBottomSheet.TAG
+                            )
+
+                            viewModel.showTracksDetailsComplete()
+                            artistsLiveData.removeObserver(observer)
+                        }
+                    }
+
+                    artistsLiveData.observeForever(observer)
+
                 }
 
                 Signal.VIEW_ALBUM -> {
