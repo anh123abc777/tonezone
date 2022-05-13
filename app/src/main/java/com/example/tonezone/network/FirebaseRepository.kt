@@ -1618,7 +1618,7 @@ class FirebaseRepository {
         val type: Type = Type.TRACK
     )
 
-    fun putRecommendedTracks(userId: String, lifecycleOwner: LifecycleOwner){
+    fun putRecommendedTracks(userId: String){
         db.collection("User")
             .document(userId)
             .collection("History")
@@ -1662,20 +1662,12 @@ class FirebaseRepository {
                                 }
                         }
 
-                        tracksObserver.observe(lifecycleOwner) { tracks ->
-//                            Log.i(
-//                                "FirebaseRepo",
-//                                "${tracks.size} ${
-//                                    recentlyPlayedIds.toSet().toList().size
-//                                } ${recentlyPlayedIds.size}"
-//                            )
-//                            Log.i("FirebaseRepo","${tracks.map { it.id }}")
+                        var observer = Observer<List<Track>> {  }
+                        observer = Observer { tracks ->
                             if (tracks != null && tracks.size == recentlyPlayedIds.toSet()
                                     .toList().size
                             ) {
-//                                Log.i("FirebaseRepo", "${tracks} ")
                                 val artists = createArtistArray(tracks)
-//                            val recentlyPlayedTracks = tracks.filter { track -> recentlyPlayedIds.contains(track.id)}
                                 val recentlyPlayedTracks = recentlyPlayedIds.map { id ->
                                     tracks.find { it.id == id } ?: Track(id = id)
                                 }
@@ -1691,9 +1683,11 @@ class FirebaseRepository {
                                     cosineSimilarityArray.keys.toList().subList(0, 3)
                                 )
 
-                                tracksObserver.removeObservers(lifecycleOwner)
+                                tracksObserver.removeObserver(observer)
                             }
                         }
+
+                        tracksObserver.observeForever(observer)
                     }
                 }
             }
