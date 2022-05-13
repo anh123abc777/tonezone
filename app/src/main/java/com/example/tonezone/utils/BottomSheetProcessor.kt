@@ -171,16 +171,16 @@ class BottomSheetProcessor(
                 }
 
                 Signal.VIEW_ALBUM -> {
-//                    modalBottomSheet.dismiss()
-//                    val albumsOfTrack = listOf(viewModel.playlistItems.value?.find { track ->
-//                        track.id == viewModel.selectedObjectID.value?.first
-//                    }?.album)
-//                    Log.i("setUpShowingArtists", albumsOfTrack.toString())
-//                    val artistsModalBottomSheet = ArtistsModalBottomSheet(albumsOfTrack)
-//                    artistsModalBottomSheet.show(
-//                        requireActivity().supportFragmentManager,
-//                        ArtistsModalBottomSheet.TAG
-//                    )
+                    modalBottomSheet.dismiss()
+                    val albumsOfTrack = listOf(viewModel.playlistItems.value?.find { track ->
+                        track.id == viewModel.selectedObjectID.value?.first
+                    }?.album)
+                    Log.i("setUpShowingArtists", albumsOfTrack.toString())
+                    val artistsModalBottomSheet = ArtistsModalBottomSheet(albumsOfTrack)
+                    artistsModalBottomSheet.show(
+                        activity.supportFragmentManager,
+                        ArtistsModalBottomSheet.TAG
+                    )
                     viewModel.showTracksDetailsComplete()
                 }
 

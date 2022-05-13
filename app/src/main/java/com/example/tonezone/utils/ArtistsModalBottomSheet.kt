@@ -11,11 +11,12 @@ import androidx.navigation.fragment.findNavController
 import com.example.tonezone.R
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.databinding.ModalBottomSheetContentBinding
+import com.example.tonezone.network.Album
 import com.example.tonezone.network.Artist
 import com.example.tonezone.network.PlaylistInfo
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class ArtistsModalBottomSheet (private val list: List<Artist>) : BottomSheetDialogFragment() {
+class ArtistsModalBottomSheet (private val list: List<*>) : BottomSheetDialogFragment() {
 
     private lateinit var binding: ModalBottomSheetContentBinding
 
@@ -37,7 +38,7 @@ class ArtistsModalBottomSheet (private val list: List<Artist>) : BottomSheetDial
 
     private fun setupBottomSheetItems(){
 
-        val adapter = LibraryAdapter(LibraryAdapter.OnClickListener{item, idButton ->
+        val adapter = LibraryAdapter(LibraryAdapter.OnClickListener{ item, _ ->
             val playlistInfo = PlaylistInfo(
                 item.id.toString(),
                 item.name.toString(),
@@ -45,14 +46,23 @@ class ArtistsModalBottomSheet (private val list: List<Artist>) : BottomSheetDial
                 item.image,
                 item.description.toString()
             )
+
+
             Log.i("artists",playlistInfo.toString())
             val bundle = bundleOf("playlistInfo" to playlistInfo)
-            findNavController().navigate(R.id.artistDetailsFragment,bundle)
+
+            when(item) {
+                is LibraryAdapter.DataItem.ArtistItem -> findNavController().navigate(R.id.artistDetailsFragment, bundle)
+                else -> findNavController().navigate(R.id.playlistDetailsFragment, bundle)
+            }
             this.dismiss()
         })
 
-        adapter.submitList(list.map { LibraryAdapter.DataItem.ArtistItem(it) })
-        Log.i("setUpShowingArtists",list.toString())
+
+        when(list[0]){
+            is Artist -> adapter.submitList(list.map { LibraryAdapter.DataItem.ArtistItem(it as Artist) })
+            is Album -> adapter.submitList(list.map {LibraryAdapter.DataItem.AlbumItem(it as Album)})
+        }
         binding.listOption.adapter = adapter
     }
 

@@ -59,25 +59,12 @@ class PlaylistDetailsFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        setupBottomSheet()
 
         createAdapterPlaylist()
-
-        handleSignalFromBottomSheet()
-
-        setupShowingArtistsBottomSheet()
-
-        observeNavigateToYourPlaylists()
-
-        handleLikeButtonVisibility()
 
         handlePlayPlaylist()
 
         handleAddToQueue()
-
-        handlePlayingTrack()
-
-        handleSignalAddTracks()
 
         setupAppbar()
 
@@ -85,15 +72,11 @@ class PlaylistDetailsFragment : Fragment() {
 
         handleStatePlayer()
 
-        handleAddToOtherPlaylist()
-
-        handleRemoveTrack()
-
-        viewModel.playlistItems.observe(viewLifecycleOwner){
-            if (it!=null){
-                viewModel.initStateLikedItems()
-            }
-        }
+        BottomSheetProcessor(
+            playerViewModel,
+            viewModel,
+            viewLifecycleOwner,
+            requireActivity())
 
         return binding.root
     }

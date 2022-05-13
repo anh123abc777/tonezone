@@ -245,7 +245,7 @@ class PlaylistDetailsViewModel
     }
 
     private fun showAlbumOfTrack(){
-        _isShowingTrackDetails.value = Signal.VIEW_ARTIST
+        _isShowingTrackDetails.value = Signal.VIEW_ALBUM
     }
 
     @SuppressLint("NullSafeMutableLiveData")
