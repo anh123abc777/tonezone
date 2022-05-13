@@ -118,10 +118,11 @@ class BottomSheetProcessor(
         when(buttonId) {
             R.id.more_option -> {
                 val isSaved = viewModel.isUserPlaylistFollowed.value
-                modalBottomSheet = if (isOwned == true)
-                    ModalBottomSheet(ObjectRequest.YOUR_PLAYLIST,isSaved)
-                else
-                    ModalBottomSheet(ObjectRequest.PLAYLIST,isSaved)
+                modalBottomSheet = when (isOwned) {
+                    null -> ModalBottomSheet(ObjectRequest.LIKED_PLAYLIST,false)
+                    true -> ModalBottomSheet(ObjectRequest.YOUR_PLAYLIST,false)
+                    else -> ModalBottomSheet(ObjectRequest.PLAYLIST,isSaved)
+                }
             }
 
             R.id.more_option_with_track -> {

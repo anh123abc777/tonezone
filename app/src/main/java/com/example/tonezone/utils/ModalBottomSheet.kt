@@ -104,6 +104,10 @@ class ModalBottomSheet(private val objectRequest: ObjectRequest, private val isF
                 )
             }
 
+            ObjectRequest.LIKED_PLAYLIST ->{
+                submitBottomSheetList(listOf(Signal.ADD_TO_OTHER_PLAYLIST))
+            }
+
 
             else -> submitBottomSheetList(listOf())
         }

@@ -226,8 +226,8 @@ fun setIconBottomSheetItem(button: Button,signal: Signal){
 }
 
 @BindingAdapter("isVisibility")
-fun setupButtonVisibility(imageButton: ImageButton, isOwned: Boolean){
-    if(isOwned){
+fun setupButtonVisibility(imageButton: ImageButton, isOwned: Boolean?){
+    if(isOwned== null || isOwned){
         imageButton.visibility = View.GONE
     }
     else imageButton.visibility = View.VISIBLE

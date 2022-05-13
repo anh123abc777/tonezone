@@ -56,17 +56,18 @@
             
         </com.google.android.material.appbar.AppBarLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_play_arrow"
-            android:tint="@color/black"
+            app:icon="@drawable/ic_play_arrow"
+            app:iconTint="@color/white"
+            app:rippleColor="@color/white"
+            app:backgroundTint="?attr/colorPrimary"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             android:layout_gravity="end|top"
             tools:ignore="ContentDescription"
             app:elevation="10dp"
-            android:backgroundTint="@color/colorSecondary"
             />
 
         <androidx.core.widget.NestedScrollView
@@ -151,6 +152,7 @@
                     android:textSize="16sp"
                     android:textAllCaps="false"
                     android:gravity="center_vertical"
+                    android:visibility="gone"
                     />
 
 
@@ -179,6 +181,7 @@
                     android:layout_gravity="center_horizontal"
                     android:textAllCaps="false"
                     android:onClick="@{() -> viewModel.navigateToMoreAlbums()}"
+                    android:visibility="gone"
                     />
 
 

@@ -62,28 +62,57 @@ class ArtistDetailsFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
 
         createArtistTopTracksAdapter()
-        createArtistAlbumsAdapter()
-        createRelateArtistsAdapter()
-        setupShowMoreTracks()
-        setupShowMoreAlbums()
-        handleOnPlay()
-        handlePlayingTrack()
-        setupBottomSheet()
-        handleSignalFromBottomSheet()
-        setupShowingArtistsBottomSheet()
-        handleNavigateToPlaylistDetails()
-        handleBackPress()
-        setupAppbar()
-        initStateLikedItems()
-        observeNavigateToYourPlaylists()
 
-//        viewModel.artist.observe(viewLifecycleOwner){
-//            if (it!=null){
-//                Log.i("getArtist","$it")
-//            }
-//        }
+        createArtistAlbumsAdapter()
+
+        createRelateArtistsAdapter()
+
+        setupShowMoreTracks()
+
+        setupShowMoreAlbums()
+
+        handleNavigateToPlaylistDetails()
+
+        handleBackPress()
+
+        setupAppbar()
+
+        handleStatePlayer()
+
+        setupAlbumsOfArtist()
+
+        BottomSheetProcessor(
+            playerViewModel,
+            playlistDetailsViewModel,
+            viewLifecycleOwner,
+            requireActivity())
 
         return binding.root
+    }
+
+    private fun setupAlbumsOfArtist(){
+        viewModel.artistAlbums.observe(viewLifecycleOwner){
+            if (it!=null){
+                binding.albumsTxt.visibility = View.VISIBLE
+                binding.moreAlbum.visibility = View.VISIBLE
+            }else{
+                binding.albumsTxt.visibility = View.GONE
+                binding.moreAlbum.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun handleStatePlayer(){
+        playerViewModel.currentPlaylist.observe(viewLifecycleOwner) { tracks ->
+            playerViewModel.playerState.observe(viewLifecycleOwner){ state ->
+                /**Something new**/
+                if (state == PlayerScreenViewModel.PlayerState.PLAY && tracks == playlistDetailsViewModel.playlistItems.value) {
+                    binding.playButton.setIconResource(R.drawable.ic_pause)
+                } else {
+                    binding.playButton.setIconResource(R.drawable.ic_play_arrow)
+                }
+            }
+        }
     }
 
     private fun initStateLikedItems(){

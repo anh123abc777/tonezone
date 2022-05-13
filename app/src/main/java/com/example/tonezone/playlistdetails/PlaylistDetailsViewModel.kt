@@ -76,6 +76,7 @@ class PlaylistDetailsViewModel
 
     private fun getDataPlaylistItems(): MutableLiveData<List<Track>> {
 
+        Log.i("PlaylistInfo","$playlistInfo")
         return when (playlistInfo.type) {
                 "artist" -> {
                     getArtistTopTracks()
@@ -313,8 +314,8 @@ class PlaylistDetailsViewModel
     }
 
     fun checkIsOwnedByUser(){
-        _isOwnedByUser.value = currentPlaylist.value!!.owner!!.id == firebaseUser.uid
-        Log.i("ownedBy","${currentPlaylist.value!!.owner!!.id } ${firebaseUser.uid} ${_isOwnedByUser.value}")
+        if (playlistInfo.id != "liked_track")
+            _isOwnedByUser.value = currentPlaylist.value!!.owner!!.id == firebaseUser.uid
     }
 
     fun saveHistory(){
