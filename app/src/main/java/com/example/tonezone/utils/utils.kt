@@ -212,3 +212,7 @@ fun getArtistNames(artists: List<Artist>): String{
     return artistNames
 }
 
+fun calculateDayBetweenToDate(fistDay: Long,secondDay: Long): Int {
+    return  ((secondDay-fistDay) / (1000*60*60*24)).toInt()
+}
+

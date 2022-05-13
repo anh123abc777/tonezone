@@ -20,7 +20,6 @@
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigationView</item>
 
-        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
 
 
     </style>

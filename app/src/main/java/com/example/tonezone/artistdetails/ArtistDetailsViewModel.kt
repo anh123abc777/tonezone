@@ -1,7 +1,6 @@
 package com.example.tonezone.artistdetails
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -45,7 +44,7 @@ class ArtistDetailsViewModel(
     val navigateToDetailPlaylist : LiveData<PlaylistInfo>
         get() = _navigateToDetailPlaylist
 
-    private val _relateArtists = firebaseRepo.getRelateArtist(playlistInfo.id)
+    private val _relateArtists = firebaseRepo.getRelateArtists(playlistInfo.id)
     val relateArtists : LiveData<List<Artist>>
         get() = _relateArtists
 

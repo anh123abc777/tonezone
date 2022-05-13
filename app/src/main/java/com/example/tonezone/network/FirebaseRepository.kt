@@ -3,8 +3,8 @@ package com.example.tonezone.network
 import TrackInPlaylist
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import com.example.tonezone.adapter.LibraryAdapter
 import com.example.tonezone.utils.*
 import com.google.android.gms.tasks.Task
@@ -777,7 +777,8 @@ class FirebaseRepository {
     data class FollowedObject(
         val id: String = "",
         val type: String = "",
-        val pin: Boolean = false
+        val pin: Boolean = false,
+        val date: String = Calendar.getInstance().time.time.toString(),
     )
 
     fun pinObject(userID: String,id: String) {
@@ -1486,7 +1487,89 @@ class FirebaseRepository {
 
 
     /** Recommendation **/
-    fun getRelateArtist(id: String?): MutableLiveData<List<Artist>>{
+
+
+    fun getRecommendedTracks(userId: String): MutableLiveData<List<Track>> {
+        val recommendedTracks = MutableLiveData<List<Track>>()
+
+        getInformationYourLikedTracks(userId).addOnSuccessListener { results ->
+            if (!results.isEmpty){
+                val followedTracks = results.toObjects(FollowedObject::class.java)
+                val trackIds = followedTracks.map { it.id }
+                val tracksLiveData = getYourLikedTracks(trackIds)
+
+                var observer =  Observer<List<Track>>{}
+                observer = Observer<List<Track>> { tracks ->
+                    if (tracks.size==followedTracks.size){
+                        val artists = createArtistArray(tracks)
+                        val itemProfiles = createTrackProfiles(tracks,artists)
+
+                        val currentDate = Calendar.getInstance().time.time
+                        val userProfiles = tracks.map {track ->
+                            val dateLikeSong = followedTracks.find { it.id==track.id }!!.date.toLong()
+                            calculateDayBetweenToDate(dateLikeSong,currentDate).toDouble()
+                        }.toDoubleArray()
+
+                        val similarityArray = calculateCosineSimilarity(userProfiles,itemProfiles,artists)
+
+                        if (similarityArray.keys.size<10)
+                            getTracksOfArtists(similarityArray.map { it.key }).addOnSuccessListener {
+                                recommendedTracks.value = it.toObjects(Track::class.java)
+                            }
+                        else
+                            getTracksOfArtists(similarityArray.map { it.key }
+                                .subList(0,similarityArray.size*3/10)).addOnSuccessListener {
+                                recommendedTracks.value = it.toObjects(Track::class.java)
+                            }
+
+                        tracksLiveData.removeObserver(observer)
+                    }
+                }
+
+
+                tracksLiveData.observeForever(observer)
+            }
+        }
+        return recommendedTracks
+    }
+
+    private fun getInformationYourLikedTracks(userId: String): Task<QuerySnapshot> {
+        return db.collection("User")
+            .document(userId)
+            .collection("Followed")
+            .whereEqualTo("type",Type.TRACK.name)
+            .get()
+    }
+
+    private fun getYourLikedTracks(trackIds: List<String>): MutableLiveData<List<Track>> {
+
+        val allTrack = MutableLiveData<List<Track>>()
+        val additionalTrack = mutableListOf<Track>()
+        val listTrackIds = subList(trackIds)
+        listTrackIds.forEach { ids ->
+            db.collection("Track")
+                .whereIn("id",ids)
+                .get()
+                .addOnSuccessListener { results ->
+                    if (!results.isEmpty){
+                        val tracks = results.toObjects(Track::class.java)
+                        additionalTrack.addAll(tracks)
+                        allTrack.value = additionalTrack
+                    }
+                }
+        }
+
+        return allTrack
+    }
+
+    private fun getTracksOfArtists(topArtists: List<Artist>): Task<QuerySnapshot> {
+        return db.collection("Track")
+            .whereArrayContainsAny("album.artists",topArtists)
+            .get()
+    }
+
+    //get relate artist
+    fun getRelateArtists(id: String?): MutableLiveData<List<Artist>>{
 
         val relateArtists = MutableLiveData<List<Artist>>()
         if (id!=null && id!="")
@@ -1526,21 +1609,21 @@ class FirebaseRepository {
             .set(newHistory)
     }
 
-     fun getRecommendedTracks(userID: String): MutableLiveData<List<Track>>{
-         val trackObserves = MutableLiveData<List<Track>>()
-         val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-         db.collection("Recommendation")
-             .document(userID)
-             .collection("Day6")
-             .get()
-             .addOnSuccessListener { docs ->
-                 if (docs != null && !docs.isEmpty) {
-                     val tracks = docs.toObjects(Track::class.java)
-                     trackObserves.value = tracks
-                 }
-             }
-         return trackObserves
-    }
+//     fun getRecommendedTracks(userID: String): MutableLiveData<List<Track>>{
+//         val trackObserves = MutableLiveData<List<Track>>()
+//         val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+//         db.collection("Recommendation")
+//             .document(userID)
+//             .collection("Day6")
+//             .get()
+//             .addOnSuccessListener { docs ->
+//                 if (docs != null && !docs.isEmpty) {
+//                     val tracks = docs.toObjects(Track::class.java)
+//                     trackObserves.value = tracks
+//                 }
+//             }
+//         return trackObserves
+//    }
 
     data class History(
         val id: String = "",
@@ -1594,17 +1677,17 @@ class FirebaseRepository {
                         }
 
                         tracksObserver.observe(lifecycleOwner) { tracks ->
-                            Log.i(
-                                "FirebaseRepo",
-                                "${tracks.size} ${
-                                    recentlyPlayedIds.toSet().toList().size
-                                } ${recentlyPlayedIds.size}"
-                            )
-                            Log.i("FirebaseRepo","${tracks.map { it.id }}")
+//                            Log.i(
+//                                "FirebaseRepo",
+//                                "${tracks.size} ${
+//                                    recentlyPlayedIds.toSet().toList().size
+//                                } ${recentlyPlayedIds.size}"
+//                            )
+//                            Log.i("FirebaseRepo","${tracks.map { it.id }}")
                             if (tracks != null && tracks.size == recentlyPlayedIds.toSet()
                                     .toList().size
                             ) {
-                                Log.i("FirebaseRepo", "${tracks} ")
+//                                Log.i("FirebaseRepo", "${tracks} ")
                                 val artists = createArtistArray(tracks)
 //                            val recentlyPlayedTracks = tracks.filter { track -> recentlyPlayedIds.contains(track.id)}
                                 val recentlyPlayedTracks = recentlyPlayedIds.map { id ->
