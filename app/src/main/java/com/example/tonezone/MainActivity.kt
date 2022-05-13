@@ -155,23 +155,40 @@ class MainActivity : AppCompatActivity() {
 
                 if (track != Track()) {
 
-                    if (state == PlayerScreenViewModel.PlayerState.PLAY) {
-                        CreateNotification().createNotification(
-                            this,
-                            track,
-                            R.drawable.ic_custom_pause,
-                            playerViewModel.posSongSelectedInGroup(),
-                            playerViewModel.currentPlaylist.value?.size ?: 0,
-                        )
-                    } else {
-                        CreateNotification().createNotification(
-                            this,
-                            track,
-                            R.drawable.ic_custom_play,
-                            playerViewModel.posSongSelectedInGroup(),
-                            playerViewModel.currentPlaylist.value?.size ?: 0,
-                        )
+                    when (state) {
+                        PlayerScreenViewModel.PlayerState.PLAY -> {
+                            CreateNotification.createNotification(
+                                this,
+                                track,
+                                R.drawable.ic_custom_pause,
+                                playerViewModel.posSongSelectedInGroup(),
+                                playerViewModel.currentPlaylist.value?.size ?: 0,
+                            )
+                        }
+
+                        PlayerScreenViewModel.PlayerState.NONE ->{
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                notificationManager = getSystemService(NotificationManager::class.java)
+                            }
+                            notificationManager.cancelAll()
+                        }
+
+                        else -> {
+                            CreateNotification.createNotification(
+                                this,
+                                track,
+                                R.drawable.ic_custom_play,
+                                playerViewModel.posSongSelectedInGroup(),
+                                playerViewModel.currentPlaylist.value?.size ?: 0,
+                            )
+                        }
                     }
+                }else{
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            notificationManager = getSystemService(NotificationManager::class.java)
+                        }
+                        notificationManager.cancelAll()
+
                 }
             }
         }
@@ -181,16 +198,16 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
 
             when(intent.extras?.get("action_name")){
-                CreateNotification().ACTION_PREVIOUS -> {
+                CreateNotification.ACTION_PREVIOUS -> {
                     playerViewModel.onPrevious()
                 }
 
-                CreateNotification().ACTION_PLAY -> {
+                CreateNotification.ACTION_PLAY -> {
                     playerViewModel.onChangeState()
 
                 }
 
-                CreateNotification().ACTION_NEXT -> {
+                CreateNotification.ACTION_NEXT -> {
                     playerViewModel.onNext()
                 }
 
@@ -203,7 +220,7 @@ class MainActivity : AppCompatActivity() {
     private fun createChannel(){
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
             val channel = NotificationChannel(
-                CreateNotification().CHANNEL_ID,"ToneZone",NotificationManager.IMPORTANCE_LOW)
+                CreateNotification.CHANNEL_ID,"ToneZone",NotificationManager.IMPORTANCE_LOW)
 
             notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)

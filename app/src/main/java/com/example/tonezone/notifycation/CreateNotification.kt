@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 
-class CreateNotification {
+object CreateNotification {
 
     val CHANNEL_ID = "channel"
 

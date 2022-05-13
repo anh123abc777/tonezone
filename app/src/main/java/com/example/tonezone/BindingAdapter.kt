@@ -7,6 +7,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -127,8 +128,8 @@ fun bindImage(imageView: ImageView,imageUrl: String?,listImageUrl: List<Image>?)
 //}
 
 @BindingAdapter("layoutVisibility")
-fun bindLayoutVisibility(relativeLayout: RelativeLayout, track: Track?){
-    relativeLayout.visibility = if(track!=Track() && track!=null) View.VISIBLE else View.GONE
+fun bindLayoutVisibility(coordinatorLayout: CoordinatorLayout, track: Track?){
+    coordinatorLayout.visibility = if(track!=Track() && track!=null) View.VISIBLE else View.GONE
 }
 
 

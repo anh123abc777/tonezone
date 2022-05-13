@@ -9,7 +9,7 @@
             type="com.example.tonezone.player.PlayerScreenViewModel" />
     </data>
 
-    <RelativeLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -77,10 +77,10 @@
             android:id="@+id/play"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="48dp"
-            android:layout_centerVertical="true"
             android:padding="8dp"
+            android:layout_toLeftOf="@id/close"
+            android:layout_marginEnd="16dp"
+            android:layout_centerVertical="true"
             android:background="@drawable/press_button"
             android:onClick="@{() -> playerViewModel.onChangeState()}"
             playerState="@{playerViewModel.playerState}"
@@ -89,7 +89,25 @@
             android:scaleType="fitXY"
             />
 
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_close"
+            android:background="@drawable/press_button"
+            android:layout_centerVertical="true"
+            android:tint="@{playerViewModel.darkTint}"
+            tools:ignore="UseAppTint"
+            android:scaleType="center"
+            android:onClick="@{() -> playerViewModel.closePlayer()}"
+
+            />
+
+
     </RelativeLayout>
     </androidx.cardview.widget.CardView>
-    </RelativeLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

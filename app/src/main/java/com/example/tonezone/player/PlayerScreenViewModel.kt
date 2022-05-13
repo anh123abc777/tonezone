@@ -242,9 +242,9 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?
                         _progress.value = currentPosition
                         Log.i("initSeekBar", "$this ${this.isActive}")
                         delay(200L)
-                        if (_currentTrack.value!!.id != exoPlayer.currentMediaItem!!.mediaId) {
+                        if (_currentTrack.value?.id != exoPlayer.currentMediaItem?.mediaId && _currentTrack.value!=Track()) {
                             _currentTrack.value =
-                                _currentPlaylist.value?.find { it.id == exoPlayer.currentMediaItem!!.mediaId }
+                                _currentPlaylist.value?.find { it.id == exoPlayer.currentMediaItem?.mediaId }
                         }
                     }else {
                         this.cancel()
@@ -509,6 +509,14 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?
             shuffleIndexes.add(shuffleIndexes.size)
         }
         exoPlayer.addMediaItem(MediaItem.Builder().setUri(track.preview_url).setMediaId(track.id).build())
+    }
+
+    fun closePlayer(){
+        _playerState.value = PlayerState.PAUSE
+        exoPlayer.pause()
+        exoPlayer.clearMediaItems()
+        _currentPlaylist.value = listOf()
+        _currentTrack.value = Track()
     }
 
     override fun onCleared() {
