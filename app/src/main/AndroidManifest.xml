@@ -41,8 +41,12 @@
             </intent-filter>
             <nav-graph android:value="@navigation/main_navigation" />
         </activity>
-        <receiver android:name=".notifycation.NotificationActionService"/>
-        <service android:name=".notifycation.OnClearFromRecentService"/>
+        <receiver android:name=".notifycation.NotificationActionService"
+            android:exported="true"
+            />
+        <service android:name=".notifycation.OnClearFromRecentService"
+            android:exported="true"
+            />
     </application>
 
 </manifest>

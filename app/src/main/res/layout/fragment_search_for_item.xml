@@ -17,7 +17,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".search.searchfoitem.SearchForItemFragment"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:transitionName="shared_element_container"
+        android:background="@color/darkColor"
+
+        >
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
@@ -56,7 +60,7 @@
                             android:background="@drawable/press_button"
                             />
 
-                        <androidx.appcompat.widget.AppCompatEditText
+                        <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/search_bar"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -64,7 +68,7 @@
                             android:drawablePadding="16dp"
                             android:background="#00000000"
                             android:singleLine="true"
-                        />
+                            />
 
                     </LinearLayout>
 

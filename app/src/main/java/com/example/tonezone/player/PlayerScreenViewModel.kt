@@ -376,7 +376,7 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?
                 darkColorOnPrimary.value = it.titleTextColor
             }
 
-            palette?.mutedSwatch?.let {
+            palette?.lightMutedSwatch?.let {
                 val lightDrawable = GradientDrawable()
                 lightDrawable.setColor(it.rgb)
                 lightDrawable.cornerRadius = 32f

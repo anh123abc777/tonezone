@@ -33,6 +33,7 @@
             app:menu="@menu/bottom_navigation_menu"
             android:layout_gravity="bottom"
             app:elevation="16dp"
+            style="@style/Widget.Material3.BottomNavigationView"
             />
 
         <include
@@ -41,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="56dp"
+            android:layout_marginBottom="80dp"
             />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout

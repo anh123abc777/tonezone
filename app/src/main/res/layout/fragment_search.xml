@@ -21,7 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="#00FFFFFF"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior">
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
+        >
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -31,7 +32,6 @@
                 app:title="Search">
 
             </com.google.android.material.appbar.MaterialToolbar>
-
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/search_bar"
@@ -51,7 +51,8 @@
                 app:iconPadding="16dp"
                 app:iconGravity="start"
                 app:cornerRadius="8dp"
-                 />
+                android:transitionName="shared_element_container"
+                />
 
         </com.google.android.material.appbar.AppBarLayout>
 

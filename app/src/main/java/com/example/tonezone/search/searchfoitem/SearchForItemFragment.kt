@@ -27,6 +27,7 @@ import com.example.tonezone.playlistdetails.PlaylistDetailsViewModelFactory
 import com.example.tonezone.utils.BottomSheetProcessor
 import com.example.tonezone.utils.Type
 import com.example.tonezone.yourlibrary.TypeItemLibrary
+import com.google.android.material.transition.MaterialContainerTransform
 import java.lang.Exception
 
 class SearchForItemFragment : Fragment() {
@@ -54,6 +55,11 @@ class SearchForItemFragment : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?)  {
+        super.onCreate(savedInstanceState)
+        sharedElementEnterTransition = MaterialContainerTransform()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -67,6 +73,15 @@ class SearchForItemFragment : Fragment() {
         observeSearchedItems()
         setupFilterType()
         handlePlayingTrack()
+
+
+
+        val imm = (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
+                InputMethodManager)
+        binding.searchBar.postDelayed(Runnable {
+            binding.searchBar.requestFocus()
+            imm.showSoftInput(binding.searchBar,0)
+        },100)
 
         BottomSheetProcessor(playerViewModel,playlistViewModel,this,requireActivity())
 

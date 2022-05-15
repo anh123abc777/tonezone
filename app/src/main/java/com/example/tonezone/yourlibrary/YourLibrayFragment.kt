@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.os.ResultReceiver
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -33,6 +34,7 @@ import com.example.tonezone.utils.ModalBottomSheet
 import com.example.tonezone.utils.ModalBottomSheetViewModel
 import com.example.tonezone.utils.ObjectRequest
 import com.example.tonezone.utils.convertSignalToText
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
 @Suppress("DEPRECATION")
@@ -186,16 +188,25 @@ class YourLibraryFragment : Fragment() {
                 R.id.search -> {
                     binding.toolbar.menu.setGroupVisible(R.id.menu_appbar_yourlibrary, false)
                     binding.searchBar.visibility = View.VISIBLE
-                    binding.searchBar.requestFocus()
                     binding.toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_ios_new_24)
                     binding.displayOption.arrangementFrame.visibility = View.GONE
+
+                    val imm = (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
+                            InputMethodManager)
+                    binding.searchBar.postDelayed(Runnable {
+                        binding.searchBar.requestFocus()
+                        imm.showSoftInput(binding.searchBar,0)
+                    },100)
+
+
                     binding.toolbar.setNavigationOnClickListener {
                         binding.searchBar.visibility = View.GONE
                         binding.toolbar.menu.setGroupVisible(R.id.menu_appbar_yourlibrary, true)
                         binding.toolbar.navigationIcon = null
                         binding.searchBar.clearFocus()
-                        binding.searchBar.text.clear()
+                        binding.searchBar.text?.clear()
                         binding.displayOption.arrangementFrame.visibility = View.VISIBLE
+                        hideKeyboardFrom(binding.root.context,binding.root)
                     }
                 }
 
@@ -212,10 +223,9 @@ class YourLibraryFragment : Fragment() {
         viewModel.isCreatingPlaylist.observe(viewLifecycleOwner){
             if (it){
 
-                val alert = AlertDialog.Builder(context,R.style.AlertDialogTheme)
+                val alert = MaterialAlertDialogBuilder(requireContext())
                 val input = EditText(context)
                 input.inputType = InputType.TYPE_CLASS_TEXT
-                input.setBackgroundColor(Color.BLACK)
                 input.gravity = Gravity.CENTER
                 input.setText("")
                 alert.setView(input)
@@ -231,30 +241,16 @@ class YourLibraryFragment : Fragment() {
                 }
 
                 alert.show()
-                (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
-                        InputMethodManager).toggleSoftInputFromWindow(
-                            binding.root.windowToken,
-                            InputMethodManager.SHOW_FORCED,
-                            0
-                        )
 
-//                input.setOnFocusChangeListener { _, b ->
-//                    if(b)
-//                        (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
-//                                InputMethodManager).toggleSoftInputFromWindow(
-//                            binding.root.windowToken,
-//                            InputMethodManager.SHOW_FORCED,
-//                            0
-//                        )
-//                    else{
-//                        (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
-//                                InputMethodManager).hideSoftInputFromWindow(
-//                            binding.root.windowToken,
-//                            0)
-//                    }
-//                }
 
-                input.requestFocus()
+                val imm = (requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as
+                        InputMethodManager)
+                input.postDelayed(Runnable {
+                    input.requestFocus()
+                    imm.showSoftInput(input,0)
+                },100)
+
+
                 viewModel.requestToCreatePlaylistComplete()
             }
         }

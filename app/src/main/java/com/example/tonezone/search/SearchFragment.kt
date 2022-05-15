@@ -7,11 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.example.tonezone.MainViewModel
+import com.example.tonezone.R
 import com.example.tonezone.adapter.GenreAdapter
 import com.example.tonezone.databinding.FragmentSearchBinding
 import com.example.tonezone.network.PlaylistInfo
+import com.example.tonezone.search.searchfoitem.SearchForItemFragment
+import com.google.android.material.transition.Hold
 
 
 class SearchFragment : Fragment() {
@@ -33,13 +37,16 @@ class SearchFragment : Fragment() {
         setupAdapterGenres()
         setupNavigateSearchForItem()
 
+        exitTransition = Hold()
+
         return binding.root
     }
 
     private fun setupNavigateSearchForItem(){
         binding.searchBar.setOnClickListener {
+            val extras = FragmentNavigatorExtras(binding.searchBar to "shared_element_container")
             findNavController().navigate(
-                SearchFragmentDirections.actionSearchFragmentToSearchForItemFragment()
+                R.id.action_searchFragment_to_searchForItemFragment,null,null,extras
             )
         }
     }
