@@ -6,21 +6,23 @@
         android:id="@+id/home"
         android:title="@string/home"
         android:icon="@drawable/ic_baseline_home_24"
-        app:showAsAction="ifRoom"
+        android:enabled="true"
+
         />
 
     <item
         android:id="@+id/search"
         android:title="@string/search"
         android:icon="@drawable/ic_search"
-        app:showAsAction="always"
+        android:enabled="true"
+
         />
 
     <item
         android:id="@+id/your_library"
         android:title="@string/your_library"
         android:icon="@drawable/ic_library_music"
-        app:showAsAction="always"
+        android:enabled="true"
         />
 
 </menu>

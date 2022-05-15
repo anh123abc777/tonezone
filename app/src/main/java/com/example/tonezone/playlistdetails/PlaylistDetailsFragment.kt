@@ -66,7 +66,8 @@ class PlaylistDetailsFragment : Fragment() {
 
         handleAddToQueue()
 
-        setupAppbar()
+        if (playlistInfo.type!="artist")
+            setupAppbar()
 
         handleBackPress()
 
@@ -77,6 +78,8 @@ class PlaylistDetailsFragment : Fragment() {
             viewModel,
             viewLifecycleOwner,
             requireActivity())
+
+        binding.moreOption.visibility = if (playlistInfo.type=="artist") View.INVISIBLE else View.VISIBLE
 
         return binding.root
     }
@@ -111,6 +114,7 @@ class PlaylistDetailsFragment : Fragment() {
                             R.color.black
                         )
                     )
+                    binding.toolbar.title = viewModel.playlistInfo.name
                     binding.collapsingToolbarLayout.title = viewModel.playlistInfo.name
                     binding.toolbar.setTitleTextColor(Color.WHITE)
 

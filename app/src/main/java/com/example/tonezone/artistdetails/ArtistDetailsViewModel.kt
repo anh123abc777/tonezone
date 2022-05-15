@@ -16,7 +16,7 @@ class ArtistDetailsViewModel(
 
     private val firebaseRepo = FirebaseRepository()
 
-    private val _artistTopTracks = firebaseRepo.getTracksOfArtist(playlistInfo.id,playlistInfo.name)
+    private val _artistTopTracks = firebaseRepo.getTracksOfArtist(playlistInfo.id,playlistInfo.name,6)
     val tracks : LiveData<List<Track>>
         get() = _artistTopTracks
 
@@ -24,7 +24,7 @@ class ArtistDetailsViewModel(
     val artist : LiveData<Artist>
         get() = _artist
 
-    private var _artistAlbums = MutableLiveData<List<Album>>()
+    private var _artistAlbums = firebaseRepo.getAlbumsOfArtist(playlistInfo.id,playlistInfo.name,6)
     val artistAlbums : LiveData<List<Album>>
         get() = _artistAlbums
 

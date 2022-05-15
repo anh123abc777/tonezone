@@ -22,7 +22,7 @@ class HomeFragment : Fragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private val viewModel: HomeViewModel by viewModels {
+    private val viewModel: HomeViewModel by activityViewModels {
         HomeViewModelFactory(mainViewModel.firebaseUser.value!!)
     }
 

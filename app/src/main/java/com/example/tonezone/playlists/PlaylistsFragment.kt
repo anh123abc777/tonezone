@@ -13,6 +13,7 @@ import com.example.tonezone.adapter.PlaylistAdapter
 import com.example.tonezone.artistdetails.ArtistDetailsViewModel
 import com.example.tonezone.artistdetails.ArtistDetailsViewModelFactory
 import com.example.tonezone.databinding.FragmentPlaylistsBinding
+import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.Owner
 import com.example.tonezone.network.Playlist
 import com.example.tonezone.network.PlaylistInfo
@@ -74,7 +75,8 @@ class PlaylistsFragment : Fragment() {
         }
 
         if(playlistInfo.type=="artist"){
-            artistViewModel.artistAlbums.observe(viewLifecycleOwner){ albums ->
+            val albums = FirebaseRepository().getAlbumsOfArtist(playlistInfo.id,playlistInfo.name)
+            albums.observe(viewLifecycleOwner){ albums ->
                 if (albums!=null){
                     val list = albums.map { Playlist(
                         id = it.id!!,
@@ -84,7 +86,8 @@ class PlaylistsFragment : Fragment() {
                         owner = Owner(),
                         type = it.type!!,
                         public = true
-                    ) }
+                    )
+                    }
 
                     adapter.submitList(list)
                 }

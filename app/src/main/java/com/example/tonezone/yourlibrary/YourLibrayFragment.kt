@@ -43,7 +43,7 @@ class YourLibraryFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels{
         MainViewModelFactory(requireActivity())
     }
-    private val viewModel: YourLibraryViewModel by viewModels {
+    private val viewModel: YourLibraryViewModel by activityViewModels {
         YourLibraryViewModelFactory( mainViewModel.firebaseUser.value!!)
     }
 

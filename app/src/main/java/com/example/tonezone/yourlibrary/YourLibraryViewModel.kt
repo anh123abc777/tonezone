@@ -47,6 +47,8 @@ class YourLibraryViewModel(val firebaseUser: User) : ViewModel() {
 
 
     init {
+            Log.i("HomeCheck","Library")
+
 //        getDataFollowedArtists()
 //        getDataUserPlaylists()
 //        getDataSavedAlbums()

@@ -12,7 +12,9 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.collections.HashMap
@@ -109,29 +111,17 @@ class FirebaseRepository {
         return tracks
     }
 
-    fun getTracksOfArtist(id: String, name: String): MutableLiveData<List<Track>>{
+    fun getTracksOfArtist(id: String, name: String, limit: Int = 20): MutableLiveData<List<Track>>{
         val artistInTrack = ArtistInTrack(id,name)
         val tracks = MutableLiveData<List<Track>>()
         db.collection("Track")
             .whereArrayContains("artists",artistInTrack)
-            .addSnapshotListener { value, error ->
-
-                if (error!=null)
-                    return@addSnapshotListener
-
-                if (value!=null){
+            .limit(limit.toLong())
+            .get()
+            .addOnSuccessListener{ value ->
+                if (value!=null && !value.isEmpty){
                     tracks.value = value.toObjects(Track::class.java)
 
-//                    tracks.value!!.forEach {
-//                        val map = hashMapOf(
-//                            "id" to it.id,
-//                            "type" to it.type,
-//                            "search_keywords" to generateSearchKeywords(it.name)
-//                        )
-//                        db.collection("Search")
-//                            .document(it.id)
-//                            .set(map)
-//                    }
                 }
             }
 
@@ -519,25 +509,25 @@ class FirebaseRepository {
         return albums
     }
 
-    fun getAlbumsOfArtist(artistID: String): MutableLiveData<List<Album>>{
+    fun getAlbumsOfArtist(artistId: String,artistName: String, limit: Int = 20): MutableLiveData<List<Album>>{
         val albums = MutableLiveData<List<Album>>()
 
-        db.collection("Artist")
-            .document(artistID)
+        db.collection("Track")
+            .whereArrayContains("artists",ArtistInTrack(artistId,artistName))
             .get()
-            .addOnSuccessListener { artistDoc ->
+            .addOnSuccessListener { tracks ->
+                if (tracks!=null && !tracks.isEmpty) {
 
-                if (artistDoc!=null) {
-
-                    val artist = artistDoc.toObject(Artist::class.java)
+                    val artist = tracks.toObjects(Track::class.java)[0].album?.artists?.find { it.id==artistId }
 
                     artist?.let {
                         db.collection("Album")
                             .whereArrayContains("artists", it)
+                            .limit(limit.toLong())
                             .get()
-                            .addOnSuccessListener {
-                                if (it!=null)
-                                    albums.value = it.toObjects(Album::class.java)
+                            .addOnSuccessListener { results ->
+                                if (results != null && !results.isEmpty)
+                                    albums.value = results.toObjects(Album::class.java)
                             }
                     }
                 }
@@ -1179,56 +1169,58 @@ class FirebaseRepository {
 
     /** Home **/
 
-    fun getDataHomeScreen(user: User): MutableLiveData<List<GroupPlaylist>> {
+    fun getDataHomeScreen(user: User, uiScope: CoroutineScope): MutableLiveData<List<GroupPlaylist>> {
         val groupPlaylists = MutableLiveData<List<GroupPlaylist>>()
-        db.collection("System")
-            .document("SystemTopic")
-            .get()
-            .addOnSuccessListener{ results ->
+        uiScope.launch {
+            db.collection("System")
+                .document("SystemTopic")
+                .get()
+                .addOnSuccessListener { results ->
 
-                val topic = results.data
-                val availableList = mutableListOf<GroupPlaylist>()
+                    val topic = results.data
+                    val availableList = mutableListOf<GroupPlaylist>()
 
-                if (results != null) {
-                    topic!!.keys.forEach {
-                        db.collection("Playlist")
-                            .whereIn("id", topic[it] as List<String>)
-                            .get()
-                            .addOnSuccessListener{ documents ->
-                                val listData = mutableListOf<Playlist>()
-                                if (documents != null && !documents.isEmpty) {
-                                    for (doc in documents) {
-                                        listData.add(convertDocToPlaylist(doc))
+                    if (results != null) {
+                        topic!!.keys.forEach {
+                            db.collection("Playlist")
+                                .whereIn("id", topic[it] as List<String>)
+                                .get()
+                                .addOnSuccessListener { documents ->
+                                    val listData = mutableListOf<Playlist>()
+                                    if (documents != null && !documents.isEmpty) {
+                                        for (doc in documents) {
+                                            listData.add(convertDocToPlaylist(doc))
+                                        }
+                                        availableList.add(GroupPlaylist(it, listData))
+                                        groupPlaylists.value = availableList
+
                                     }
-                                    availableList.add(GroupPlaylist(it, listData))
-                                    groupPlaylists.value = availableList
-
                                 }
-                            }
 
-                        db.collection("Album")
-                            .whereIn("id", topic[it] as List<String>)
-                            .get()
-                            .addOnSuccessListener{ documents ->
-                                if (documents != null && !documents.isEmpty) {
-                                    val albums = documents.toObjects(Album::class.java)
-                                    availableList.add(
-                                        GroupPlaylist(
-                                            it,
-                                            convertAlbumsToPlaylists(albums)
+                            db.collection("Album")
+                                .whereIn("id", topic[it] as List<String>)
+                                .get()
+                                .addOnSuccessListener { documents ->
+                                    if (documents != null && !documents.isEmpty) {
+                                        val albums = documents.toObjects(Album::class.java)
+                                        availableList.add(
+                                            GroupPlaylist(
+                                                it,
+                                                convertAlbumsToPlaylists(albums)
+                                            )
                                         )
-                                    )
-                                    groupPlaylists.value = availableList
+                                        groupPlaylists.value = availableList
+                                    }
                                 }
-                            }
 
+                        }
                     }
+                    getRecommendedPlaylists(user, groupPlaylists, availableList)
+                    getRecentPlaylists(user, groupPlaylists, availableList)
+                    getYourArtists(user, groupPlaylists, availableList)
+                    getRelateArtists(user, groupPlaylists, availableList)
                 }
-                getRecommendedPlaylists(user,groupPlaylists,availableList)
-                getRecentPlaylists(user,groupPlaylists,availableList)
-                getYourArtists(user,groupPlaylists,availableList)
-                getRelateArtists(user,groupPlaylists,availableList)
-            }
+        }
 
         return groupPlaylists
     }
@@ -1244,12 +1236,18 @@ class FirebaseRepository {
             .addOnSuccessListener { docs ->
                 if (docs != null && !docs.isEmpty) {
                     val playlists = docs.toObjects(Playlist::class.java)
+
+                    val mixForYouPlaylist = availableList.find { it.title == "Mix for you" }
+                    if (mixForYouPlaylist==null)
                     availableList.add(
                         GroupPlaylist(
                             "Mix for you",
                             playlists
                         )
                     )
+                    else{
+                        availableList[availableList.indexOf(mixForYouPlaylist)].playlists = playlists
+                    }
                     _groupPlaylists.value = availableList
 
                 }
@@ -1286,6 +1284,7 @@ class FirebaseRepository {
                                 val recentlyPlayedPlaylists =
                                     availableList.find { it.title == "Recent playlist" }
 //
+                                Log.i("HomeCheck","$group")
                                 if (recentlyPlayedPlaylists != null) {
                                     availableList[availableList.indexOf(recentlyPlayedPlaylists)]
                                         .playlists = playlists
@@ -1329,11 +1328,13 @@ class FirebaseRepository {
 
                                     val group = GroupPlaylist("Your favorite artists", artists)
 
-                                    val recentlyPlayedPlaylists =
+                                    val yourFavoriteArtistsList =
                                         availableList.find { it.title == "Your favorite artists" }
 
-                                    if (recentlyPlayedPlaylists != null) {
-                                        availableList[availableList.indexOf(recentlyPlayedPlaylists)]
+                                    Log.i("HomeCheck","$group")
+
+                                    if (yourFavoriteArtistsList != null) {
+                                        availableList[availableList.indexOf(yourFavoriteArtistsList)]
                                             .playlists = artists
                                         _groupPlaylists.value = availableList
                                     } else {

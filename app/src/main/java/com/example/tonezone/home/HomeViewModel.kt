@@ -6,18 +6,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.tonezone.network.*
-import com.example.tonezone.utils.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
-import java.util.*
 
 
 class HomeViewModel(val user: User) : ViewModel() {
 
     private val firebaseRepo = FirebaseRepository()
+    private val job = Job()
+    private val uiScope = CoroutineScope(job + Dispatchers.Default)
 
-    private var _groupPlaylists = firebaseRepo.getDataHomeScreen(user)
+    private var _groupPlaylists = firebaseRepo.getDataHomeScreen(user,uiScope)
     val groupPlaylists : LiveData<List<GroupPlaylist>>
         get() = _groupPlaylists
 
@@ -25,9 +25,9 @@ class HomeViewModel(val user: User) : ViewModel() {
     val navigateToPlaylistDetails : LiveData<PlaylistInfo>
         get() = _navigateToPlaylistDetails
 
-    private val job = Job()
-//    private val uiScope = CoroutineScope(job + Dispatchers.Main)
-
+    init {
+        Log.i("HomeCheck","${_groupPlaylists.value}")
+    }
 
      fun displayPlaylistDetails(playlistInfo: PlaylistInfo){
         _navigateToPlaylistDetails.value = playlistInfo

@@ -39,7 +39,7 @@
 
             <TextView
                 android:id="@+id/name"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="20dp"
                 android:text="@{track.name}"
                 android:textSize="16dp"
@@ -55,7 +55,7 @@
 
             <TextView
                 android:id="@+id/artists"
-                android:layout_width="290sp"
+                android:layout_width="200sp"
                 android:layout_height="20dp"
                 artists="@{track.artists}"
                 android:layout_marginTop="8dp"

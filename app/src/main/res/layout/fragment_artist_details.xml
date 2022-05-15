@@ -66,6 +66,7 @@
             app:backgroundTint="?attr/colorPrimary"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             android:layout_gravity="end|top"
+            android:layout_marginEnd="8dp"
             tools:ignore="ContentDescription"
             app:elevation="10dp"
             />

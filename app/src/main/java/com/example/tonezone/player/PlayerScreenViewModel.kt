@@ -241,7 +241,7 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?
                         currentPosition = exoPlayer.currentPosition
                         _progress.value = currentPosition
                         Log.i("initSeekBar", "$this ${this.isActive}")
-                        delay(200L)
+                        delay(100L)
                         if (_currentTrack.value?.id != exoPlayer.currentMediaItem?.mediaId && _currentTrack.value!=Track()) {
                             _currentTrack.value =
                                 _currentPlaylist.value?.find { it.id == exoPlayer.currentMediaItem?.mediaId }
@@ -376,11 +376,15 @@ class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?
                 darkColorOnPrimary.value = it.titleTextColor
             }
 
-            palette?.lightMutedSwatch?.let {
+            palette?.mutedSwatch?.let {
                 val lightDrawable = GradientDrawable()
                 lightDrawable.setColor(it.rgb)
                 lightDrawable.cornerRadius = 32f
                 lightBackgroundDrawable.value = lightDrawable
+
+            }
+
+            palette?.lightMutedSwatch?.let {
                 lightTint.value = ColorStateList.valueOf(it.titleTextColor)
                 lightColorOnPrimary.value = it.rgb
             }

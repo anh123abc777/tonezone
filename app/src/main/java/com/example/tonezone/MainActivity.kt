@@ -12,6 +12,7 @@ import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
@@ -245,9 +246,14 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
         binding.bottomBar.setupWithNavController(navController)
-        binding.bottomBar.selectedItemId = R.id.homeFragment
+//        binding.bottomBar.selectedItemId = R.id.homeFragment
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
+        binding.bottomBar.setOnItemReselectedListener {
+
+        }
+
+
+        navController.addOnDestinationChangedListener { a, destination, b ->
             when(destination.id){
                 R.id.loginFragment,R.id.registerFragment,R.id.splashScreenFragment -> {
                     binding.bottomBar.visibility = View.GONE
