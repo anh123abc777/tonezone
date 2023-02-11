@@ -11,8 +11,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.palette.graphics.Palette
-import com.example.tonezone.database.TokenRepository
-import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.Track
 import com.example.tonezone.utils.Type
@@ -31,8 +29,6 @@ import java.util.*
 
 class PlayerScreenViewModel(val application: Application,val user: FirebaseUser?) : ViewModel() {
 
-    private val tokenRepository = TokenRepository(TonezoneDB.getInstance(application).tokenDao)
-    val token = runBlocking(Dispatchers.IO) { tokenRepository.token}
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope( Dispatchers.Main)
     private val uiSeekBarScope = CoroutineScope(viewModelJob + Dispatchers.Main)

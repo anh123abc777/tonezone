@@ -9,6 +9,7 @@ import com.example.tonezone.R
 import com.example.tonezone.databinding.GroupTracksBinding
 import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.Playlist
+import com.example.tonezone.network.Track
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.Type
 
@@ -48,6 +49,11 @@ class GroupTracksAdapter (private val clickListener: LibraryAdapter.OnClickListe
                             (binding.tracks.adapter as LibraryAdapter).notifyItemRemoved(
                                 it.indexOf(track))
                         }
+                        val temp = mutableListOf<Track>()
+                        temp.addAll(playlist.deltailTracks!!)
+                        temp.remove(track)
+                        playlist.deltailTracks = temp
+
                     }else{
                         playerViewModel.onInit(0, listOf(track) )
                     }

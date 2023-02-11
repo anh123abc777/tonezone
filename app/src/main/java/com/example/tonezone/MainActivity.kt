@@ -24,9 +24,6 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import androidx.palette.graphics.Palette
-import com.example.tonezone.database.Token
-import com.example.tonezone.database.TokenRepository
-import com.example.tonezone.database.TonezoneDB
 import com.example.tonezone.databinding.ActivityMainBinding
 import com.example.tonezone.network.FirebaseRepository
 import com.example.tonezone.network.Track
@@ -35,9 +32,6 @@ import com.example.tonezone.notifycation.OnClearFromRecentService
 import com.example.tonezone.player.PlayerScreenViewModel
 import com.example.tonezone.utils.createBitmapFromUrl
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.spotify.sdk.android.auth.AuthorizationClient
-import com.spotify.sdk.android.auth.AuthorizationResponse
-import com.spotify.sdk.android.auth.LoginActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
@@ -55,9 +49,6 @@ class MainActivity : AppCompatActivity() {
 
     private val playerViewModel: PlayerScreenViewModel by viewModels()
 
-    private val repository: TokenRepository by lazy{
-        TokenRepository(TonezoneDB.getInstance(application).tokenDao)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -246,11 +237,9 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
         binding.bottomBar.setupWithNavController(navController)
+
+
 //        binding.bottomBar.selectedItemId = R.id.homeFragment
-
-        binding.bottomBar.setOnItemReselectedListener {
-
-        }
 
 
         navController.addOnDestinationChangedListener { a, destination, b ->
@@ -261,7 +250,11 @@ class MainActivity : AppCompatActivity() {
                 else  -> {
                     binding.bottomBar.visibility = View.VISIBLE
                 }
+
             }
+
+
+            Log.i("backstack",navController.backQueue.map { it.destination.displayName }.toString())
         }
 
     }
@@ -328,20 +321,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigateToHome(){
-        mainViewModel.firebaseUser.observe(this) {
-            if(it!=null) {
                 navController.popBackStack()
-                navController.navigate(R.id.home)
-            }
-        }
+                navController.navigate(R.id.a)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        runBlocking(Dispatchers.IO) {
-            repository.clear()
-        }
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
             notificationManager.cancelAll()
         }

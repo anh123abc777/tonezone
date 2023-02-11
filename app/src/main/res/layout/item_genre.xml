@@ -43,6 +43,7 @@
             android:elevation="4dp"
             android:textStyle="bold"
             android:layout_marginBottom="4dp"
+            android:layout_gravity="center_horizontal|bottom"
         />
 
         </com.google.android.material.card.MaterialCardView>

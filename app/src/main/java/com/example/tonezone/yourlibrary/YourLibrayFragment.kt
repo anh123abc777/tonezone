@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -40,10 +41,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 @Suppress("DEPRECATION")
 class YourLibraryFragment : Fragment() {
 
-    private val mainViewModel: MainViewModel by activityViewModels{
-        MainViewModelFactory(requireActivity())
-    }
-    private val viewModel: YourLibraryViewModel by activityViewModels {
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val viewModel: YourLibraryViewModel by viewModels {
         YourLibraryViewModelFactory( mainViewModel.firebaseUser.value!!)
     }
 
@@ -64,7 +63,7 @@ class YourLibraryFragment : Fragment() {
     ): View {
 
         binding = FragmentYourLibraryBinding.inflate(inflater)
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = activity
         binding.viewModel = viewModel
 
 //        viewModel.getDataUserPlaylists()
